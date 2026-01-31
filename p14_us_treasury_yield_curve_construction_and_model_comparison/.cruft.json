@@ -1,0 +1,42 @@
+{
+  "template": "https://github.com/backofficedev/cookiecutter_chartbook",
+  "commit": "4080816fa0e0dca41c5cc1d1641b1dda3b94b662",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "project_name": "p14_us_treasury_yield_curve_construction_and_model_comparison",
+      "project_slug": "p14_us_treasury_yield_curve_construction_and_model_comparison",
+      "project_description": "This project studies how the U.S. Treasury yield curve is constructed and how different modeling choices affect its shape and interpretation.",
+      "author_name": "Phoebe Fingold, Annie Reynolds",
+      "author_email": "pfingold@uchicago.edu",
+      "python_version": "3.12",
+      "environment_manager": "pip",
+      "include_latex_reports": true,
+      "include_jupyter_notebooks": true,
+      "include_r_scripts": false,
+      "include_stata_scripts": false,
+      "include_chartbook": true,
+      "include_github_actions": true,
+      "include_fred": false,
+      "include_fed_yield_curve": true,
+      "include_ofr_api": false,
+      "include_bloomberg": false,
+      "include_crsp_stock": true,
+      "include_crsp_compustat": true,
+      "_copy_without_render": [
+        "*.bst",
+        "*.sty",
+        "*.eps",
+        "*.ipe",
+        "*.png",
+        "*.pdf",
+        "*.tex",
+        "*.bib",
+        ".github/workflows/*.yml"
+      ],
+      "_template": "https://github.com/backofficedev/cookiecutter_chartbook",
+      "_commit": "4080816fa0e0dca41c5cc1d1641b1dda3b94b662"
+    }
+  },
+  "directory": null
+}
