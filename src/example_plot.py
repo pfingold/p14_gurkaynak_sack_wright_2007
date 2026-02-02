@@ -1,6 +1,6 @@
 from pathlib import Path
 
-import pull_fred
+import #pull_fred
 from settings import config
 
 DATA_DIR = Path(config("DATA_DIR"))
@@ -11,7 +11,7 @@ from matplotlib import pyplot as plt
 
 sns.set()
 
-df = pull_fred.load_fred(data_dir=DATA_DIR)
+#df = pull_fred.load_fred(data_dir=DATA_DIR)
 
 (
     100
