@@ -1,26 +1,65 @@
+"""
+Example plot using CRSP stock data:
+- Boxplot of Market Capitalization by Primary Exchange
+"""
 from pathlib import Path
+import numpy as np
+import pandas as pd
+from matplotlib import pyplot as plt
 
-import #pull_fred
 from settings import config
 
 DATA_DIR = Path(config("DATA_DIR"))
 OUTPUT_DIR = Path(config("OUTPUT_DIR"))
 
-import seaborn as sns
-from matplotlib import pyplot as plt
+def main():
+    crsp_data = pd.read_parquet(DATA_DIR / "CRSP_stock_ciz.parquet")
 
-sns.set()
+    df = crsp_data.copy()
+    df['shrout'] = df['shrout'] * 1000  # convert to actual shares
+    df['mktcap'] = df['mthprc'].abs() * df['shrout']
+    
+    #Filter out non-positive market caps
+    df = df.loc[
+        (df['mktcap'] > 0) & (df['mktcap'].notna())
+        & (df['primaryexch'].notna())
+    ]
 
-#df = pull_fred.load_fred(data_dir=DATA_DIR)
+    df['log_mktcap'] = np.log(df['mktcap'])
+    # Order exchanges by median log market cap
+    order = (
+        df.groupby('primaryexch')['log_mktcap']
+        .median()
+        .sort_values()
+        .index
+    )
 
-(
-    100
-    * df[["CPIAUCNS", "GDPC1"]]
-    .rename(columns={"CPIAUCNS": "Inflation", "GDPC1": "Real GDP"})
-    .dropna()
-    .pct_change(4)
-).plot()
-plt.title("Inflation and Real GDP, Seasonally Adjusted")
-plt.ylabel("Percent change from 12-months prior")
-filename = OUTPUT_DIR / "example_plot.png"
-plt.savefig(filename)
+    organized_df = [df.loc[df['primaryexch'] == exch, 'log_mktcap'] for exch in order]
+    exchanges = {
+        'N': 'NYSE',
+        'A': 'AMEX',
+        'Q': 'NASDAQ',
+        'B': 'BATS',
+        'R': 'NYSE ARCA',
+        'I': 'IEX',
+        'X': 'UNKNOWN'
+    }
+    labels = [exchanges.get(code, code) for code in order]
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.boxplot(organized_df, tick_labels=labels, showfliers=False)
+
+    ax.set_title('Log Market Capitalization by Primary Exchange')
+    ax.set_xlabel('Primary Exchange')
+    ax.set_ylabel('Log Market Capitalization (USD)')
+    ax.grid(True, linestyle='--', alpha=0.7)
+
+    plt.tight_layout()
+
+    outpath = OUTPUT_DIR / "crsp_stock_log_mktcap_by_exchange.png"
+    fig.savefig(outpath)
+    print(f"Saving plot to {outpath}")
+    plt.close(fig)
+
+if __name__ == "__main__":
+    main()
