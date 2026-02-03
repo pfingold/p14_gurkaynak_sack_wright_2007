@@ -5,17 +5,18 @@ Example plot using CRSP stock data:
 from pathlib import Path
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
+import plotly.graph_objects as go
+from plotly.offline import plot
 
 from settings import config
 
 DATA_DIR = Path(config("DATA_DIR"))
 OUTPUT_DIR = Path(config("OUTPUT_DIR"))
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 def main():
-    crsp_data = pd.read_parquet(DATA_DIR / "CRSP_stock_ciz.parquet")
+    df = pd.read_parquet(DATA_DIR / "CRSP_stock_ciz.parquet")
 
-    df = crsp_data.copy()
     df['shrout'] = df['shrout'] * 1000  # convert to actual shares
     df['mktcap'] = df['mthprc'].abs() * df['shrout']
     
@@ -34,7 +35,6 @@ def main():
         .index
     )
 
-    organized_df = [df.loc[df['primaryexch'] == exch, 'log_mktcap'] for exch in order]
     exchanges = {
         'N': 'NYSE',
         'A': 'AMEX',
@@ -44,22 +44,27 @@ def main():
         'I': 'IEX',
         'X': 'UNKNOWN'
     }
-    labels = [exchanges.get(code, code) for code in order]
+    fig = go.Figure()
 
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.boxplot(organized_df, tick_labels=labels, showfliers=False)
+    for exch in order:
+        fig.add_trace(
+            go.Box(
+                y=df.loc[df['primaryexch'] == exch, 'log_mktcap'],
+                name=exchanges.get(exch, exch),
+                boxpoints=False
+            )
+        )
 
-    ax.set_title('Log Market Capitalization by Primary Exchange')
-    ax.set_xlabel('Primary Exchange')
-    ax.set_ylabel('Log Market Capitalization (USD)')
-    ax.grid(True, linestyle='--', alpha=0.7)
+    fig.update_layout(
+        title="Log Market Capitalization by Primary Exchange",
+        yaxis_title="Log Market Capitalization (USD)",
+        xaxis_title="Primary Exchange",
+        template="plotly_white"
+    )
 
-    plt.tight_layout()
-
-    outpath = OUTPUT_DIR / "crsp_stock_log_mktcap_by_exchange.png"
-    fig.savefig(outpath)
-    print(f"Saving plot to {outpath}")
-    plt.close(fig)
+    outpath = OUTPUT_DIR / "crsp_stock_log_mktcap_by_exchange.html"
+    plot(fig, filename=str(outpath), auto_open=False)
+    print(f'Saved interactive plot as html to: {outpath}')
 
 if __name__ == "__main__":
     main()
