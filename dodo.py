@@ -125,24 +125,20 @@ def task_config():
         "clean": [],
     }
 
-
-def task_pull():
-    """Pull data from external sources"""
-    yield {
-        "name": "crsp_stock",
-        "doc": "Pull CRSP stock data from WRDS",
-        "actions": [
-            "ipython ./src/settings.py",
-            "ipython ./src/pull_CRSP_stock.py",
-        ],
+#Separately Load Data Sources, Can Be Updated Individually
+def task_pull_CRSP_stock():
+    """Pull CRSP stock data from WRDS"""
+    return {
+        "actions": ["ipython ./src/settings.py", "ipython ./src/pull_CRSP_stock.py"],
         "targets": [DATA_DIR / "CRSP_stock.parquet",
                     DATA_DIR / "CRSP_MSIX.parquet"],
         "file_dep": ["./src/settings.py", "./src/pull_CRSP_stock.py"],
         "clean": [],
     }
-    yield {
-        "name": "crsp_compustat",
-        "doc": "Pull CRSP Compustat data from WRDS",
+
+def task_pull_CRSP_compustat():
+    """Pull CRSP Compustat data from WRDS"""
+    return {
         "actions": [
             "ipython ./src/settings.py",
             "ipython ./src/pull_CRSP_Compustat.py",
@@ -151,12 +147,44 @@ def task_pull():
                     DATA_DIR / "CRSP_stock_ciz.parquet",
                     DATA_DIR / "CRSP_Comp_Link_Table.parquet",
                     DATA_DIR / "FF_FACTORS.parquet"],
-        "file_dep": ["./src/settings.py", "./src/pull_CRSP_compustat.py"],
+        "file_dep": ["./src/settings.py", "./src/pull_CRSP_Compustat.py"],
         "clean": [],
     }
 
+def task_pull_CRSP_treasury():
+    """Pull CRSP Treasury data from WRDS"""
+    return {
+        "actions": [
+            "ipython ./src/settings.py",
+            "ipython ./src/pull_CRSP_treasury.py",
+        ],
+        "targets": [
+            DATA_DIR / "TFZ_DAILY.parquet",
+            DATA_DIR / "TFZ_INFO.parquet",
+            DATA_DIR / "TFZ_consolidated.parquet",
+            DATA_DIR / "TFZ_with_runness.parquet",
+        ],
+        "file_dep": ["./src/settings.py", "./src/pull_CRSP_treasury.py"],
+        "clean": [],
+    }
 
-def task_summary_stats():
+def task_pull_fed_yield_curve():
+    """Pull Federal Reserve Yield Curve Data, GSW Approach"""
+    return {
+        "actions": [
+            "ipython ./src/settings.py",
+            "ipython ./src/pull_yield_curve_data.py",
+        ],
+        "targets": [
+            DATA_DIR / "fed_yield_curve_all.parquet",
+            DATA_DIR / "fed_yield_curve.parquet",
+        ],
+        "file_dep": ["./src/settings.py", "./src/pull_yield_curve_data.py"],
+        "clean": [],
+    }
+
+#Temporarily Disabling Summary Stats Task for Setup Ease
+#def summary_stats_disabled():
     """Generate summary statistics tables"""
     file_dep = ["./src/example_table.py"]
     file_output = [
