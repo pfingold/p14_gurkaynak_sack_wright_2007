@@ -40,7 +40,7 @@ data_sources = ["CRSP Treasury Database"]
 data_providers = ["CRSP", "WRDS"]
 how_is_pulled = "Pulled via WRDS SQL query and cleaned in Python"
 path_to_parquet_data = "./_data/parquet/TFZ_DAILY.parquet"
-dataframe_docs_path = "./docs_src/dataframes/crsp_daily_treasury_prices.md"
+dataframe_docs_path = "./docs/dataframes/crsp_daily_treasury_prices.md"
 
 [dataframes.crsp_treasury_issue_info]
 dataframe_name = "CRSP Treasury Issue Info"

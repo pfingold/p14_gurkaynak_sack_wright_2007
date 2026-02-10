@@ -263,7 +263,7 @@ def task_run_notebooks():
 ###############################################################
 
 
-def DISABLE_task_compile_latex_docs():
+def task_compile_latex_docs():
     """Compile the LaTeX documents to PDFs"""
     file_dep = [
         "./reports/report_example.tex",
