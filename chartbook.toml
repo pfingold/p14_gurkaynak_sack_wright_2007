@@ -20,16 +20,6 @@ runs_on_grid_or_windows_or_other = "Windows/Linux/MacOS"
 git_repo_URL = ""
 README_file_path = "./README.md"
 
-[notebooks]
-
-
-[notebooks.01_example_notebook_interactive]
-notebook_name = "Example Notebook Interactive"
-notebook_description = "Example notebook for demonstrating how to construct a Chartbook notebook."
-notebook_path = "_output/01_example_notebook_interactive.ipynb"
-
-
-
 
 [dataframes]
 
@@ -39,8 +29,9 @@ dataframe_description = "Daily time-series data of treasury pricing"
 data_sources = ["CRSP Treasury Database"]
 data_providers = ["CRSP", "WRDS"]
 how_is_pulled = "Pulled via WRDS SQL query and cleaned in Python"
-path_to_parquet_data = "./_data/parquet/TFZ_DAILY.parquet"
-dataframe_docs_path = "./docs/dataframes/crsp_daily_treasury_prices.md"
+path_to_parquet_data = "./_data/TFZ_DAILY.parquet"
+dataframe_docs_path = "./docs_src/dataframes/crsp_daily_treasury_prices.md"
+date_col = "caldt"
 
 [dataframes.crsp_treasury_issue_info]
 dataframe_name = "CRSP Treasury Issue Info"
@@ -50,6 +41,7 @@ data_providers = ["CRSP", "WRDS"]
 how_is_pulled = "Pulled via WRDS SQL query and stored as issue-level metadata"
 path_to_parquet_data = "./_data/TFZ_INFO.parquet"
 dataframe_docs_path = "./docs_src/dataframes/crsp_treasury_issue_info.md"
+date_col = "tdatdt"
 
 [dataframes.crsp_treasury_consolidated]
 dataframe_name = "CRSP Treasury Consolidated"
@@ -59,6 +51,7 @@ data_providers = ["WRDS"]
 how_is_pulled = "Pulled via WRDS SQL query and merged in Python"
 path_to_parquet_data = "./_data/TFZ_consolidated.parquet"
 dataframe_docs_path = "./docs_src/dataframes/crsp_treasury_consolidated.md"
+date_col = "caldt"
 
 [dataframes.fed_yield_curve_all]
 dataframe_name = "Fed Yield Curve All"
@@ -68,6 +61,7 @@ data_providers = ["Public"]
 how_is_pulled = "Pulled directly from Fed Website and stored"
 path_to_parquet_data = "./_data/fed_yield_curve_all.parquet"
 dataframe_docs_path = "./docs_src/dataframes/fed_yield_curve_all.md"
+date_col = "date"
 
 [dataframes.fed_yield_curve]
 dataframe_name = "Fed Yield Curve"
@@ -77,6 +71,7 @@ data_providers = ["Public"]
 how_is_pulled = "Pulled directly from Fed Website, columns selected in Python"
 path_to_parquet_data = "./_data/fed_yield_curve.parquet"
 dataframe_docs_path = "./docs_src/dataframes/fed_yield_curve.md"
+date_col = "date"
 
 
 

@@ -194,12 +194,16 @@ def task_create_diagnostic_charts():
             OUTPUT_DIR / "crsp_treasury_sample_plot.html",
             OUTPUT_DIR / "fed_yield_curve_sample_plot.html",
         ],
-        "file_dep": ["./src/settings.py", "./src/pull_yield_curve_data.py"],
-        "clean": [],
+        "file_dep": ["./src/settings.py", 
+                     "./src/generate_chart.py",
+                     DATA_DIR / "TFZ_consolidated.parquet",
+                     DATA_DIR / "fed_yield_curve_all.parquet"],
+        "task_dep": ["pull_CRSP_treasury", "pull_fed_yield_curve"],
+        "clean": True,
     }
 
 #Temporarily Disabling Summary Stats Task for Setup Ease
-#def summary_stats_disabled():
+def DISABLE_task_summary_stats_disabled():
     """Generate summary statistics tables"""
     file_dep = ["./src/example_table.py"]
     file_output = [
@@ -315,7 +319,7 @@ def task_build_chartbook_site():
     file_dep = [
         "./README.md",
         "./chartbook.toml",
-        *notebook_scripts,
+        #*notebook_scripts,
     ]
 
     return {
@@ -325,7 +329,8 @@ def task_build_chartbook_site():
         "targets": sphinx_targets,
         "file_dep": file_dep,
         "task_dep": [
-            "run_notebooks",
+            #"run_notebooks",
+            "create_diagnostic_charts",
         ],
         "clean": True,
     }
