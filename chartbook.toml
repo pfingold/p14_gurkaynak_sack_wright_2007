@@ -33,6 +33,66 @@ notebook_path = "_output/01_example_notebook_interactive.ipynb"
 
 [dataframes]
 
+[dataframes.crsp_treasury_daily_prices]
+dataframe_name = "CRSP Treasury Daily Prices"
+dataframe_description = "Daily time-series data of treasury pricing"
+data_sources = ["CRSP Treasury Database"]
+data_providers = ["CRSP", "WRDS"]
+how_is_pulled = "Pulled via WRDS SQL query and cleaned in Python"
+path_to_parquet_data = "./_data/parquet/TFZ_DAILY.parquet"
+dataframe_docs_path = "./docs_src/dataframes/crsp_daily_treasury_prices.md"
+
+[dataframes.crsp_treasury_issue_info]
+dataframe_name = "CRSP Treasury Issue Info"
+dataframe_description = "Information about each treasury issue in the data"
+data_sources = ["CRSP Treasury Database"]
+data_providers = ["CRSP", "WRDS"]
+how_is_pulled = "Pulled via WRDS SQL query and stored as issue-level metadata"
+path_to_parquet_data = "./_data/TFZ_INFO.parquet"
+dataframe_docs_path = "./docs_src/dataframes/crsp_treasury_issue_info.md"
+
+[dataframes.crsp_treasury_consolidated]
+dataframe_name = "CRSP Treasury Consolidated"
+dataframe_description = "Both issue-level descriptive data and daily time-series data for treasuries"
+data_sources = ["CRSP Treasury Database"]
+data_providers = ["WRDS"]
+how_is_pulled = "Pulled via WRDS SQL query and merged in Python"
+path_to_parquet_data = "./_data/TFZ_consolidated.parquet"
+dataframe_docs_path = "./docs_src/dataframes/crsp_treasury_consolidated.md"
+
+[dataframes.fed_yield_curve_all]
+dataframe_name = "Fed Yield Curve All"
+dataframe_description = "Fed's Yield Curve Data, exactly as reported for all dates"
+data_sources = ["Federal Reserve Website"]
+data_providers = ["Public"]
+how_is_pulled = "Pulled directly from Fed Website and stored"
+path_to_parquet_data = "./_data/fed_yield_curve_all.parquet"
+dataframe_docs_path = "./docs_src/dataframes/fed_yield_curve_all.md"
+
+[dataframes.fed_yield_curve]
+dataframe_name = "Fed Yield Curve"
+dataframe_description = "Only zero-coupon yield data for all maturities/dates in fed yield curve"
+data_sources = ["Federal Reserve Website"]
+data_providers = ["Public"]
+how_is_pulled = "Pulled directly from Fed Website, columns selected in Python"
+path_to_parquet_data = "./_data/fed_yield_curve.parquet"
+dataframe_docs_path = "./docs_src/dataframes/fed_yield_curve.md"
+
+
 
 [charts]
+
+[charts.crsp_treasury_sample_plot]
+chart_name = "Lifecycle of Selected 10-Year Treasury Issues (CRSP)"
+short_description_chart = "Exploratory diagnostic: plots clean price over years since issuance for four CRSP 10-Year Bonds"
+dataframe_id = "crsp_treasury_consolidated"
+path_to_html_chart = "./_output/crsp_treasury_sample_plot.html"
+chart_docs_path = "./docs_src/charts/crsp_treasury_sample_plot.md"
+
+[charts.fed_yield_curve_sample_plot]
+chart_name = "Observed vs Fitted Zero-Coupon Curve (Fed Data)"
+short_description_chart = "Exploratory diagnostic: compares reported zero-coupon yields to fitted parameterized curve to verify curve reconstruction."
+dataframe_id = "fed_yield_curve_all"
+path_to_html_chart = "./_output/fed_yield_curve_sample_plot.html"
+chart_docs_path = "./docs_src/charts/fed_yield_curve_sample_plot.md"
 

@@ -126,7 +126,7 @@ def task_config():
     }
 
 #Separately Load Data Sources, Can Be Updated Individually
-def task_pull_CRSP_stock():
+def DISABLE_task_pull_CRSP_stock():
     """Pull CRSP stock data from WRDS"""
     return {
         "actions": ["ipython ./src/settings.py", "ipython ./src/pull_CRSP_stock.py"],
@@ -136,7 +136,7 @@ def task_pull_CRSP_stock():
         "clean": [],
     }
 
-def task_pull_CRSP_compustat():
+def DISABLE_task_pull_CRSP_compustat():
     """Pull CRSP Compustat data from WRDS"""
     return {
         "actions": [
@@ -178,6 +178,21 @@ def task_pull_fed_yield_curve():
         "targets": [
             DATA_DIR / "fed_yield_curve_all.parquet",
             DATA_DIR / "fed_yield_curve.parquet",
+        ],
+        "file_dep": ["./src/settings.py", "./src/pull_yield_curve_data.py"],
+        "clean": [],
+    }
+
+def task_create_diagnostic_charts():
+    """Create Diagnostic Charts for Data Sources (Homework 3)"""
+    return {
+        "actions": [
+            "ipython ./src/settings.py",
+            "ipython ./src/generate_chart.py",
+        ],
+        "targets": [
+            OUTPUT_DIR / "crsp_treasury_sample_plot.html",
+            OUTPUT_DIR / "fed_yield_curve_sample_plot.html",
         ],
         "file_dep": ["./src/settings.py", "./src/pull_yield_curve_data.py"],
         "clean": [],
@@ -248,7 +263,7 @@ def task_run_notebooks():
 ###############################################################
 
 
-def task_compile_latex_docs():
+def DISABLE_task_compile_latex_docs():
     """Compile the LaTeX documents to PDFs"""
     file_dep = [
         "./reports/report_example.tex",
