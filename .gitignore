@@ -101,7 +101,7 @@ coverage.xml
 *.log
 
 # Sphinx documentation
-docs/
+# docs/ #keep Chartbook site tracked for GitHub Pages
 /docs_src/apidocs
 
 

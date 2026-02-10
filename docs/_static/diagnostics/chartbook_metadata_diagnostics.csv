@@ -1,0 +1,9 @@
+Name,Metadata Complete,Object Type,Identifier,Pipeline,Missing Fields,Page Link
+p14_us_treasury_yield_curve_construction_and_model_comparison,False,pipeline,P1,P1,"build_commands, os_compatibility, git_repo_URL",../index.html
+CRSP Treasury Daily Prices,False,dataframe,crsp_treasury_daily_prices,P1,"short_description_df, links_to_data_providers, topic_tags",../dataframes/P1/crsp_treasury_daily_prices.html
+CRSP Treasury Issue Info,False,dataframe,crsp_treasury_issue_info,P1,"short_description_df, links_to_data_providers, topic_tags",../dataframes/P1/crsp_treasury_issue_info.html
+CRSP Treasury Consolidated,False,dataframe,crsp_treasury_consolidated,P1,"short_description_df, links_to_data_providers, topic_tags",../dataframes/P1/crsp_treasury_consolidated.html
+Fed Yield Curve All,False,dataframe,fed_yield_curve_all,P1,"short_description_df, links_to_data_providers, topic_tags",../dataframes/P1/fed_yield_curve_all.html
+Fed Yield Curve,False,dataframe,fed_yield_curve,P1,"short_description_df, links_to_data_providers, topic_tags",../dataframes/P1/fed_yield_curve.html
+Lifecycle of Selected 10-Year Treasury Issues (CRSP),False,chart,crsp_treasury_sample_plot,P1,"topic_tags, data_frequency, observation_period, lag_in_data_release, data_release_timing, units",../charts/P1.crsp_treasury_sample_plot.html
+Observed vs Fitted Zero-Coupon Curve (Fed Data),False,chart,fed_yield_curve_sample_plot,P1,"topic_tags, data_frequency, observation_period, lag_in_data_release, data_release_timing, units",../charts/P1.fed_yield_curve_sample_plot.html
