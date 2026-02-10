@@ -126,7 +126,7 @@ def task_config():
     }
 
 #Separately Load Data Sources, Can Be Updated Individually
-def DISABLE_task_pull_CRSP_stock():
+def task_pull_CRSP_stock():
     """Pull CRSP stock data from WRDS"""
     return {
         "actions": ["ipython ./src/settings.py", "ipython ./src/pull_CRSP_stock.py"],
@@ -136,7 +136,7 @@ def DISABLE_task_pull_CRSP_stock():
         "clean": [],
     }
 
-def DISABLE_task_pull_CRSP_compustat():
+def task_pull_CRSP_compustat():
     """Pull CRSP Compustat data from WRDS"""
     return {
         "actions": [
