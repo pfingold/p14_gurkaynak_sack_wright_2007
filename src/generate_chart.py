@@ -24,8 +24,7 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 def CRSP_treasury_plot():
     prices_maturities = load_CRSP_treasury_consolidated(DATA_DIR, with_runness=False)
 
-    # merge relevant information into prices
-    #prices_maturities = prices.merge(treas[["kytreasno", "tdatdt", "tmatdt", "original_maturity"]], on="kytreasno")
+    # fix datetime column
     prices_maturities["caldt"] = pd.to_datetime(prices_maturities["caldt"])
 
     # find all treasury issues that were originally 10yr bonds
