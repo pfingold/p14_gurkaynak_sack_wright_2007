@@ -14,7 +14,7 @@ from plotly.offline import plot
 from settings import config
 
 from pull_yield_curve_data import load_fed_yield_curve_all
-from pull_CRSP_treasury import load_CRSP_treasury_daily, load_CRSP_treasury_info
+from pull_CRSP_treasury import load_CRSP_treasury_consolidated
 from gsw2006_yield_curve import spot
 
 DATA_DIR = Path(config("DATA_DIR"))
@@ -22,11 +22,10 @@ OUTPUT_DIR = Path(config("OUTPUT_DIR"))
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 def CRSP_treasury_plot():
-    prices = load_CRSP_treasury_daily(DATA_DIR)
-    treas = load_CRSP_treasury_info(DATA_DIR)
+    prices_maturities = load_CRSP_treasury_consolidated(DATA_DIR, with_runness=False)
 
     # merge relevant information into prices
-    prices_maturities = prices.merge(treas[["kytreasno", "tdatdt", "tmatdt", "original_maturity"]], on="kytreasno")
+    #prices_maturities = prices.merge(treas[["kytreasno", "tdatdt", "tmatdt", "original_maturity"]], on="kytreasno")
     prices_maturities["caldt"] = pd.to_datetime(prices_maturities["caldt"])
 
     # find all treasury issues that were originally 10yr bonds
