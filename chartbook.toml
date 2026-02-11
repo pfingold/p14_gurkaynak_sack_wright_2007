@@ -20,6 +20,8 @@ runs_on_grid_or_windows_or_other = "Windows/Linux/MacOS"
 git_repo_URL = ""
 README_file_path = "./README.md"
 
+[notebooks]
+
 
 [dataframes]
 

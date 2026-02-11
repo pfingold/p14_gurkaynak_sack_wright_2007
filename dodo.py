@@ -126,31 +126,6 @@ def task_config():
     }
 
 #Separately Load Data Sources, Can Be Updated Individually
-def task_pull_CRSP_stock():
-    """Pull CRSP stock data from WRDS"""
-    return {
-        "actions": ["ipython ./src/settings.py", "ipython ./src/pull_CRSP_stock.py"],
-        "targets": [DATA_DIR / "CRSP_stock.parquet",
-                    DATA_DIR / "CRSP_MSIX.parquet"],
-        "file_dep": ["./src/settings.py", "./src/pull_CRSP_stock.py"],
-        "clean": [],
-    }
-
-def task_pull_CRSP_compustat():
-    """Pull CRSP Compustat data from WRDS"""
-    return {
-        "actions": [
-            "ipython ./src/settings.py",
-            "ipython ./src/pull_CRSP_Compustat.py",
-        ],
-        "targets": [DATA_DIR / "Compustat.parquet",
-                    DATA_DIR / "CRSP_stock_ciz.parquet",
-                    DATA_DIR / "CRSP_Comp_Link_Table.parquet",
-                    DATA_DIR / "FF_FACTORS.parquet"],
-        "file_dep": ["./src/settings.py", "./src/pull_CRSP_Compustat.py"],
-        "clean": [],
-    }
-
 def task_pull_CRSP_treasury():
     """Pull CRSP Treasury data from WRDS"""
     return {
