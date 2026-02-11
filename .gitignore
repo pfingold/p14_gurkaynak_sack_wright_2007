@@ -10,7 +10,7 @@
 /_output/*
 
 # Exclude data files from docs/_downloads
-/docs/_downloads/*.parquet
+/docs/_downloads/**/*.parquet
 
 # Exclude PDFs generated from source LaTeX files, which are kept in the reports directory
 /reports/*.pdf
