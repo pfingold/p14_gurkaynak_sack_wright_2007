@@ -20,6 +20,13 @@ def test_fed_yield_curve_data_exists():
     assert (DATA_DIR / "fed_yield_curve.parquet").exists()
     assert (DATA_DIR / "fed_yield_curve_all.parquet").exists()
 
+def test_CRSP_treasury_data_exists():
+    """Test that CRSP data files were created"""
+    assert (DATA_DIR / "TFZ_consolidated.parquet").exists()
+    assert (DATA_DIR / "TFZ_DAILY.parquet").exists()
+    assert (DATA_DIR / "TFZ_INFO.parquet").exists()
+    assert (DATA_DIR / "TFZ_with_runness.parquet").exists()
+
 ### REPLACE TESTS ONCE NOTEBOOKS ARE CREATED ###
 
 #def test_notebook_outputs_exist():
