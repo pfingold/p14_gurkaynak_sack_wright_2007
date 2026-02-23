@@ -25,7 +25,7 @@ def CRSP_treasury_plot():
     prices_maturities = load_CRSP_treasury_consolidated(DATA_DIR, with_runness=False)
 
     # fix datetime column
-    prices_maturities["caldt"] = pd.to_datetime(prices_maturities["caldt"])
+    prices_maturities["mcaldt"] = pd.to_datetime(prices_maturities["mcaldt"])
 
     # find all treasury issues that were originally 10yr bonds
     ten_year_issues = (
@@ -42,8 +42,8 @@ def CRSP_treasury_plot():
         .reset_index()
         .sort_values("tdatdt")
     )
-    DATA_START = prices_maturities["caldt"].min()
-    DATA_END = prices_maturities["caldt"].max()
+    DATA_START = prices_maturities["mcaldt"].min()
+    DATA_END = prices_maturities["mcaldt"].max()
     issue_meta = issue_meta.loc[(issue_meta["tdatdt"] >= DATA_START) &
                                 (issue_meta["tmatdt"] <= DATA_END)]
 
