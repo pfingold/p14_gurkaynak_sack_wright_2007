@@ -17,6 +17,11 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from settings import config
+
+DATA_DIR = Path(config("DATA_DIR"))
+OUTPUT_DIR = Path(config("OUTPUT_DIR"))
+
 def load_CRSP_treasury_data(data_dir):
     "Load CRSP Treasury data from the given directory, and return a tidy DataFrame."
     path = data_dir / "TFZ_with_runness.parquet"
@@ -28,23 +33,22 @@ def standardize_column_names(df):
     output_df = df.copy()
     # Clean column names
     output_df = output_df.rename(columns={
-        'caldt': 'date',
+        'mcaldt': 'date',
         'tcusip': 'cusip',
         'tcouprt': 'coupon',
-        'tdduratn': 'duration',
+        'tmduratn': 'duration',
         'tdatdt': 'issue_date',
         'tmatdt': 'maturity_date',
-        'tdbid': 'bid',
-        'tdask': 'ask',
-        'tdaccint': 'accrued_interest',
-        'tdyld': 'yield',
+        'tmbid': 'bid',
+        'tmask': 'ask',
+        'tmaccint': 'accrued_interest',
+        'tmyld': 'yield',
         'price': 'price_raw',
         'itype': 'itype',
         'run': 'run',
         #'original_maturity': 'original_maturity',
         'days_to_maturity': 'ttm_days',
         'years_to_maturity': 'ttm_years',
-        'callable': 'callable',
         'kytreasno': 'kytreasno',
         'kycrspid': 'kycrspid',
     })
@@ -61,10 +65,6 @@ def standardize_column_names(df):
     for col in numeric_columns:
         if col in output_df.columns:
             output_df[col] = pd.to_numeric(output_df[col], errors='coerce')
-
-    # Convert callable column to boolean if it exists
-    if 'callable' in output_df.columns:
-        output_df['callable'] = output_df['callable'].astype(bool)
 
     return output_df
 
@@ -102,9 +102,6 @@ def add_relevant_fields(df):
     output_df['is_first_off_the_run'] = output_df['run'] == 1
     output_df['is_off_the_run'] = output_df['run'] >= 2
 
-    # Waggoner uses Months
-    output_df['month'] = output_df['date'].dt.to_period('M').dt.to_timestamp('M')
-
     # Maturity Flags (Waggoner excludes under 30 days and under 1y from curve estimation)
     output_df['is_under_30d'] = output_df['ttm_days'] < 30
     output_df['is_under_3m'] = output_df['ttm_days'] < 90
@@ -115,11 +112,12 @@ def add_relevant_fields(df):
     output_df['is_20yr_post_1996'] = (output_df['date'] >= '1996-01-01') & (output_df['is_20y'])
 
     # Instrument Type Flags
-    output_df['is_itype1'] = output_df['itype'] == 1
-    output_df['is_itype2'] = output_df['itype'] == 2
+    output_df['is_bond'] = output_df['itype'] == 1
+    output_df['is_note'] = output_df['itype'] == 2
+    output_df['is_bill'] = output_df['itype'] == 4
 
-    # Callable Flag (GSW excludes callable bonds from curve estimation)
-    output_df['is_callable'] = output_df['callable']
+    # Flower Bond Flags
+    output_df['is_flower'] = output_df['iflwr'] > 1
    
     return output_df
 
@@ -127,9 +125,9 @@ def select_relevant_cols(df):
     "Keeps the relevant columns for curve estimation & analysis."
     cols = [
         # identifiers
-        'date', 'cusip', 'month', 'kytreasno', 'kycrspid',
+        'date', 'cusip', 'kytreasno', 'kycrspid',
         # bond chracteristics
-        'issue_date', 'maturity_date', 'coupon', 'itype', 'run',
+        'issue_date', 'maturity_date', 'coupon', 'itype', 'iflwr', 'run',
         # quotes & prices
         'bid', 'ask', 'mid_price', 'accrued_interest', 'yield', 'price_raw',
         # maturity measures & duration
@@ -138,8 +136,8 @@ def select_relevant_cols(df):
         'is_on_the_run', 'is_first_off_the_run', 'is_off_the_run',
         'is_under_30d', 'is_under_3m', 'is_under_1y',
         'is_20y', 'is_20yr_post_1996',
-        'is_itype1', 'is_itype2',
-        'is_callable',
+        'is_bond', 'is_note', 'is_bill',
+        'is_flower',
         'valid_quote', 'nonnegative_maturity', 'clean',
     ]
     cols = [col for col in cols if col in df.columns]
@@ -154,7 +152,7 @@ def generate_tidy_CRSP_treasury_data(tidy_df, output_dir):
     return output_path
 
 
-def main(data_dir = '../_data', output_dir = '../_output'):
+def main(data_dir = DATA_DIR, output_dir = OUTPUT_DIR):
     data_dir = Path(data_dir)
     output_dir = Path(output_dir)
 

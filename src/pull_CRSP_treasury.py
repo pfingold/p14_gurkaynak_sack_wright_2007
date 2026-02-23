@@ -5,14 +5,14 @@ Reference:
     https://www.crsp.org/wp-content/uploads/guides/CRSP_US_Treasury_Database_Guide_for_SAS_ASCII_EXCEL_R.pdf
 
 Data Description:
-    TFZ_DLY ( DAILY TIME SERIES ITEMS)
+    TFZ_MTH ( MONTHLY TIME SERIES ITEMS)
         kytreasno: TREASURY RECORD IDENTIFIER
         kycrspid: CRSP-ASSIGNED UNIQUE ID
-        caldt: QUOTATION DATE
-        tdbid: DAILY BID
-        tdask: DAILY ASK
-        tdaccint: DAILY SERIES OF TOTAL ACCRUED INTEREST
-        tdyld: DAILY SERIES OF PROMISED DAILY YIELD
+        mcaldt: LAST QUOTATION DATE IN MONTH
+        tmbid: MONTHLY BID
+        tmask: MONTHLY ASK
+        tmaccint: MONTHLY SERIES OF TOTAL ACCRUED INTEREST
+        tmyld: MONTHLY SERIES OF PROMISED DAILY YIELD
 
     TFZ_ISS (ISSUE DESCRIPTIONS)
         tcusip: TREASURY CUSIP
@@ -20,6 +20,7 @@ Data Description:
         tmatdt: MATURITY DATE AT TIME OF ISSUE
         tcouprt: COUPON RATE
         itype: TYPE OF ISSUE (1: NONCALLABLE BONDS, 2: NONCALLABLE NOTES)
+        iflwr: ISSUE FLOWER BOND STATUS (relevant before 1971)
 
 Thank you to Younghun Lee for preparing this script for use in class.
 """
@@ -43,12 +44,12 @@ def pull_CRSP_treasury_daily(
 ):
     query = f"""
     SELECT 
-        kytreasno, kycrspid, caldt, tdbid, tdask, tdaccint, tdyld,
-        ((tdbid + tdask) / 2.0 + tdaccint) AS price
+        kytreasno, kycrspid, mcaldt, tmbid, tmask, tmaccint, tmyld,
+        ((tmbid + tmask) / 2.0 + tmaccint) AS price
     FROM 
-        crspm.tfz_dly
+        crspm.tfz_mth
     WHERE 
-        caldt BETWEEN '{start_date}' AND '{end_date}'
+        mcaldt BETWEEN '{start_date}' AND '{end_date}'
     """
 
     db = wrds.Connection(wrds_username=wrds_username)
@@ -65,7 +66,7 @@ def pull_CRSP_treasury_info(wrds_username=WRDS_USERNAME):
         FROM 
             crspm.tfz_iss AS iss
         WHERE 
-            iss.itype IN (1, 2)
+            iss.itype IN (1, 2, 4)
     """
 
     db = wrds.Connection(wrds_username=wrds_username)
@@ -84,16 +85,16 @@ def calc_runness(data):
     """
 
     def _calc_runness(df):
-        temp = df.sort_values(by=["caldt", "original_maturity", "tdatdt"])
+        temp = df.sort_values(by=["mcaldt", "original_maturity", "tdatdt"])
         next_temp = (
-            temp.groupby(["caldt", "original_maturity"])["tdatdt"].rank(
+            temp.groupby(["mcaldt", "original_maturity"])["tdatdt"].rank(
                 method="first", ascending=False
             )
             - 1
         )
         return next_temp
 
-    data_run_ = data[data["caldt"] >= "1980"]
+    data_run_ = data[data["mcaldt"] >= "1980"]
     runs = _calc_runness(data_run_)
     data["run"] = 0
     data.loc[data_run_.index, "run"] = runs
@@ -108,7 +109,7 @@ def pull_CRSP_treasury_consolidated(
     """Pull consolidated CRSP Treasury data with all relevant fields.
 
     Includes fields from these tables:
-    - tfz_dly (daily quotes): bid/ask prices, accrued interest, yields
+    - tfz_mth (monthly quotes): bid/ask prices, accrued interest, yields
     - tfz_iss (issue info): CUSIP, dates, coupon rates, issue types
 
     Price Terminology:
@@ -133,48 +134,49 @@ def pull_CRSP_treasury_consolidated(
         tfz.kytreasno, tfz.kycrspid, iss.tcusip,
         
         -- Dates
-        tfz.caldt,                  -- Quote date: Date of price observation
+        tfz.mcaldt,                  -- Quote date: Date of price observation
         iss.tdatdt,                 -- Date dated: Original issue date when interest starts accruing
         iss.tmatdt,                 -- Maturity date: When principal is repaid
         iss.tfcaldt,                -- First call date (0 if not callable)
         
         -- Prices and Yields
-        tfz.tdbid,                  -- Bid price (clean)
-        tfz.tdask,                  -- Ask price (clean)
-        tfz.tdaccint,               -- Accrued interest since last coupon
-        tfz.tdyld,                  -- Bond equivalent yield
-        ((tfz.tdbid + tfz.tdask) / 2.0 + tfz.tdaccint) AS price,  
+        tfz.tmbid,                  -- Bid price (clean)
+        tfz.tmask,                  -- Ask price (clean)
+        tfz.tmaccint,               -- Accrued interest since last coupon
+        tfz.tmyld,                  -- Bond equivalent yield
+        ((tfz.tmbid + tfz.tmask) / 2.0 + tfz.tmaccint) AS price,  
                                     -- Dirty price (clean price + accrued interest)
         
         -- Issue Characteristics
         iss.tcouprt,                -- Coupon rate (annual)
-        iss.itype,                  -- Type of issue (1: bonds, 2: notes)
+        iss.itype,                  -- Type of issue (1: bonds, 2: notes, 4: bills)
         ROUND((iss.tmatdt - iss.tdatdt) / 365.0) AS original_maturity,  
                                     -- Original maturity at issuance
+        iss.iflwr,                  -- Flower bond status
         
         -- Additional Derived Fields
-        ROUND((iss.tmatdt - tfz.caldt) / 365.0) AS years_to_maturity,  
+        ROUND((iss.tmatdt - tfz.mcaldt) / 365.0) AS years_to_maturity,  
                                     -- Remaining time to maturity
         
         -- Trading info (if available)
-        tfz.tdduratn,               -- Duration: Price sensitivity to yield changes
-        tfz.tdretnua                -- Return (unadjusted): Simple price change + accrued interest
+        tfz.tmduratn,               -- Duration: Price sensitivity to yield changes
+        tfz.tmretnua                -- Return (unadjusted): Simple price change + accrued interest
         
     FROM 
-        crspm.tfz_dly AS tfz
+        crspm.tfz_mth AS tfz
     LEFT JOIN 
         crspm.tfz_iss AS iss 
     ON 
         tfz.kytreasno = iss.kytreasno AND 
         tfz.kycrspid = iss.kycrspid
     WHERE 
-        tfz.caldt BETWEEN '{start_date}' AND '{end_date}' AND 
-        iss.itype IN (1, 2)  -- Only include Treasury bonds (1) and notes (2)
+        tfz.mcaldt BETWEEN '{start_date}' AND '{end_date}' AND 
+        iss.itype IN (1, 2, 4)  -- Only include Treasury bonds (1), notes (2), and bills (4)
     """
 
     db = wrds.Connection(wrds_username=wrds_username)
-    df = db.raw_sql(query, date_cols=["caldt", "tdatdt", "tmatdt", "tfcaldt"])
-    df["days_to_maturity"] = (df["tmatdt"] - df["caldt"]).dt.days
+    df = db.raw_sql(query, date_cols=["mcaldt", "tdatdt", "tmatdt", "tfcaldt"])
+    df["days_to_maturity"] = (df["tmatdt"] - df["mcaldt"]).dt.days
     df["tfcaldt"] = df["tfcaldt"].fillna(0)
     df["callable"] = df["tfcaldt"] != 0  # Add boolean callable flag
     db.close()
