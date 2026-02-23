@@ -55,7 +55,7 @@ def CRSP_treasury_plot():
     df_plot = prices_maturities[prices_maturities["kytreasno"].isin(selected_issues)].copy()
 
     df_plot["years_since_issue"] = (
-        df_plot["caldt"] - df_plot["tdatdt"]
+        df_plot["mcaldt"] - df_plot["tdatdt"]
     ).dt.days / 365.25
 
     df_plot["tdatdt"] = df_plot["tdatdt"].dt.date
