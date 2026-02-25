@@ -61,7 +61,7 @@ def pull_CRSP_treasury_daily(
 def pull_CRSP_treasury_info(wrds_username=WRDS_USERNAME):
     query = """
         SELECT 
-            kytreasno, kycrspid, tcusip, tdatdt, tmatdt, tcouprt, itype,
+            kytreasno, kycrspid, tcusip, tdatdt, tmatdt, tcouprt, tfcpdt, itype,
             ROUND((tmatdt - tdatdt) / 365.0) AS original_maturity
         FROM 
             crspm.tfz_iss AS iss
@@ -70,7 +70,7 @@ def pull_CRSP_treasury_info(wrds_username=WRDS_USERNAME):
     """
 
     db = wrds.Connection(wrds_username=wrds_username)
-    df = db.raw_sql(query, date_cols=["tdatdt", "tmatdt"])
+    df = db.raw_sql(query, date_cols=["tdatdt", "tmatdt", "tfcpdt"])
     db.close()
     return df
 
@@ -110,7 +110,7 @@ def pull_CRSP_treasury_consolidated(
 
     Includes fields from these tables:
     - tfz_mth (monthly quotes): bid/ask prices, accrued interest, yields
-    - tfz_iss (issue info): CUSIP, dates, coupon rates, issue types
+    - tfz_iss (issue info): CUSIP, dates, coupon rates, first coupon date, issue types
 
     Price Terminology:
     - Clean Price = (bid + ask)/2 = quoted price without accrued interest
@@ -138,6 +138,7 @@ def pull_CRSP_treasury_consolidated(
         iss.tdatdt,                 -- Date dated: Original issue date when interest starts accruing
         iss.tmatdt,                 -- Maturity date: When principal is repaid
         iss.tfcaldt,                -- First call date (0 if not callable)
+        iss.tfcpdt,                 -- First coupon date
         
         -- Prices and Yields
         tfz.tmbid,                  -- Bid price (clean)
@@ -175,7 +176,7 @@ def pull_CRSP_treasury_consolidated(
     """
 
     db = wrds.Connection(wrds_username=wrds_username)
-    df = db.raw_sql(query, date_cols=["mcaldt", "tdatdt", "tmatdt", "tfcaldt"])
+    df = db.raw_sql(query, date_cols=["mcaldt", "tdatdt", "tmatdt", "tfcaldt", "tfcpdt"])
     df["days_to_maturity"] = (df["tmatdt"] - df["mcaldt"]).dt.days
     df["tfcaldt"] = df["tfcaldt"].fillna(0)
     df["callable"] = df["tfcaldt"] != 0  # Add boolean callable flag

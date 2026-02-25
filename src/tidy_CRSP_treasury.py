@@ -36,6 +36,7 @@ def standardize_column_names(df):
         'mcaldt': 'date',
         'tcusip': 'cusip',
         'tcouprt': 'coupon',
+        'tfcpdt': 'first_coupon_date',
         'tmduratn': 'duration',
         'tdatdt': 'issue_date',
         'tmatdt': 'maturity_date',
@@ -127,7 +128,7 @@ def select_relevant_cols(df):
         # identifiers
         'date', 'cusip', 'kytreasno', 'kycrspid',
         # bond chracteristics
-        'issue_date', 'maturity_date', 'coupon', 'itype', 'iflwr', 'run',
+        'issue_date', 'maturity_date', 'coupon', 'first_coupon_date', 'itype', 'iflwr', 'run',
         # quotes & prices
         'bid', 'ask', 'mid_price', 'accrued_interest', 'yield', 'price_raw',
         # maturity measures & duration
