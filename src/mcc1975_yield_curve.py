@@ -12,9 +12,9 @@ ID_COLS = ["date", "cusip"]
 def get_nodes(bonds, maturities):
     """DOCSTRING"""
     n_bonds = len(bonds)
-    ncoef = int(np.sqrt(n_bonds))
+    n_knots = int(np.sqrt(n_bonds))
     Tmax = max(maturities)
-    n_knots = ncoef - 1
+    ncoef = n_knots + 1
     interior_knots = []
     for j in range(2, n_knots):
         h = int(np.floor((j-1)*n_bonds/(ncoef-2)))
@@ -163,14 +163,14 @@ def discount_curve(bonds, beta_hat, d, ncoef):
     F_nodes = build_basis_matrix(d, d, ncoef)
     D_nodes = 1.0 + F_nodes @ beta_hat
 
-    curve_df = pd.DataFrame({"T": T_grid,
-                             "discount": D})
-
     F = build_basis_matrix(T_grid, d, ncoef)
     D = 1.0 + F @ beta_hat
     
     nodes_df = pd.DataFrame({"T": d,
                              "discount": D_nodes})
+
+    curve_df = pd.DataFrame({"T": T_grid,
+                             "discount": D})
     
     return curve_df, nodes_df
 
