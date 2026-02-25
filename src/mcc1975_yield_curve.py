@@ -227,7 +227,7 @@ def get_full_error_metrics(results, id_cols=ID_COLS, error_cols=ERROR_COLS):
     wmae_list = []
     hit_rate_list = []
 
-    preds = pd.concat([results[r]["bonds_df"][id_cols + error_cols].set_index(id_cols) for r in results], axis=0)
+    preds = pd.concat([results[r]["bonds"][id_cols + error_cols].set_index(id_cols) for r in results], axis=0)
 
     for start, stop in ttm_bins:
         preds_bin = preds.loc[(preds["ttm"] >= start) & (preds["ttm"] < stop)]
