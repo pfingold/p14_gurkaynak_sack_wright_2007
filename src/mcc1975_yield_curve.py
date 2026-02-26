@@ -6,6 +6,8 @@ import pandas as pd
 import error_metrics
 import curve_fitting_utils
 
+from curve_conversions import add_spot_and_forwards
+
 ERROR_COLS = ["bid", "ask", "duration", "model_price", "ttm"]
 ID_COLS = ["date", "cusip"]
 
