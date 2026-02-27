@@ -177,7 +177,7 @@ def discount_curve(bonds, beta_hat, d, ncoef):
     return curve_df, nodes_df
 
 
-def run_mcculloch(sample):
+def run_mcculloch(sample, pre_trained_results = None):
     results = {}
 
     dates = sample["date"].unique()
@@ -198,9 +198,13 @@ def run_mcculloch(sample):
 
         cashflows, times = curve_fitting_utils.get_cashflows_from_bonds(bonds)
 
-        d, ncoef = get_nodes(bonds, maturities)
-
-        beta_hat = fit(cashflows, times, prices, acc_int, d, ncoef)
+        if pre_trained_results:
+            beta_hat = pre_trained_results[DATE]["beta_hat"]
+            ncoef = beta_hat.shape[0]
+            d = pre_trained_results[DATE]["nodes"]["T"].to_numpy()
+        else:
+            d, ncoef = get_nodes(bonds, maturities)
+            beta_hat = fit(cashflows, times, prices, acc_int, d, ncoef)
         
         P_hat = predict_prices(beta_hat, cashflows, times, d, ncoef, acc_int)
         resid = P_hat - prices
