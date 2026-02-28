@@ -1,3 +1,11 @@
+"""
+Curve fitting utilities for Waggoner's method of Treasury data
+preparation and cashflow construction. This includes:
+    - Loading and filtering CRSP treasury data according to Waggoner's criteria
+    - Splitting the data into in-sample and out-of-sample groups
+    - Constructing cashflows and payment times for each bond, 
+        including handling of stubs and missing first coupon dates
+"""
 from pathlib import Path
 import numpy as np
 import pandas as pd

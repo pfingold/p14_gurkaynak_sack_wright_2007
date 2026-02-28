@@ -1,3 +1,10 @@
+"""
+Unit tests for pricing error metrics: WMAE and Hit Rate.
+Tests include:
+    - Basic functionality with simple examples
+    - Edge case with perfect fit (zero errors)
+"""
+
 import pytest
 import numpy as np
 from error_metrics import wmae, hit_rate

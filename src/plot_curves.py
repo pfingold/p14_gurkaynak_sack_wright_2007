@@ -4,7 +4,6 @@ Executes the replication pipeline and plots the resulting curves:
     - Build MCC discount curves (mcc1975_yield_curve.py)
     - Convert discount to spot & forward (curve_conversions.py)
     - Plot the curves for selected dates (this file)
-
 """
 from pathlib import Path
 import importlib

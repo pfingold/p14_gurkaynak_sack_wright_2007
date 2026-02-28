@@ -1,3 +1,10 @@
+"""
+Unit tests for data processing and notebook outputs.
+Tests include:
+    - Existence of data and output directories
+    - Existence of key data files (Fed yield curve, CRSP treasury data)
+    - Existence of notebook outputs (HTML and notebook copies)
+"""
 import pytest
 from pathlib import Path
 from settings import config
