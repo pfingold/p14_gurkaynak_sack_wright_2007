@@ -22,11 +22,7 @@ SRC_DIR = Path(__file__).resolve().parent
 ROOT_DIR = SRC_DIR.parent
 CHARTS_DIR = ROOT_DIR / "docs" / "charts"
 CHARTS_DIR.mkdir(parents=True, exist_ok=True)
-
 DATA_DIR = Path(config("DATA_DIR"))
-GSW_DATE = "1995-01-03"  # Date of GSW curve to overlay for comparison
-DT_FWD = 0.25  # Time step for forward rate conversions (in years)
-
     
 def pick_dates(df, n=3):
     "Pick n evenly spaced dates from the available sample dates in the DataFrame"
@@ -38,7 +34,7 @@ def pick_dates(df, n=3):
     idx = np.linspace(0, len(dates) - 1, n).round().astype(int)
     return list(dates[idx])
 
-def build_converted_curve(treasury_filtered, dates_to_plot, dt_fwd=0.25):
+def build_converted_curve(treasury_filtered, dates_to_plot, dt_fwd):
     "Build MCC curve for selected dates and add spot/forward conversions"
     sample = treasury_filtered.copy()
     sample['date'] = pd.to_datetime(sample['date'])
@@ -115,10 +111,19 @@ def build_converted_gsw_curve(gsw_date, t_grid, dt_fwd=0.25):
     #Maps Fed Column Names to Model Parameters
     tau1 = float(row["TAU1"])
     tau2 = float(row["TAU2"])
-    beta1 = float(row["BETA0"]) / 100.0
-    beta2 = float(row["BETA1"]) / 100.0
-    beta3 = float(row["BETA2"]) / 100.0
-    beta4 = float(row["BETA3"]) / 100.0
+
+    b0 = float(row["BETA0"])
+    b1 = float(row["BETA1"])
+    b2 = float(row["BETA2"])
+    b3 = float(row["BETA3"])
+
+    #Scale to decimals if betas are percentages
+    scale = 0.01 if max(abs(b0), abs(b1), abs(b2), abs(b3)) > 1.0 else 1.0
+    beta1 = b0 * scale
+    beta2 = b1 * scale
+    beta3 = b2 * scale
+    beta4 = b3 * scale
+
     params = (tau1, tau2, beta1, beta2, beta3, beta4)
 
     spot = _gsw_spot(t_grid, params)
@@ -147,10 +152,12 @@ def plot_curves(curves_dict,
     if extra_traces:
         for tr in extra_traces:
             df2 = tr["df"]
+            xcol = tr.get("x_col", x_col)
+            ycol = tr.get("y_col", y_col)
             fig.add_trace(
                 go.Scatter(
-                    x=df2.get(tr.get("x_col", x_col), df2[x_col]),
-                    y=df2.get(tr.get("y_col", y_col), df2[y_col]),
+                    x=df2[xcol],
+                    y=df2[ycol],
                     mode="lines",
                     name=tr["name"],
                     line=dict(dash=tr.get("dash", "dash")),
@@ -172,9 +179,13 @@ def main():
 
     #Pick dates to plot
     dates_to_plot = pick_dates(treasury_filtered, n=3)
+    GSW_DATE = max(dates_to_plot)  # Date of GSW curve to overlay for comparison
+
+    t_grid = np.linspace(0.0, 30.0, 30*48 +1) #approx weekly grid for 0-30y
+    DT_FWD = t_grid[1] - t_grid[0]  # Time step for forward rate conversions (in years)
 
     #Build curves with conversions
-    curves_dict = build_converted_curve(treasury_filtered, dates_to_plot, dt_fwd=0.25)
+    curves_dict = build_converted_curve(treasury_filtered, dates_to_plot, dt_fwd=DT_FWD)
 
     #Plot Discount Factors
     plot_curves(curves_dict, 
@@ -198,9 +209,8 @@ def main():
     print(f'MCC Discount, Spot, and Forward curve plots saved to {CHARTS_DIR}')
 
     ### Overlay GSW curve for comparison ###
+
     #Build GSW Curve
-    any_date = next(iter(curves_dict.keys()))
-    t_grid = np.asarray(curves_dict[any_date]["T"], dtype=float)
     gsw_actual_date, gsw_df = build_converted_gsw_curve(GSW_DATE, t_grid, DT_FWD)
     gsw_label = f"GSW Curve ({gsw_actual_date.date()})"
 
