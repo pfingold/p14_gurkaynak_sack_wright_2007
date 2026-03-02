@@ -268,7 +268,7 @@ def get_full_error_metrics(results, id_cols=ID_COLS, error_cols=ERROR_COLS):
             preds["ask"]
         ))
 
-    labels = [f"{start}—{stop}"
+    labels = [f"{start}-{stop}"
               if stop < np.inf
               else f">{start}"
               for start, stop in ttm_bins
