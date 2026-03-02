@@ -184,7 +184,7 @@ def run_mcculloch(sample, pre_trained_results = None):
 
     for idx, DATE in enumerate(dates):
         if idx % 50 == 0:
-            print(f"{DATE.to_period("M")}: {idx} / {len(dates)} ({int(idx/len(dates)*100)}%)")
+            print(f"{DATE.to_period('M')}: {idx} / {len(dates)} ({int(idx/len(dates)*100)}%)")
 
         bonds = sample.loc[sample["date"] == DATE].reset_index(drop=True)
 
