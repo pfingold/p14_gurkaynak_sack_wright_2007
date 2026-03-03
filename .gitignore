@@ -33,6 +33,12 @@ drafts/draft_bp.pdf
 # Sphinx build files
 _docs/
 
+# Generated charts
+docs/charts/
+
+# Data artifacts
+_data/*.parquet
+
 
 ##############
 #Excluded PDFs
