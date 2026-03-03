@@ -210,41 +210,50 @@ def main():
 
     ### Overlay GSW curve for comparison ###
 
-    #Build GSW Curve
-    gsw_actual_date, gsw_df = build_converted_gsw_curve(GSW_DATE, t_grid, DT_FWD)
-    gsw_label = f"GSW Curve ({gsw_actual_date.date()})"
+        ### (1) Date-specific MCC vs GSW plots (3 dates × 3 curve types = 9 files) ###
+    for d in dates_to_plot:
+        d = pd.to_datetime(d)
 
-    # Plot Discount Factors (MCC + GSW overlay)
-    plot_curves(
-        curves_dict,
-        x_col="T", y_col="discount",
-        title="Discount Curves: MCC vs GSW",
-        y_axis_title="Discount Factor",
-        out_html=CHARTS_DIR / "discount_mcc_vs_gsw.html",
-        extra_traces=[{"name": gsw_label, "df": gsw_df, "dash": "dash"}],
-    )
+        # MCC curve for this date only
+        mcc_one = {d: curves_dict[d]}
 
-    # Plot Spot Rates (MCC + GSW overlay)
-    plot_curves(
-        curves_dict,
-        x_col="T", y_col="spot_cc",
-        title="Spot Curves (CC): MCC vs GSW",
-        y_axis_title="Spot Rate (Continuously Compounded)",
-        out_html=CHARTS_DIR / "spot_cc_mcc_vs_gsw.html",
-        extra_traces=[{"name": gsw_label, "df": gsw_df, "dash": "dash"}],
-    )
+        # GSW curve "asof" this date
+        gsw_actual_date, gsw_df = build_converted_gsw_curve(d, t_grid, DT_FWD)
+        gsw_label = f"GSW ({gsw_actual_date.date()})"
 
-    # Plot Instantaneous Forwards (MCC + GSW overlay)
-    plot_curves(
-        curves_dict,
-        x_col="T", y_col="forward_instant_cc",
-        title="Instantaneous Forward Curves (CC): MCC vs GSW",
-        y_axis_title="Instantaneous Forward Rate",
-        out_html=CHARTS_DIR / "fwd_instant_cc_mcc_vs_gsw.html",
-        extra_traces=[{"name": gsw_label, "df": gsw_df, "dash": "dash"}],
-    )
+        date_tag = d.strftime("%Y-%m-%d")
 
-    print(f'MCC vs GSW plots saved to {CHARTS_DIR}')
+        # Discount
+        plot_curves(
+            mcc_one,
+            x_col="T", y_col="discount",
+            title=f"Discount Curves: MCC vs GSW ({date_tag})",
+            y_axis_title="Discount Factor",
+            out_html=CHARTS_DIR / f"discount_mcc_vs_gsw_{date_tag}.html",
+            extra_traces=[{"name": gsw_label, "df": gsw_df, "dash": "dash"}],
+        )
+
+        # Spot (cc)
+        plot_curves(
+            mcc_one,
+            x_col="T", y_col="spot_cc",
+            title=f"Spot Curves (CC): MCC vs GSW ({date_tag})",
+            y_axis_title="Spot Rate (Continuously Compounded)",
+            out_html=CHARTS_DIR / f"spot_cc_mcc_vs_gsw_{date_tag}.html",
+            extra_traces=[{"name": gsw_label, "df": gsw_df, "dash": "dash"}],
+        )
+
+        # Instantaneous forward (cc)
+        plot_curves(
+            mcc_one,
+            x_col="T", y_col="forward_instant_cc",
+            title=f"Instantaneous Forward Curves (CC): MCC vs GSW ({date_tag})",
+            y_axis_title="Instantaneous Forward Rate",
+            out_html=CHARTS_DIR / f"fwd_instant_cc_mcc_vs_gsw_{date_tag}.html",
+            extra_traces=[{"name": gsw_label, "df": gsw_df, "dash": "dash"}],
+        )
+
+    print(f"Date-specific MCC vs GSW plots saved to {CHARTS_DIR}")
 
 if __name__ == "__main__":   
     main()
