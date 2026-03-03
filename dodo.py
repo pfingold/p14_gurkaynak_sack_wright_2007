@@ -177,6 +177,55 @@ def task_create_diagnostic_charts():
         "clean": True,
     }
 
+#Tidy the CRSP Treasury Data
+def task_tidy_CRSP_treasury():
+    """Tidy CRSP Treasury data for curve estimation"""
+    return {
+        "actions": [
+            "ipython ./src/settings.py",
+            "ipython ./src/tidy_CRSP_treasury.py",
+        ],
+        "targets": [
+            OUTPUT_DIR / "tidy_CRSP_treasury.parquet",
+        ],
+        "file_dep": [
+            "./src/settings.py",
+            "./src/tidy_CRSP_treasury.py",
+            DATA_DIR / "TFZ_with_runness.parquet",
+        ],
+        "task_dep": ["pull_CRSP_treasury"],
+        "clean": True,
+    }
+
+# Begin Replication Tasks
+def task_build_mcc_yield_curve():
+    """Run McCulloch (MCC) yield curve replication from CRSP Treasury data"""
+    return{
+        "actions": [
+            "ipython ./src/settings.py",
+            "ipython ./src/run_mcc_yield_curve.py",
+        ],
+        "targets":[
+            DATA_DIR / "mcc_discount_curve.parquet",
+            DATA_DIR / "mcc_discount_curve_nodes.parquet",
+            DATA_DIR / "mcc_bond_fits.parquet",
+            DATA_DIR / "mcc_fit_quality_by_date.parquet",
+            DATA_DIR / "mcc_error_metrics.parquet",
+        ],
+        "file_dep":[
+            "./src/settings.py",
+            "./src/run_mcc_yield_curve.py",
+            "./src/mcc1975_yield_curve.py",
+            "./src/curve_fitting_utils.py",
+            "./src/curve_conversions.py",
+            "./src/error_metrics.py",
+            OUTPUT_DIR / "tidy_CRSP_treasury.parquet",
+
+        ],
+        "task_dep": ["tidy_CRSP_treasury"],
+        "clean": True,
+    }
+
 #Temporarily Disabling Summary Stats Task for Setup Ease
 def DISABLE_task_summary_stats_disabled():
     """Generate summary statistics tables"""

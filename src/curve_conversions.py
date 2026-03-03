@@ -1,7 +1,11 @@
 """
-Convert a discount-curve representation into:
-    - spot/zero rates (continuously compounded, annualized)
-    - forward rates (instantaneous, discrete forward over a tenor)
+Provides Curve Conversions for our different replication methods:
+(1) McCulloch (1975) - discount curve -> spot/forward
+    Convert a discount-curve representation into:
+        - spot/zero rates (continuously compounded, annualized)
+        - forward rates (instantaneous, discrete forward over a tenor)
+(2) Fisher - forward rates -> 
+        - forward rates 
 
 Compiles a set of functions to perform these conversions, and a 
 wrapper to add all the columns to the curve DataFrame at once.
