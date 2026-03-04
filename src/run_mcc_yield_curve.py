@@ -16,6 +16,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 from settings import config
+import curve_fitting_utils as cfu
 import mcc1975_yield_curve as mcc
 
 DATA_DIR = Path(config("DATA_DIR"))
@@ -85,7 +86,7 @@ def main():
     fit_quality_df = pd.DataFrame(fit_quality).sort_values("date")
 
     # Overall + by maturity-bin error metrics
-    err_df = mcc.get_full_error_metrics(results).reset_index().rename(columns={"index": "bucket"})
+    err_df = cfu.get_full_error_metrics(results).reset_index().rename(columns={"index": "bucket"})
 
     # Save Outputs
     (DATA_DIR / "mcc_discount_curve.parquet").write_bytes(b"")  # ensures parent exists in some envs

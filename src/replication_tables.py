@@ -208,7 +208,7 @@ def compute_replication_values(sample, sample_label, pre_trained=None):
     else:
         mcc_results = mcc.run_mcculloch(sample)
 
-    mcc_metrics = mcc.get_full_error_metrics(mcc_results)
+    mcc_metrics = cfu.get_full_error_metrics(mcc_results)
     replication.update(metrics_df_to_dict(mcc_metrics, "McCulloch"))
 
     #Fisher
@@ -217,7 +217,7 @@ def compute_replication_values(sample, sample_label, pre_trained=None):
     else:
         fisher_results = fisher.run_fisher(sample)
     
-    fisher_metrics = fisher.get_full_error_metrics(fisher_results)
+    fisher_metrics = cfu.get_full_error_metrics(fisher_results)
     replication.update(metrics_df_to_dict(fisher_metrics, "Fisher"))
 
     #VRP
@@ -226,7 +226,7 @@ def compute_replication_values(sample, sample_label, pre_trained=None):
     else:
         vrp_results = vrp.run_vrp(sample)
 
-    vrp_metrics = vrp.get_full_error_metrics(vrp_results)
+    vrp_metrics = cfu.get_full_error_metrics(vrp_results)
     replication.update(metrics_df_to_dict(vrp_metrics, "VRP"))
 
     return replication
