@@ -226,6 +226,33 @@ def task_build_mcc_yield_curve():
         "clean": True,
     }
 
+def task_build_fisher_yield_curve():
+    """Run Fisher (1995) forward-curve replication from CRSP Treasury data"""
+    return {
+        "actions": [
+            "ipython ./src/settings.py",
+            "ipython ./src/run_fisher_yield_curve.py",
+        ],
+        "targets": [
+            DATA_DIR / "fisher_forward_curve.parquet",
+            DATA_DIR / "fisher_forward_curve_nodes.parquet",
+            DATA_DIR / "fisher_bond_fits.parquet",
+            DATA_DIR / "fisher_fit_quality_by_date.parquet",
+            DATA_DIR / "fisher_error_metrics.parquet",
+        ],
+        "file_dep": [
+            "./src/settings.py",
+            "./src/run_fisher_yield_curve.py",
+            "./src/fisher1995_yield_curve.py",
+            "./src/curve_fitting_utils.py",
+            "./src/error_metrics.py",
+            OUTPUT_DIR / "tidy_CRSP_treasury.parquet",
+        ],
+        "task_dep": ["tidy_CRSP_treasury"],
+        "clean": True,
+    }
+
+
 #Temporarily Disabling Summary Stats Task for Setup Ease
 def DISABLE_task_summary_stats_disabled():
     """Generate summary statistics tables"""

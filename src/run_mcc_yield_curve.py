@@ -2,8 +2,9 @@
 Runs the McCulloch (1975) yield curve replication method (a discount-curve representation 
 of the yield curve to compute spot/zero rates and forward rates) and saves the outputs for analysis
 
-Input:
-    - DATA_DIR/TFZ_with_runness.parquet
+Inputs:
+  - OUTPUT_DIR/tidy_CRSP_treasury.parquet   (produced by tidy_CRSP_treasury.py)
+
 Outputs:
     - DATA_DIR/mcc_discount_curve.parquet
     - DATA_DIR/mcc_discount_curve_nodes.parquet
