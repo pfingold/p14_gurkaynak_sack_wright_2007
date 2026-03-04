@@ -140,6 +140,21 @@ def price_and_jac(beta, bonds, A_all, idx_slices):
 # -----------------------------
 # Fit for a fixed lambda (Fisher objective via LS on augmented residuals)
 # -----------------------------
+def sqrt_penalty_from_K(K, eps=1e-12):
+    # Symmetrize
+    Ksym = 0.5 * (K + K.T)
+
+    # Eigen-decompose (K should be symmetric)
+    w, Q = np.linalg.eigh(Ksym)
+
+    # Floor small/negative eigenvalues
+    w_clipped = np.clip(w, eps, None)
+
+    # Return L such that L.T @ L ≈ K (with flooring)
+    # If you want exactly: beta^T K beta = ||L beta||^2
+    L = (np.sqrt(w_clipped)[:, None] * Q.T)   # shape (p, p)
+    return L
+
 def fit_fisher_forward_fixed_lambda(
     bonds,
     knots,
@@ -173,7 +188,7 @@ def fit_fisher_forward_fixed_lambda(
 
     # Cholesky for penalty residuals: ||sqrt(lam)*L beta||^2 = lam * beta^T K beta
     jitter = 1e-12
-    L = np.linalg.cholesky(K + jitter * np.eye(p))
+    L = sqrt_penalty_from_K(K, eps=1e-12)
 
     P_obs = np.array([b["P"] for b in bonds], float)
     N = len(P_obs)
@@ -658,3 +673,5 @@ def run_fisher(sample, pre_trained_results=None):
                         "wmae": wmae,
                         "hit_rate": hit_rate,
                         }
+        
+    return results
