@@ -73,10 +73,18 @@ def split_in_out_sample_data(treasury_filtered):
     treasury_filtered["is_in_sample"] = treasury_filtered["group"] == 0
 
     # Build dataframes of in-sample and out-of-sample data
-    in_sample = treasury_filtered.loc[treasury_filtered.is_in_sample].copy()
-    in_sample = in_sample.drop(["maturity_rank_in_month", "group", "is_in_sample"], axis=1)
-    out_of_sample = treasury_filtered.loc[~treasury_filtered.is_in_sample]
-    out_of_sample = out_of_sample.drop(["maturity_rank_in_month", "group", "is_in_sample"], axis=1)
+    in_sample = treasury_filtered.loc[
+        treasury_filtered.is_in_sample].drop(
+            ["maturity_rank_in_month",
+             "group",
+             "is_in_sample"],
+            axis=1)
+    out_of_sample = treasury_filtered.loc[
+        ~treasury_filtered.is_in_sample].drop(
+            ["maturity_rank_in_month",
+             "group",
+             "is_in_sample"],
+            axis=1)
 
     return in_sample, out_of_sample
 
@@ -155,4 +163,57 @@ def get_cashflows_from_bonds(bonds, face=100, freq=2, stub_tol_days=3):
         times.append(payment_times)
 
     return cashflows, times
+
+
+
+def get_full_error_metrics(results, id_cols=ID_COLS, error_cols=ERROR_COLS):
+    ttm_bins = [(0, 1), (1, 3), (3, 5), (5, 10), (10, np.inf)]
+    wmae_list = []
+    hit_rate_list = []
+
+    preds = pd.concat([results[r]["bonds"][id_cols + error_cols].set_index(id_cols) for r in results], axis=0)
+
+    for start, stop in ttm_bins:
+        preds_bin = preds.loc[(preds["ttm"] >= start) & (preds["ttm"] < stop)]
+
+        wmae = error_metrics.wmae(
+            preds_bin["model_price"],
+            preds_bin["bid"],
+            preds_bin["ask"],
+            preds_bin["duration"]
+            )
+        wmae_list.append(wmae)
+
+        hit_rate = error_metrics.hit_rate(
+            preds_bin["model_price"],
+            preds_bin["bid"],
+            preds_bin["ask"]
+            )
+        hit_rate_list.append(hit_rate)
+
+    wmae_list.append(
+        error_metrics.wmae(
+            preds["model_price"],
+            preds["bid"],
+            preds["ask"],
+            preds["duration"]
+        ))
+    
+    hit_rate_list.append(
+        error_metrics.hit_rate(
+            preds["model_price"],
+            preds["bid"],
+            preds["ask"]
+        ))
+
+    labels = [f"{start}-{stop}"
+              if stop < np.inf
+              else f">{start}"
+              for start, stop in ttm_bins
+              ] + ["All"]
+
+    return pd.DataFrame({
+        "wmae": wmae_list,
+        "hit_rate": hit_rate_list},
+        index=labels)
 
