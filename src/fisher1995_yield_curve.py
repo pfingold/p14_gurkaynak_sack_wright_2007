@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from scipy.interpolate import BSpline
 from scipy.optimize import least_squares, minimize_scalar
 import curve_fitting_utils
