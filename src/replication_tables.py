@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 import curve_fitting_utils as cfu
 import mcc1975_yield_curve as mcc
-#import fisher_yield_curve as fisher
+import fisher1995_yield_curve as fisher
 #import vrp_yield_curve as vrp
 
 #Categories for the table rows (buckets of maturities)
