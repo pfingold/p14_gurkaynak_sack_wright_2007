@@ -35,36 +35,12 @@ def _require_exists(p, label):
 
 def main():
     #Load tidy CRSP treasury data
-    input_path = OUTPUT_DIR / "tidy_CRSP_treasury.parquet"
-    _require_exists(input_path, "tidy CRSP treasury data")
-    df = pd.read_parquet(input_path).copy()
-
-    #Check columns for required Fisher & cashflow construction inputs
-    required = ["date", "cusip", "ttm_days", "mid_price", "accrued_interest",
-                 "bid", "ask", "duration", "maturity_date", "coupon"]
-    optional = ["first_coupon_date"]
-    cols = [c for c in required + optional if c in df.columns]
-
-    missing = [c for c in required if c not in df.columns]
-    if missing:
-        raise KeyError(f"Input DataFrame missing required columns for Fisher replication: {missing}")
-    
-    sample = df[cols].copy()
-    sample = sample.dropna(subset=["date", "cusip", "maturity_date", "coupon", "mid_price"])
-    sample["date"] = pd.to_datetime(sample["date"], errors="coerce")
-    sample = sample.loc[(sample["date"].notna())]
-    #Sanity Filters
-    sample = sample.loc[
-    (sample["ttm_days"] > 0) &
-    (sample["duration"] > 0) &
-    (sample["mid_price"] > 0) &
-    (sample["bid"] > 0) &
-    (sample["ask"] > 0) &
-    (sample["ask"] >= sample["bid"])
-    ].copy()
+    df = cfu.load_tidy_CRSP_treasury(OUTPUT_DIR)
+    df_filtered = cfu.filter_waggoner_treasury_data(df)
+    in_sample, out_of_sample = cfu.split_in_out_sample_data(df_filtered)
 
     #Run Fisher Replication
-    results = fisher.run_fisher(sample)
+    results = fisher.run_fisher(in_sample)
 
     curves= []
     nodes = []
