@@ -11,7 +11,7 @@ import error_metrics
 # Build knot vector
 # -----------------------------
 
-def fisher_nodes_equal_counts(maturities: np.ndarray) -> np.ndarray:
+def fisher_nodes_equal_counts(maturities: np.ndarray, node_ratio:int = 3) -> np.ndarray:
     """Compute fisher nodes equal counts."""
     m = np.asarray(maturities, dtype=float)
     m = m[np.isfinite(m) & (m >= 0)]
@@ -20,8 +20,8 @@ def fisher_nodes_equal_counts(maturities: np.ndarray) -> np.ndarray:
     m_sorted = np.sort(m)
     n = m_sorted.size
 
-    n_nodes = max(2, int(n / 3))      # Fisher rule of thumb
-    n_interior = max(0, n_nodes - 2)  # excluding 0 and Tmax
+    n_nodes = max(2, int(n / node_ratio))   # Fisher rule of thumb; increase ratio for denser samples
+    n_interior = max(0, n_nodes - 2)        # excluding 0 and Tmax
 
     nodes = [0.0]
     if n_interior > 0:
@@ -87,7 +87,7 @@ def integrated_basis_matrix(times: np.ndarray, basis: list[BSpline], t0: float =
 # -----------------------------
 # Roughness penalty matrix K = ∫ N''_k N''_l
 # -----------------------------
-def roughness_matrix(knots: np.ndarray, degree: int = 3, grid_size: int = 5000):
+def roughness_matrix(knots: np.ndarray, degree: int = 3, grid_size: int = 1000):
     """
     K_{kl} = ∫ N''_k(t) N''_l(t) dt approximated with trapezoid on a dense grid.
     """
@@ -115,30 +115,31 @@ def roughness_matrix(knots: np.ndarray, degree: int = 3, grid_size: int = 5000):
 # -----------------------------
 # Price + Jacobian (w.r.t beta)
 # -----------------------------
-def price_and_jac(beta, bonds, A_all, idx_slices):
+def price_and_jac(beta, c_all, bond_idx, A_all, N):
     """
     Returns:
       P_hat: (N,)
       J: (N, p) with J[i,k] = d P_hat_i / d beta_k
+
+    Parameters
+    ----------
+    c_all    : (total_cf,) concatenated cashflows across all bonds
+    bond_idx : (total_cf,) integer bond index for each cashflow
+    A_all    : (total_cf, p) integrated basis matrix
+    N        : number of bonds
     """
     p = len(beta)
-    N = len(bonds)
-    P_hat = np.zeros(N)
-    J = np.zeros((N, p))
+    z = A_all @ beta                   # (total_cf,) — one BLAS call
+    d = np.exp(-z)
+    wd = c_all * d                     # (total_cf,)
 
-    for i, b in enumerate(bonds):
-        sl = idx_slices[i]
-        A = A_all[sl, :]   # (n_cf_i, p)
-        c = b["c"]         # (n_cf_i,)
+    P_hat = np.bincount(bond_idx, weights=wd, minlength=N).astype(float)
 
-        z = A @ beta
-        d = np.exp(-z)
-
-        P_hat[i] = c @ d
-
-        # dP/dbeta = - sum_j c_j exp(-z_j) A_j
-        w = c * d
-        J[i, :] = -(w @ A)
+    wd_A = wd[:, np.newaxis] * A_all   # (total_cf, p)
+    J = np.empty((N, p))
+    for k in range(p):
+        J[:, k] = np.bincount(bond_idx, weights=wd_A[:, k], minlength=N)
+    J = -J
 
     return P_hat, J
 
@@ -170,6 +171,8 @@ def fit_fisher_forward_fixed_lambda(
     idx_slices=None,
     K=None,
     beta0=None,
+    c_all=None,
+    bond_idx=None,
 ):
     """
     Fits beta for fixed lam and returns fit dict incl. RSS, pricing Jacobian, etc.
@@ -192,8 +195,10 @@ def fit_fisher_forward_fixed_lambda(
     if K is None:
         K = roughness_matrix(knots, degree=degree)
 
-    # Cholesky for penalty residuals: ||sqrt(lam)*L beta||^2 = lam * beta^T K beta
-    jitter = 1e-12
+    if c_all is None or bond_idx is None:
+        c_all = np.concatenate([b["c"] for b in bonds])
+        bond_idx = np.repeat(np.arange(len(bonds)), [len(b["c"]) for b in bonds])
+
     L = sqrt_penalty_from_K(K, eps=1e-12)
 
     P_obs = np.array([b["P"] for b in bonds], float)
@@ -202,25 +207,31 @@ def fit_fisher_forward_fixed_lambda(
     if beta0 is None:
         beta0 = np.zeros(p)
 
+    # Cache price_and_jac between fun() and jac() — scipy calls both with the
+    # same beta on each iteration, so we avoid computing it twice.
+    _cache = {"beta": None, "P_hat": None, "Jp": None}
+
+    def _eval(beta):
+        if _cache["beta"] is None or not np.array_equal(beta, _cache["beta"]):
+            _cache["P_hat"], _cache["Jp"] = price_and_jac(beta, c_all, bond_idx, A_all, N)
+            _cache["beta"] = beta.copy()
+
     def fun(beta):
-        """Evaluate the objective function value."""
-        P_hat, _ = price_and_jac(beta, bonds, A_all, idx_slices)
-        r_price = P_obs - P_hat
+        _eval(beta)
+        r_price = P_obs - _cache["P_hat"]
         r_pen = np.sqrt(lam) * (L @ beta)
         return np.concatenate([r_price, r_pen])
 
     def jac(beta):
-        """Evaluate the objective function gradient (Jacobian)."""
-        _, Jp = price_and_jac(beta, bonds, A_all, idx_slices)
-        # r_price = P_obs - P_hat => dr/dbeta = -dP_hat/dbeta = -Jp
-        Jr_price = -Jp
+        _eval(beta)
+        Jr_price = -_cache["Jp"]
         Jr_pen = np.sqrt(lam) * L
         return np.vstack([Jr_price, Jr_pen])
 
     res = least_squares(fun, beta0, jac=jac, method="trf")
 
     beta_hat = res.x
-    P_hat, J_price = price_and_jac(beta_hat, bonds, A_all, idx_slices)
+    P_hat, J_price = price_and_jac(beta_hat, c_all, bond_idx, A_all, N)
     r_price = P_obs - P_hat
     RSS = float(r_price @ r_price)
 
@@ -282,8 +293,9 @@ def select_lambda_gcv(
     degree: int = 3,
     lambda_grid=None,
     theta: float = 2.0,
-    n_refine_starts: int = 3,
+    n_refine_starts: int = 1,
     refine_halfwidth_decades: float = 0.75,
+    beta_warmstart=None,
 ):
     """
     Selects λ by GCV following Fisher, Nychka, and Zervos (1995):
@@ -315,6 +327,8 @@ def select_lambda_gcv(
     A_all = integrated_basis_matrix(times_all, basis, t0=0.0)
     K = roughness_matrix(knots, degree=degree)
     N = len(bonds)
+    c_all = np.concatenate([b["c"] for b in bonds])
+    bond_idx = np.repeat(np.arange(N), [len(b["c"]) for b in bonds])
 
     def eval_gcv(lam: float, beta_init=None):
         """Compute eval gcv."""
@@ -322,6 +336,7 @@ def select_lambda_gcv(
             bonds=bonds, knots=knots, lam=lam, degree=degree,
             A_all=A_all, idx_slices=idx_slices, K=K,
             beta0=(beta_init if beta_init is not None else np.zeros(p)),
+            c_all=c_all, bond_idx=bond_idx,
         )
         ep = effective_params(fit["J_price"], K, lam)
         gcv = gcv_score(fit["RSS"], N=N, ep=ep, theta=theta)
@@ -333,7 +348,7 @@ def select_lambda_gcv(
     grid_gcvs = np.full(len(lambda_grid), np.inf)
     grid_fits = {}
     grid_rows = []
-    beta0 = np.zeros(p)
+    beta0 = beta_warmstart if (beta_warmstart is not None and len(beta_warmstart) == p) else np.zeros(p)
 
     for i, lam in enumerate(lambda_grid):
         gcv, fit = eval_gcv(float(lam), beta_init=beta0)
@@ -452,22 +467,11 @@ def fisher_curve_points_to_dfs(
     for k, Nk in enumerate(basis):
         f_vals += beta[k] * Nk(t_grid)
 
-    # ---- discount factor δ(t) = exp(-∫_0^t f(s) ds) on the grid ----
-    dt = np.diff(t_grid)
-    integral = np.concatenate([[0.0], np.cumsum(0.5 * (f_vals[1:] + f_vals[:-1]) * dt)])
-    delta_vals = np.exp(-integral)
-
-    # ---- spot z(t) = -log δ(t) / t ----
-    spot_vals = np.full_like(t_grid, np.nan)
-    spot_vals[1:] = -np.log(delta_vals[1:]) / t_grid[1:]
-
-
     # ---- curve_df ----
     data = {"T": t_grid, "forward": f_vals}
     curve_df = pd.DataFrame(data)
 
     # ---- nodes_df ----
-    nodes_df = pd.DataFrame(columns=["T", "forward"])
     # "unique" interior knots for clamped cubic: strip repeated boundaries
     # (keep the same convention you used in the plotting function)
     unique_knots = knots[degree:-degree]
@@ -517,16 +521,13 @@ def fisher_predict_prices(beta, knots, bonds_dict, degree=3):
     basis = bspline_basis_list(knots, degree)
 
     times_all = np.concatenate([b["times"] for b in bonds_dict])
-    idx_slices = []
-    start = 0
-    for b in bonds_dict:
-        n = len(b["times"])
-        idx_slices.append(slice(start, start + n))
-        start += n
     A_all = integrated_basis_matrix(times_all, basis, t0=0.0)
+    c_all = np.concatenate([b["c"] for b in bonds_dict])
+    N = len(bonds_dict)
+    bond_idx = np.repeat(np.arange(N), [len(b["c"]) for b in bonds_dict])
 
     P_obs = np.array([b["P"] for b in bonds_dict], float)
-    P_hat, _ = price_and_jac(beta, bonds_dict, A_all, idx_slices)
+    P_hat, _ = price_and_jac(beta, c_all, bond_idx, A_all, N)
     resid = P_obs - P_hat
 
     return P_hat, resid
@@ -537,11 +538,13 @@ def fisher_predict_prices(beta, knots, bonds_dict, degree=3):
 # ----------------
 
 
-def run_fisher(sample, pre_trained_results=None):
+def run_fisher(sample, pre_trained_results=None, node_ratio: int = 3):
     """DOCSTRING"""
     results = {}
 
     dates = sample["date"].unique()
+
+    prev_beta = None   # warm-start: reuse previous date's solution as beta0
 
     for idx, DATE in enumerate(dates):
         if idx % 50 == 0:
@@ -575,10 +578,10 @@ def run_fisher(sample, pre_trained_results=None):
             fit_for_curve = {"beta": beta_hat, "knots": knots, "degree": 3}
             curve_df, nodes_df = fisher_curve_points_to_dfs(fit_for_curve)
         else:
-            nodes = fisher_nodes_equal_counts(maturities)
+            nodes = fisher_nodes_equal_counts(maturities, node_ratio=node_ratio)
             knots = bspline_knots_from_nodes(nodes, degree=3)
 
-            gcv_out = select_lambda_gcv(bonds_dict, knots, degree=3)
+            gcv_out = select_lambda_gcv(bonds_dict, knots, degree=3, beta_warmstart=prev_beta)
 
             out = gcv_out["best_fit"]
             best_lam = gcv_out["best_lambda"]
@@ -588,6 +591,7 @@ def run_fisher(sample, pre_trained_results=None):
             bonds["resid"] = out["resid_price"]
 
             curve_df, nodes_df = fisher_curve_points_to_dfs(out)
+            prev_beta = beta_hat
 
         wmae = error_metrics.wmae(bonds["model_price"], bonds["bid"], bonds["ask"], bonds["duration"])
         hit_rate = error_metrics.hit_rate(bonds["model_price"], bonds["bid"], bonds["ask"])
