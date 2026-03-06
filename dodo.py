@@ -186,7 +186,7 @@ def task_tidy_CRSP_treasury():
             "ipython ./src/tidy_CRSP_treasury.py",
         ],
         "targets": [
-            OUTPUT_DIR / "tidy_CRSP_treasury.parquet",
+            DATA_DIR / "tidy_CRSP_treasury.parquet",
         ],
         "file_dep": [
             "./src/settings.py",
@@ -207,10 +207,13 @@ def task_build_mcc_yield_curve():
         ],
         "targets":[
             DATA_DIR / "mcc_discount_curve.parquet",
-            DATA_DIR / "mcc_discount_curve_nodes.parquet",
+            DATA_DIR / "mcc_discount_curve_nodes.csv",
             DATA_DIR / "mcc_bond_fits.parquet",
-            DATA_DIR / "mcc_fit_quality_by_date.parquet",
-            DATA_DIR / "mcc_error_metrics.parquet",
+            DATA_DIR / "mcc_fit_quality_by_date.csv",
+            DATA_DIR / "mcc_error_metrics.csv",
+            DATA_DIR / "mcc_oos_bond_fits.parquet",
+            DATA_DIR / "mcc_oos_fit_quality_by_date.csv",
+            DATA_DIR / "mcc_oos_error_metrics.csv",
         ],
         "file_dep":[
             "./src/settings.py",
@@ -219,7 +222,7 @@ def task_build_mcc_yield_curve():
             "./src/curve_fitting_utils.py",
             "./src/curve_conversions.py",
             "./src/error_metrics.py",
-            OUTPUT_DIR / "tidy_CRSP_treasury.parquet",
+            DATA_DIR / "tidy_CRSP_treasury.parquet",
 
         ],
         "task_dep": ["tidy_CRSP_treasury"],
@@ -235,10 +238,13 @@ def task_build_fisher_yield_curve():
         ],
         "targets": [
             DATA_DIR / "fisher_forward_curve.parquet",
-            DATA_DIR / "fisher_forward_curve_nodes.parquet",
+            DATA_DIR / "fisher_forward_curve_nodes.csv",
             DATA_DIR / "fisher_bond_fits.parquet",
-            DATA_DIR / "fisher_fit_quality_by_date.parquet",
-            DATA_DIR / "fisher_error_metrics.parquet",
+            DATA_DIR / "fisher_fit_quality_by_date.csv",
+            DATA_DIR / "fisher_error_metrics.csv",
+            DATA_DIR / "fisher_oos_bond_fits.parquet",
+            DATA_DIR / "fisher_oos_fit_quality_by_date.csv",
+            DATA_DIR / "fisher_oos_error_metrics.csv",
         ],
         "file_dep": [
             "./src/settings.py",
@@ -246,7 +252,134 @@ def task_build_fisher_yield_curve():
             "./src/fisher1995_yield_curve.py",
             "./src/curve_fitting_utils.py",
             "./src/error_metrics.py",
-            OUTPUT_DIR / "tidy_CRSP_treasury.parquet",
+            DATA_DIR / "tidy_CRSP_treasury.parquet",
+        ],
+        "task_dep": ["tidy_CRSP_treasury"],
+        "clean": True,
+    }
+
+
+def task_build_waggoner_yield_curve():
+    """Run Waggoner (1997) forward-curve replication from CRSP Treasury data"""
+    return {
+        "actions": [
+            "ipython ./src/settings.py",
+            "ipython ./src/run_waggoner_yield_curve.py",
+        ],
+        "targets": [
+            DATA_DIR / "waggoner_forward_curve.parquet",
+            DATA_DIR / "waggoner_forward_curve_nodes.csv",
+            DATA_DIR / "waggoner_bond_fits.parquet",
+            DATA_DIR / "waggoner_fit_quality_by_date.csv",
+            DATA_DIR / "waggoner_error_metrics.csv",
+            DATA_DIR / "waggoner_oos_bond_fits.parquet",
+            DATA_DIR / "waggoner_oos_fit_quality_by_date.csv",
+            DATA_DIR / "waggoner_oos_error_metrics.csv",
+        ],
+        "file_dep": [
+            "./src/settings.py",
+            "./src/run_waggoner_yield_curve.py",
+            "./src/waggoner1997_yield_curve.py",
+            "./src/fisher1995_yield_curve.py",
+            "./src/curve_fitting_utils.py",
+            "./src/error_metrics.py",
+            DATA_DIR / "tidy_CRSP_treasury.parquet",
+        ],
+        "task_dep": ["tidy_CRSP_treasury"],
+        "clean": True,
+    }
+
+
+# Modern (rolling 20-year) sample tasks
+def task_build_mcc_yield_curve_modern():
+    """Run McCulloch yield curve on rolling modern (last 20 years) sample"""
+    return {
+        "actions": [
+            "ipython ./src/settings.py",
+            "ipython ./src/run_mcc_yield_curve_modern.py",
+        ],
+        "targets": [
+            DATA_DIR / "modern_mcc_discount_curve.parquet",
+            DATA_DIR / "modern_mcc_discount_curve_nodes.csv",
+            DATA_DIR / "modern_mcc_bond_fits.parquet",
+            DATA_DIR / "modern_mcc_fit_quality_by_date.csv",
+            DATA_DIR / "modern_mcc_error_metrics.csv",
+            DATA_DIR / "modern_mcc_oos_bond_fits.parquet",
+            DATA_DIR / "modern_mcc_oos_fit_quality_by_date.csv",
+            DATA_DIR / "modern_mcc_oos_error_metrics.csv",
+        ],
+        "file_dep": [
+            "./src/settings.py",
+            "./src/run_mcc_yield_curve_modern.py",
+            "./src/run_mcc_yield_curve.py",
+            "./src/mcc1975_yield_curve.py",
+            "./src/curve_fitting_utils.py",
+            "./src/curve_conversions.py",
+            "./src/error_metrics.py",
+            DATA_DIR / "tidy_CRSP_treasury.parquet",
+        ],
+        "task_dep": ["tidy_CRSP_treasury"],
+        "clean": True,
+    }
+
+
+def task_build_fisher_yield_curve_modern():
+    """Run Fisher yield curve on rolling modern (last 20 years) sample"""
+    return {
+        "actions": [
+            "ipython ./src/settings.py",
+            "ipython ./src/run_fisher_yield_curve_modern.py",
+        ],
+        "targets": [
+            DATA_DIR / "modern_fisher_forward_curve.parquet",
+            DATA_DIR / "modern_fisher_forward_curve_nodes.csv",
+            DATA_DIR / "modern_fisher_bond_fits.parquet",
+            DATA_DIR / "modern_fisher_fit_quality_by_date.csv",
+            DATA_DIR / "modern_fisher_error_metrics.csv",
+            DATA_DIR / "modern_fisher_oos_bond_fits.parquet",
+            DATA_DIR / "modern_fisher_oos_fit_quality_by_date.csv",
+            DATA_DIR / "modern_fisher_oos_error_metrics.csv",
+        ],
+        "file_dep": [
+            "./src/settings.py",
+            "./src/run_fisher_yield_curve_modern.py",
+            "./src/run_fisher_yield_curve.py",
+            "./src/fisher1995_yield_curve.py",
+            "./src/curve_fitting_utils.py",
+            "./src/error_metrics.py",
+            DATA_DIR / "tidy_CRSP_treasury.parquet",
+        ],
+        "task_dep": ["tidy_CRSP_treasury"],
+        "clean": True,
+    }
+
+
+def task_build_waggoner_yield_curve_modern():
+    """Run Waggoner yield curve on rolling modern (last 20 years) sample"""
+    return {
+        "actions": [
+            "ipython ./src/settings.py",
+            "ipython ./src/run_waggoner_yield_curve_modern.py",
+        ],
+        "targets": [
+            DATA_DIR / "modern_waggoner_forward_curve.parquet",
+            DATA_DIR / "modern_waggoner_forward_curve_nodes.csv",
+            DATA_DIR / "modern_waggoner_bond_fits.parquet",
+            DATA_DIR / "modern_waggoner_fit_quality_by_date.csv",
+            DATA_DIR / "modern_waggoner_error_metrics.csv",
+            DATA_DIR / "modern_waggoner_oos_bond_fits.parquet",
+            DATA_DIR / "modern_waggoner_oos_fit_quality_by_date.csv",
+            DATA_DIR / "modern_waggoner_oos_error_metrics.csv",
+        ],
+        "file_dep": [
+            "./src/settings.py",
+            "./src/run_waggoner_yield_curve_modern.py",
+            "./src/run_waggoner_yield_curve.py",
+            "./src/waggoner1997_yield_curve.py",
+            "./src/fisher1995_yield_curve.py",
+            "./src/curve_fitting_utils.py",
+            "./src/error_metrics.py",
+            DATA_DIR / "tidy_CRSP_treasury.parquet",
         ],
         "task_dep": ["tidy_CRSP_treasury"],
         "clean": True,

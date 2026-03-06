@@ -58,10 +58,17 @@ def _collect_results(results):
     )
 
 
-def main():
+def main(start_date=None, end_date=None, output_prefix=""):
     df = cfu.load_tidy_CRSP_treasury(DATA_DIR)
-    df_filtered = cfu.filter_waggoner_treasury_data(df)
+    filter_kwargs = {}
+    if start_date is not None:
+        filter_kwargs["start_date"] = start_date
+    if end_date is not None:
+        filter_kwargs["end_date"] = end_date
+    df_filtered = cfu.filter_waggoner_treasury_data(df, **filter_kwargs)
     in_sample, out_of_sample = cfu.split_in_out_sample_data(df_filtered)
+
+    p = output_prefix
 
     # --- In-sample ---
     print("Running Waggoner in-sample...")
@@ -71,11 +78,11 @@ def main():
     err_df = cfu.get_full_error_metrics(in_sample_results).reset_index().rename(columns={"index": "bucket"})
 
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    curves_df.to_parquet(DATA_DIR / "waggoner_forward_curve.parquet", index=False)
-    nodes_df.to_csv(DATA_DIR / "waggoner_forward_curve_nodes.csv", index=False)
-    bonds_df.to_parquet(DATA_DIR / "waggoner_bond_fits.parquet", index=False)
-    fit_quality_df.to_csv(DATA_DIR / "waggoner_fit_quality_by_date.csv", index=False)
-    err_df.to_csv(DATA_DIR / "waggoner_error_metrics.csv", index=False)
+    curves_df.to_parquet(DATA_DIR / f"{p}waggoner_forward_curve.parquet", index=False)
+    nodes_df.to_csv(DATA_DIR / f"{p}waggoner_forward_curve_nodes.csv", index=False)
+    bonds_df.to_parquet(DATA_DIR / f"{p}waggoner_bond_fits.parquet", index=False)
+    fit_quality_df.to_csv(DATA_DIR / f"{p}waggoner_fit_quality_by_date.csv", index=False)
+    err_df.to_csv(DATA_DIR / f"{p}waggoner_error_metrics.csv", index=False)
 
     # --- Out-of-sample ---
     print("Running Waggoner out-of-sample...")
@@ -84,9 +91,9 @@ def main():
     _, _, oos_bonds_df, oos_fit_quality_df = _collect_results(oos_results)
     oos_err_df = cfu.get_full_error_metrics(oos_results).reset_index().rename(columns={"index": "bucket"})
 
-    oos_bonds_df.to_parquet(DATA_DIR / "waggoner_oos_bond_fits.parquet", index=False)
-    oos_fit_quality_df.to_csv(DATA_DIR / "waggoner_oos_fit_quality_by_date.csv", index=False)
-    oos_err_df.to_csv(DATA_DIR / "waggoner_oos_error_metrics.csv", index=False)
+    oos_bonds_df.to_parquet(DATA_DIR / f"{p}waggoner_oos_bond_fits.parquet", index=False)
+    oos_fit_quality_df.to_csv(DATA_DIR / f"{p}waggoner_oos_fit_quality_by_date.csv", index=False)
+    oos_err_df.to_csv(DATA_DIR / f"{p}waggoner_oos_error_metrics.csv", index=False)
 
     print("Wrote Waggoner outputs to:", DATA_DIR.resolve())
 

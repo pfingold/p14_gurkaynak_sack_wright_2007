@@ -29,7 +29,7 @@ def load_tidy_CRSP_treasury(data_dir: Path = DATA_DIR) -> pd.DataFrame:
     treasury = pd.read_parquet(treasury_path)
     return treasury
 
-def filter_waggoner_treasury_data(treasury):
+def filter_waggoner_treasury_data(treasury, start_date=START_DATE, end_date=END_DATE):
     """
     Filters the treasury data according to the following criteria:
         - Bills: exclude those with maturity under 30 days
@@ -42,8 +42,8 @@ def filter_waggoner_treasury_data(treasury):
                                     (treasury.is_note) & (~treasury.is_under_1y)) |
                                     (treasury.is_bond) & (~treasury.is_under_1y)]
 
-    treasury_filtered = treasury_filtered.loc[(treasury_filtered.date <= END_DATE) &
-                                              (treasury_filtered.date >= START_DATE)]
+    treasury_filtered = treasury_filtered.loc[(treasury_filtered.date <= end_date) &
+                                              (treasury_filtered.date >= start_date)]
 
     treasury_filtered = treasury_filtered.loc[~treasury_filtered.is_flower]
 
