@@ -170,7 +170,7 @@ def main(data_dir = DATA_DIR, output_dir = OUTPUT_DIR):
     tidy_df = select_relevant_cols(df)
 
     # Generate tidy CRSP Treasury data set
-    output_path = generate_tidy_CRSP_treasury_data(tidy_df, output_dir)
+    output_path = generate_tidy_CRSP_treasury_data(tidy_df, data_dir)
     print(f"Wrote tidy CRSP Treasury data set saved to: {output_path}")
 
 if __name__ == "__main__":

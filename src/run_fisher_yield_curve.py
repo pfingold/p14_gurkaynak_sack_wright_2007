@@ -2,19 +2,19 @@
 Runs the Fisher (1995) forward curve replication method and saves the outputs for analysis
 
 Inputs:
-  - OUTPUT_DIR/tidy_CRSP_treasury.parquet   (produced by tidy_CRSP_treasury.py)
+  - DATA_DIR/tidy_CRSP_treasury.parquet   (produced by tidy_CRSP_treasury.py)
 
 Outputs (in-sample):
   - DATA_DIR/fisher_forward_curve.parquet
-  - DATA_DIR/fisher_forward_curve_nodes.parquet
+  - DATA_DIR/fisher_forward_curve_nodes.csv
   - DATA_DIR/fisher_bond_fits.parquet
-  - DATA_DIR/fisher_fit_quality_by_date.parquet
-  - DATA_DIR/fisher_error_metrics.parquet
+  - DATA_DIR/fisher_fit_quality_by_date.csv
+  - DATA_DIR/fisher_error_metrics.csv
 
 Outputs (out-of-sample):
   - DATA_DIR/fisher_oos_bond_fits.parquet
-  - DATA_DIR/fisher_oos_fit_quality_by_date.parquet
-  - DATA_DIR/fisher_oos_error_metrics.parquet
+  - DATA_DIR/fisher_oos_fit_quality_by_date.csv
+  - DATA_DIR/fisher_oos_error_metrics.csv
 """
 from pathlib import Path
 import pandas as pd
@@ -60,7 +60,7 @@ def _collect_results(results):
 
 
 def main():
-    df = cfu.load_tidy_CRSP_treasury(OUTPUT_DIR)
+    df = cfu.load_tidy_CRSP_treasury(DATA_DIR)
     df_filtered = cfu.filter_waggoner_treasury_data(df)
     in_sample, out_of_sample = cfu.split_in_out_sample_data(df_filtered)
 
@@ -73,10 +73,10 @@ def main():
 
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     curves_df.to_parquet(DATA_DIR / "fisher_forward_curve.parquet", index=False)
-    nodes_df.to_parquet(DATA_DIR / "fisher_forward_curve_nodes.parquet", index=False)
+    nodes_df.to_csv(DATA_DIR / "fisher_forward_curve_nodes.csv", index=False)
     bonds_df.to_parquet(DATA_DIR / "fisher_bond_fits.parquet", index=False)
-    fit_quality_df.to_parquet(DATA_DIR / "fisher_fit_quality_by_date.parquet", index=False)
-    err_df.to_parquet(DATA_DIR / "fisher_error_metrics.parquet", index=False)
+    fit_quality_df.to_csv(DATA_DIR / "fisher_fit_quality_by_date.csv", index=False)
+    err_df.to_csv(DATA_DIR / "fisher_error_metrics.csv", index=False)
 
     # --- Out-of-sample ---
     print("Running Fisher out-of-sample...")
@@ -86,8 +86,8 @@ def main():
     oos_err_df = cfu.get_full_error_metrics(oos_results).reset_index().rename(columns={"index": "bucket"})
 
     oos_bonds_df.to_parquet(DATA_DIR / "fisher_oos_bond_fits.parquet", index=False)
-    oos_fit_quality_df.to_parquet(DATA_DIR / "fisher_oos_fit_quality_by_date.parquet", index=False)
-    oos_err_df.to_parquet(DATA_DIR / "fisher_oos_error_metrics.parquet", index=False)
+    oos_fit_quality_df.to_csv(DATA_DIR / "fisher_oos_fit_quality_by_date.csv", index=False)
+    oos_err_df.to_csv(DATA_DIR / "fisher_oos_error_metrics.csv", index=False)
 
     print("Wrote Fisher outputs to:", DATA_DIR.resolve())
 

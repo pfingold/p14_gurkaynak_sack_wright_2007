@@ -14,6 +14,7 @@ import error_metrics
 
 from settings import config
 
+DATA_DIR = Path(config("DATA_DIR"))
 OUTPUT_DIR = Path(config("OUTPUT_DIR"))
 
 START_DATE = "1970-01-01"
@@ -22,9 +23,9 @@ END_DATE = "1995-12-31"
 ERROR_COLS = ["bid", "ask", "duration", "model_price", "ttm"]
 ID_COLS = ["date", "cusip"]
 
-def load_tidy_CRSP_treasury(output_dir: Path = OUTPUT_DIR) -> pd.DataFrame:
-    """Loads the tidy CRSP treasury data from the specified output directory"""
-    treasury_path = output_dir / "tidy_CRSP_treasury.parquet"
+def load_tidy_CRSP_treasury(data_dir: Path = DATA_DIR) -> pd.DataFrame:
+    """Loads the tidy CRSP treasury data from the specified directory"""
+    treasury_path = data_dir / "tidy_CRSP_treasury.parquet"
     treasury = pd.read_parquet(treasury_path)
     return treasury
 

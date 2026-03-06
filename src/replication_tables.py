@@ -12,6 +12,9 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import curve_fitting_utils as cfu
+from settings import config
+
+DATA_DIR = Path(config("DATA_DIR"))
 import mcc1975_yield_curve as mcc
 import fisher1995_yield_curve as fisher
 #import vrp_yield_curve as vrp
@@ -239,7 +242,7 @@ def main():
     out_dir.mkdir(parents=True, exist_ok=True)
 
     #Load IS & OOS Data
-    treasury = cfu.load_tidy_CRSP_treasury(output_dir=out_dir)
+    treasury = cfu.load_tidy_CRSP_treasury(data_dir=DATA_DIR)
     treasury_filtered = cfu.filter_waggoner_treasury_data(treasury)
     in_sample, out_sample = cfu.split_in_out_sample_data(treasury_filtered)
 
