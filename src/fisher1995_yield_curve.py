@@ -235,213 +235,146 @@ def fit_fisher_forward_fixed_lambda(
 # -----------------------------
 # Effective parameters + GCV
 # -----------------------------
+
 def effective_params(J_price: np.ndarray, K: np.ndarray, lam: float) -> float:
     """
-    ep ≈ tr( J^T J (J^T J + lam K)^{-1} )
+    ep(λ) = tr( J^T J (J^T J + λK)^{-1} )
 
-    Here J_price is dP_hat/dbeta (N x p). Residual Jacobian differs by sign,
-    but J^T J is sign-invariant.
+    J_price is dP_hat/dbeta (N x p).
     """
     J = np.asarray(J_price, float)
     K = np.asarray(K, float)
-    JTJ = J.T @ J  # (p, p)
-
-    # Solve (JTJ + lam K) X = JTJ  => ep = tr(X)
-    A = JTJ + lam * K
-
-    # add tiny jitter for numerical stability
-    jitter = 1e-12
-    A = A + jitter * np.eye(A.shape[0])
-
+    JTJ = J.T @ J
+    A = JTJ + lam * K + 1e-12 * np.eye(K.shape[0])
     X = np.linalg.solve(A, JTJ)
     return float(np.trace(X))
 
+
 def gcv_score(RSS: float, N: int, ep: float, theta: float = 2.0) -> float:
-    denom = (N - theta * ep)
+    """
+    γ(λ) = RSS(λ) / (N - θ · ep(λ))²
+
+    θ = 2 following Fisher, Nychka, and Zervos (1995).
+    """
+    denom = N - theta * ep
     if denom <= 0:
         return np.inf
-    return RSS / (denom * denom)
+    return RSS / (denom ** 2)
+
 
 # -----------------------------
-# GCV wrapper
+# GCV λ selection
 # -----------------------------
 from scipy.optimize import minimize_scalar
 
-def select_lambda_gcv_fisher_grid_and_linesearch(
+
+def select_lambda_gcv(
     bonds,
     knots,
     degree: int = 3,
     lambda_grid=None,
     theta: float = 2.0,
-    lambda_min: float | None = None,
-    lambda_max: float | None = None,
-    warm_start: bool = True,
-    # refinement controls
-    n_refine_starts: int = 3,         # refine around best K grid points
-    refine_halfwidth_decades: float = 0.75,  # +/- decades around grid point
-    refine_maxiter: int = 30,
-    # numerical safety
-    enforce_success: bool = False,     # if True, ignore failed fits
+    n_refine_starts: int = 3,
+    refine_halfwidth_decades: float = 0.75,
 ):
     """
-    Waggoner-style GCV selection:
-      1) Grid search over lambdas (log-spaced)
-      2) Local line search (Brent) in log(lambda) around best grid minima
+    Selects λ by GCV following Fisher, Nychka, and Zervos (1995):
+
+      1. For fixed λ, minimize equation (3.5) via non-linear least squares.
+      2. Grid search over log-spaced λ values to handle multiple local minima.
+      3. Brent's method refinement in log(λ) around the best grid candidates.
 
     Returns
     -------
-    out : dict with keys:
-      - best_lambda (refined)
-      - best_fit (refined fit dict)
-      - best_gcv
-      - grid_table : structured array with (lambda, RSS, ep, gcv, success)
-      - refined_table : structured array with (start_lambda, opt_lambda, gcv, success)
+    dict with keys: best_lambda, best_gcv, best_fit
     """
     knots = np.asarray(knots, float)
 
-    # Default grid: wide, but you should tune based on units (years vs days).
     if lambda_grid is None:
-        lambda_grid = np.logspace(-2, 8, 41)
-    lambda_grid = np.asarray(list(lambda_grid), float)
+        lambda_grid = 10.0 ** np.arange(-1, 6)  # [0.1, 1, 10, 100, 1000, 10000, 100000]
+    lambda_grid = np.asarray(lambda_grid, float)
 
-    # Apply bounds if provided
-    if lambda_min is not None:
-        lambda_grid = lambda_grid[lambda_grid >= float(lambda_min)]
-    if lambda_max is not None:
-        lambda_grid = lambda_grid[lambda_grid <= float(lambda_max)]
-    if lambda_grid.size < 3:
-        raise ValueError("Need at least 3 lambdas in grid after applying bounds.")
-
-    # Precompute shared structures (reuse your existing helpers)
+    # Precompute structures shared across all λ evaluations
     basis = bspline_basis_list(knots, degree)
     p = len(basis)
 
     times_all = np.concatenate([b["times"] for b in bonds])
-    idx_slices = []
-    start = 0
+    idx_slices, start = [], 0
     for b in bonds:
         n = len(b["times"])
         idx_slices.append(slice(start, start + n))
         start += n
     A_all = integrated_basis_matrix(times_all, basis, t0=0.0)
     K = roughness_matrix(knots, degree=degree)
+    N = len(bonds)
 
-    P_obs = np.array([b["P"] for b in bonds], float)
-    N = len(P_obs)
+    def eval_gcv(lam: float, beta_init=None):
+        fit = fit_fisher_forward_fixed_lambda(
+            bonds=bonds, knots=knots, lam=lam, degree=degree,
+            A_all=A_all, idx_slices=idx_slices, K=K,
+            beta0=(beta_init if beta_init is not None else np.zeros(p)),
+        )
+        ep = effective_params(fit["J_price"], K, lam)
+        gcv = gcv_score(fit["RSS"], N=N, ep=ep, theta=theta)
+        return float(gcv), fit
 
-    # --------
-    # Stage 1: grid search
-    # --------
+    # ----------------------------------
+    # Stage 1: Grid search
+    # ----------------------------------
+    grid_gcvs = np.full(len(lambda_grid), np.inf)
+    grid_fits = {}
     grid_rows = []
-    grid_fits = {}  # store fits for reuse
     beta0 = np.zeros(p)
 
-    best_grid = None
-
-    for lam in lambda_grid:
-        fit = fit_fisher_forward_fixed_lambda(
-            bonds=bonds,
-            knots=knots,
-            lam=float(lam),
-            degree=degree,
-            A_all=A_all,
-            idx_slices=idx_slices,
-            K=K,
-            beta0=beta0,
-        )
-
-        # optionally require solver success
-        if enforce_success and not fit["success"]:
-            ep = np.nan
-            gcv = np.inf
-        else:
-            ep = effective_params(fit["J_price"], K, float(lam))
-            gcv = gcv_score(fit["RSS"], N=N, ep=ep, theta=theta)
-
-        grid_rows.append((float(lam), float(fit["RSS"]), float(ep), float(gcv), bool(fit["success"])))
+    for i, lam in enumerate(lambda_grid):
+        gcv, fit = eval_gcv(float(lam), beta_init=beta0)
+        ep = effective_params(fit["J_price"], K, float(lam))
+        grid_gcvs[i] = gcv
         grid_fits[float(lam)] = fit
-
-        if warm_start and fit["success"]:
+        grid_rows.append((float(lam), float(fit["RSS"]), float(ep), float(gcv), bool(fit["success"])))
+        if fit["success"]:
             beta0 = fit["beta"]
-
-        if best_grid is None or gcv < best_grid["gcv"]:
-            best_grid = {"lambda": float(lam), "gcv": float(gcv), "fit": fit}
 
     grid_table = np.array(
         grid_rows,
         dtype=[("lambda", "f8"), ("RSS", "f8"), ("ep", "f8"), ("gcv", "f8"), ("success", "?")],
     )
 
-    # Identify candidate starting points for refinement:
-    # pick the n_refine_starts smallest gcv values from the grid
-    order = np.argsort(grid_table["gcv"])
-    order = order[np.isfinite(grid_table["gcv"][order])]
-    order = order[: max(1, int(n_refine_starts))]
-    start_lams = grid_table["lambda"][order]
+    # ----------------------------------
+    # Stage 2: Brent refinement around the best grid candidates
+    # ----------------------------------
+    top_idx = np.argsort(grid_gcvs)[:max(1, n_refine_starts)]
+    top_idx = top_idx[np.isfinite(grid_gcvs[top_idx])]
 
-    # Helper: evaluate GCV at a lambda (re-fit each time, but can warm-start locally)
-    def eval_gcv_at_lambda(lam: float, beta_init=None):
-        lam = float(lam)
-        fit = fit_fisher_forward_fixed_lambda(
-            bonds=bonds,
-            knots=knots,
-            lam=lam,
-            degree=degree,
-            A_all=A_all,
-            idx_slices=idx_slices,
-            K=K,
-            beta0=(beta_init if beta_init is not None else np.zeros(p)),
-        )
-        if enforce_success and not fit["success"]:
-            return np.inf, fit
-        ep = effective_params(fit["J_price"], K, lam)
-        gcv = gcv_score(fit["RSS"], N=N, ep=ep, theta=theta)
-        return float(gcv), fit
+    best_i = top_idx[0]
+    best = {
+        "lambda": float(lambda_grid[best_i]),
+        "gcv": grid_gcvs[best_i],
+        "fit": grid_fits[float(lambda_grid[best_i])],
+    }
 
-    # --------
-    # Stage 2: local line-search refinements in log-lambda
-    # --------
     refined_rows = []
-    best = {"lambda": best_grid["lambda"], "gcv": best_grid["gcv"], "fit": best_grid["fit"]}
-
-    for lam0 in start_lams:
-        lam0 = float(lam0)
-
-        # bracket around lam0 in log10 space
+    for i in top_idx:
+        lam0 = float(lambda_grid[i])
         lo = 10 ** (np.log10(lam0) - refine_halfwidth_decades)
         hi = 10 ** (np.log10(lam0) + refine_halfwidth_decades)
+        beta_init = grid_fits[lam0]["beta"]
 
-        # Respect global bounds if provided
-        if lambda_min is not None:
-            lo = max(lo, float(lambda_min))
-        if lambda_max is not None:
-            hi = min(hi, float(lambda_max))
-        if not (lo < hi):
-            continue
-
-        # optional warm-start for this local search: use beta from nearest grid lambda
-        beta_init = grid_fits.get(lam0, best_grid["fit"])["beta"]
-
-        # optimize in log space for stability
-        def objective(loglam):
-            lam = 10.0 ** float(loglam)
-            gcv, _ = eval_gcv_at_lambda(lam, beta_init=beta_init)
+        def objective(loglam, _beta=beta_init):
+            gcv, _ = eval_gcv(10.0 ** loglam, beta_init=_beta)
             return gcv
 
         res = minimize_scalar(
             objective,
             bounds=(np.log10(lo), np.log10(hi)),
             method="bounded",
-            options={"maxiter": int(refine_maxiter)},
         )
-
         lam_star = 10.0 ** float(res.x)
-        gcv_star, fit_star = eval_gcv_at_lambda(lam_star, beta_init=beta_init)
-
+        gcv_star, fit_star = eval_gcv(lam_star, beta_init=beta_init)
         refined_rows.append((lam0, float(lam_star), float(gcv_star), bool(fit_star["success"])))
 
         if gcv_star < best["gcv"]:
-            best = {"lambda": float(lam_star), "gcv": float(gcv_star), "fit": fit_star}
+            best = {"lambda": lam_star, "gcv": gcv_star, "fit": fit_star}
 
     refined_table = np.array(
         refined_rows,
@@ -536,7 +469,7 @@ def fisher_curve_points_to_dfs(
 
     nodes_df = pd.DataFrame(
         {
-            "t": unique_knots.astype(float),
+            "T": unique_knots.astype(float),
             "forward": (f_nodes).astype(float),
         }
     )
@@ -635,7 +568,7 @@ def run_fisher(sample, pre_trained_results=None):
             nodes = fisher_nodes_equal_counts(maturities)
             knots = bspline_knots_from_nodes(nodes, degree=3)
 
-            gcv_out = select_lambda_gcv_fisher_grid_and_linesearch(bonds_dict, knots, degree=3)
+            gcv_out = select_lambda_gcv(bonds_dict, knots, degree=3)
 
             out = gcv_out["best_fit"]
             best_lam = gcv_out["best_lambda"]

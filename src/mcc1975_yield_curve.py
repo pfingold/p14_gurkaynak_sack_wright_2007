@@ -157,7 +157,7 @@ def fit(cashflows, times, prices_clean, ai, d, ncoef):
 
 def discount_curve(bonds, beta_hat, d, ncoef):
     """DOCSTRING"""
-    T_grid = np.linspace(0, np.ceil(max(bonds["ttm"])), 200)
+    T_grid = np.linspace(0, np.ceil(max(bonds["ttm"])), 1000)
 
     F_nodes = build_basis_matrix(d, d, ncoef)
     D_nodes = 1.0 + F_nodes @ beta_hat
