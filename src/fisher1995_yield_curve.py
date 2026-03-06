@@ -544,80 +544,50 @@ def fisher_curve_points_to_dfs(
     return curve_df, nodes_df
 
 # ----------------
-# Pricing function for out of sample
+# Out-of-sample pricing from pre-trained coefficients
 # ----------------
-def price_bonds_from_fisher_beta_times_cashflows(
-    beta: np.ndarray,
-    knots: np.ndarray,
-    degree: int,
-    cashflows: list[np.ndarray],
-    times: list[np.ndarray],
-    t0: float = 0.0,
-) -> np.ndarray:
-    """
-    Price bonds from a pre-trained Fisher forward-curve spline.
 
-    Model:
-      z(t) = ∫_0^t f(s) ds = A(t) @ beta
-      D(t) = exp(-z(t))
-      P_i  = Σ_j c_{i,j} * D(t_{i,j})
+def fisher_predict_prices(beta, knots, bonds_dict, degree=3):
+    """
+    Compute model prices and residuals from pre-trained Fisher coefficients.
 
     Parameters
     ----------
-    beta : (p,) array
+    beta : array-like
         Pre-trained spline coefficients.
-    knots : array
-        Knot vector used in training (must match beta).
+    knots : array-like
+        Knot vector used during training.
+    bonds_dict : list of dicts
+        Each dict with keys 'P' (dirty price), 'times' (cashflow times), 'c' (cashflows).
     degree : int
-        Spline degree used in training (must match beta/knots).
-    cashflows : list of (n_cf_i,) arrays
-        Cashflows per bond (dirty cashflows: coupons + principal).
-    times : list of (n_cf_i,) arrays
-        Cashflow times in years, aligned with cashflows.
-    t0 : float
-        Integration anchor (should match training, usually 0.0).
+        B-spline degree.
 
     Returns
     -------
-    P_hat : (N,) array
-        Model-implied dirty prices.
+    P_hat : np.ndarray
+        Model dirty prices.
+    resid : np.ndarray
+        Residuals P_obs - P_hat.
     """
     beta = np.asarray(beta, float)
     knots = np.asarray(knots, float)
-    degree = int(degree)
-
-    if len(cashflows) != len(times):
-        raise ValueError("cashflows and times must have the same length (one entry per bond).")
-
     basis = bspline_basis_list(knots, degree)
 
-    # Stack all cashflow times to do one matrix multiply
-    n_bonds = len(times)
-    idx_slices: list[slice] = []
-    t_all = []
+    times_all = np.concatenate([b["times"] for b in bonds_dict])
+    idx_slices = []
     start = 0
-    for i in range(n_bonds):
-        ti = np.asarray(times[i], float)
-        ci = np.asarray(cashflows[i], float)
-        if ti.shape != ci.shape:
-            raise ValueError(f"Bond {i}: times and cashflows must have same shape.")
-        t_all.append(ti)
-        n = ti.size
+    for b in bonds_dict:
+        n = len(b["times"])
         idx_slices.append(slice(start, start + n))
         start += n
+    A_all = integrated_basis_matrix(times_all, basis, t0=0.0)
 
-    t_all = np.concatenate(t_all, axis=0)
+    P_obs = np.array([b["P"] for b in bonds_dict], float)
+    P_hat, _ = price_and_jac(beta, bonds_dict, A_all, idx_slices)
+    resid = P_obs - P_hat
 
-    A_all = integrated_basis_matrix(t_all, basis, t0=t0)   # (M, p)
-    z_all = A_all @ beta                                   # (M,)
-    D_all = np.exp(-z_all)                                  # (M,)
+    return P_hat, resid
 
-    P_hat = np.empty(n_bonds, float)
-    for i, sl in enumerate(idx_slices):
-        ci = np.asarray(cashflows[i], float)
-        P_hat[i] = float(ci @ D_all[sl])
-
-    return P_hat
 
 # ----------------
 # Full wrapper for Fisher
@@ -649,23 +619,38 @@ def run_fisher(sample, pre_trained_results=None):
 
         bonds_dict = [{"P": prices[i] + acc_int[i], "times": times[i], "c": cashflows[i]} for i in range(n_bonds)]
 
-        nodes = fisher_nodes_equal_counts(maturities)
-        knots = bspline_knots_from_nodes(nodes, degree=3)
+        if pre_trained_results is not None:
+            pre = pre_trained_results[DATE]
+            beta_hat = np.asarray(pre["beta_hat"], float)
+            knots = np.asarray(pre["knots"], float)
+            best_lam = pre["lambda"]
 
-        gcv_out = select_lambda_gcv_fisher_grid_and_linesearch(bonds_dict, knots, degree=3)
+            P_hat_dirty, resid = fisher_predict_prices(beta_hat, knots, bonds_dict, degree=3)
+            bonds["model_price"] = P_hat_dirty - acc_int
+            bonds["resid"] = resid
 
-        out = gcv_out["best_fit"]
-        best_lam = gcv_out["best_lambda"]
+            fit_for_curve = {"beta": beta_hat, "knots": knots, "degree": 3}
+            curve_df, nodes_df = fisher_curve_points_to_dfs(fit_for_curve)
+        else:
+            nodes = fisher_nodes_equal_counts(maturities)
+            knots = bspline_knots_from_nodes(nodes, degree=3)
 
-        bonds["model_price"] = out["P_hat"] - acc_int
-        bonds["resid"] = out["resid_price"]
+            gcv_out = select_lambda_gcv_fisher_grid_and_linesearch(bonds_dict, knots, degree=3)
 
-        curve_df, nodes_df = fisher_curve_points_to_dfs(out)
+            out = gcv_out["best_fit"]
+            best_lam = gcv_out["best_lambda"]
+            beta_hat = out["beta"]
+
+            bonds["model_price"] = out["P_hat"] - acc_int
+            bonds["resid"] = out["resid_price"]
+
+            curve_df, nodes_df = fisher_curve_points_to_dfs(out)
 
         wmae = error_metrics.wmae(bonds["model_price"], bonds["bid"], bonds["ask"], bonds["duration"])
         hit_rate = error_metrics.hit_rate(bonds["model_price"], bonds["bid"], bonds["ask"])
 
-        results[DATE] = {"beta_hat": out["beta"],
+        results[DATE] = {"beta_hat": beta_hat,
+                        "knots": knots,
                         "lambda": best_lam,
                         "bonds": bonds,
                         "curve": curve_df,
