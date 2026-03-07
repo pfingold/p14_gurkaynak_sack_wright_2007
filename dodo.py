@@ -289,7 +289,6 @@ def task_build_waggoner_yield_curve():
         "clean": True,
     }
 
-
 # Modern (rolling 20-year) sample tasks
 def task_build_mcc_yield_curve_modern():
     """Run McCulloch yield curve on rolling modern (last 20 years) sample"""
@@ -385,6 +384,122 @@ def task_build_waggoner_yield_curve_modern():
         "clean": True,
     }
 
+### Build Replication Fit Tables (Table 1a and Table 1b) ###
+def task_build_replication_tables():
+    """Build replication fit tables (Table 1a and Table 1b) from saved method outputs"""
+    return {
+        "actions": [
+            "ipython ./src/settings.py",
+            "ipython ./src/replication_tables.py",
+        ],
+        "targets": [
+            OUTPUT_DIR / "table_1a_fit.tex",
+            OUTPUT_DIR / "table_1b_fit.tex",
+        ],
+        "file_dep": [
+            "./src/settings.py",
+            "./src/replication_tables.py",
+            "./src/curve_fitting_utils.py",
+            "./src/error_metrics.py",
+            DATA_DIR / "mcc_error_metrics.csv",
+            DATA_DIR / "mcc_oos_error_metrics.csv",
+            DATA_DIR / "fisher_error_metrics.csv",
+            DATA_DIR / "fisher_oos_error_metrics.csv",
+            DATA_DIR / "waggoner_error_metrics.csv",
+            DATA_DIR / "waggoner_oos_error_metrics.csv",
+        ],
+        "task_dep": [
+            "build_mcc_yield_curve",
+            "build_fisher_yield_curve",
+            "build_waggoner_yield_curve",
+        ],
+        "clean": True,
+    }
+
+
+def task_build_correlation_metrics():
+    """Compute date-level correlation metrics across replication methods vs GSW"""
+    return {
+        "actions": [
+            "ipython ./src/settings.py",
+            "ipython ./src/correlation_metrics.py",
+        ],
+        "targets": [
+            DATA_DIR / "correlation_metrics_detail.csv",
+            DATA_DIR / "correlation_metrics_by_date.csv",
+            DATA_DIR / "correlation_selected_dates.csv",
+            DATA_DIR / "method_pairwise_correlation_detail.csv",
+            DATA_DIR / "method_pairwise_correlation_spot_cc.csv",
+            DATA_DIR / "method_pairwise_correlation_forward_instant_cc.csv",
+            BASE_DIR / "docs" / "charts" / "method_corr_heatmap_spot_cc.html",
+            BASE_DIR / "docs" / "charts" / "method_corr_heatmap_forward_instant_cc.html",
+        ],
+        "file_dep": [
+            "./src/settings.py",
+            "./src/correlation_metrics.py",
+            "./src/curve_conversions.py",
+            "./src/pull_yield_curve_data.py",
+            DATA_DIR / "mcc_discount_curve.parquet",
+            DATA_DIR / "fisher_forward_curve.parquet",
+            DATA_DIR / "waggoner_forward_curve.parquet",
+            DATA_DIR / "fed_yield_curve_all.parquet",
+        ],
+        "task_dep": [
+            "build_mcc_yield_curve",
+            "build_fisher_yield_curve",
+            "build_waggoner_yield_curve",
+            "pull_fed_yield_curve",
+        ],
+        "clean": True,
+    }
+
+
+def task_build_curve_plots():
+    """Create all method curve plots and method-vs-GSW overlays"""
+    chart_targets = [
+        "methods_vs_gsw_low_corr_discount.html",
+        "methods_vs_gsw_low_corr_spot_cc.html",
+        "methods_vs_gsw_low_corr_fwd_instant_cc.html",
+        "methods_vs_gsw_median_corr_discount.html",
+        "methods_vs_gsw_median_corr_spot_cc.html",
+        "methods_vs_gsw_median_corr_fwd_instant_cc.html",
+        "methods_vs_gsw_high_corr_discount.html",
+        "methods_vs_gsw_high_corr_spot_cc.html",
+        "methods_vs_gsw_high_corr_fwd_instant_cc.html",
+        "mcc_discount_selected_dates.html",
+        "mcc_spot_cc_selected_dates.html",
+        "mcc_fwd_instant_cc_selected_dates.html",
+        "fisher_discount_selected_dates.html",
+        "fisher_spot_cc_selected_dates.html",
+        "fisher_fwd_instant_cc_selected_dates.html",
+        "waggoner_discount_selected_dates.html",
+        "waggoner_spot_cc_selected_dates.html",
+        "waggoner_fwd_instant_cc_selected_dates.html",
+        "curve_plot_manifest.csv",
+    ]
+    return {
+        "actions": [
+            "ipython ./src/settings.py",
+            "ipython ./src/plot_curves.py",
+        ],
+        "targets": [BASE_DIR / "docs" / "charts" / f for f in chart_targets],
+        "file_dep": [
+            "./src/settings.py",
+            "./src/plot_curves.py",
+            "./src/correlation_metrics.py",
+            "./src/curve_conversions.py",
+            "./src/pull_yield_curve_data.py",
+            DATA_DIR / "mcc_discount_curve.parquet",
+            DATA_DIR / "fisher_forward_curve.parquet",
+            DATA_DIR / "waggoner_forward_curve.parquet",
+            DATA_DIR / "fed_yield_curve_all.parquet",
+            DATA_DIR / "correlation_selected_dates.csv",
+        ],
+        "task_dep": [
+            "build_correlation_metrics",
+        ],
+        "clean": True,
+    }
 
 #Temporarily Disabling Summary Stats Task for Setup Ease
 def DISABLE_task_summary_stats_disabled():

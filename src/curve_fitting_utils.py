@@ -23,7 +23,7 @@ END_DATE = "1995-12-31"
 ERROR_COLS = ["bid", "ask", "duration", "model_price", "ttm"]
 ID_COLS = ["date", "cusip"]
 
-def load_tidy_CRSP_treasury(data_dir: Path = DATA_DIR) -> pd.DataFrame:
+def load_tidy_CRSP_treasury(data_dir = DATA_DIR):
     """Loads the tidy CRSP treasury data from the specified directory"""
     treasury_path = data_dir / "tidy_CRSP_treasury.parquet"
     treasury = pd.read_parquet(treasury_path)
@@ -171,12 +171,53 @@ def get_cashflows_from_bonds(bonds, face=100, freq=2, stub_tol_days=3):
 
 
 
-def get_full_error_metrics(results, id_cols=ID_COLS, error_cols=ERROR_COLS):
+def _load_error_input(results_or_bonds, id_cols=ID_COLS, error_cols=ERROR_COLS):
+    """Normalize supported inputs into a single prediction DataFrame.
+
+    Supported inputs:
+    - results dict from run_mcculloch/run_fisher/run_waggoner
+    - DataFrame with required columns (date, cusip, bid, ask, duration, model_price, ttm)
+    - Path/str to a parquet/csv file containing that DataFrame
+    """
+    cols = id_cols + error_cols
+
+    if isinstance(results_or_bonds, dict):
+        return pd.concat(
+            [
+                results_or_bonds[r]["bonds"][cols].set_index(id_cols)
+                for r in results_or_bonds
+            ],
+            axis=0,
+        )
+
+    if isinstance(results_or_bonds, (str, Path)):
+        path = Path(results_or_bonds)
+        if path.suffix == ".parquet":
+            df = pd.read_parquet(path)
+        elif path.suffix == ".csv":
+            df = pd.read_csv(path)
+        else:
+            raise ValueError(f"Unsupported file type: {path}")
+    elif isinstance(results_or_bonds, pd.DataFrame):
+        df = results_or_bonds
+    else:
+        raise TypeError(
+            "get_full_error_metrics expects a results dict, DataFrame, or csv/parquet path."
+        )
+
+    missing = set(cols) - set(df.columns)
+    if missing:
+        raise ValueError(f"Input is missing required columns: {sorted(missing)}")
+    return df[cols].set_index(id_cols)
+
+
+def get_full_error_metrics(results_or_bonds, id_cols=ID_COLS, error_cols=ERROR_COLS):
+    """Compute WMAE and hit rate for each TTM bin and overall, given a results dict, DataFrame, or path to a csv/parquet file."""
     ttm_bins = [(0, 1), (1, 3), (3, 5), (5, 10), (10, np.inf)]
     wmae_list = []
     hit_rate_list = []
 
-    preds = pd.concat([results[r]["bonds"][id_cols + error_cols].set_index(id_cols) for r in results], axis=0)
+    preds = _load_error_input(results_or_bonds, id_cols=id_cols, error_cols=error_cols)
 
     for start, stop in ttm_bins:
         preds_bin = preds.loc[(preds["ttm"] >= start) & (preds["ttm"] < stop)]
@@ -221,4 +262,3 @@ def get_full_error_metrics(results, id_cols=ID_COLS, error_cols=ERROR_COLS):
         "wmae": wmae_list,
         "hit_rate": hit_rate_list},
         index=labels)
-
