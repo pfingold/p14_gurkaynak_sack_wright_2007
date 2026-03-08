@@ -418,6 +418,7 @@ def _write_method_heatmap_html(pairwise_overall, curve_type, out_path, title):
 
 
 def main():
+    """Run the module's main workflow."""
     _, summary, selected = compute_and_save_correlation_metrics(data_dir=DATA_DIR)
     print("Wrote correlation metrics to:", DATA_DIR.resolve())
     print("Selected dates:")

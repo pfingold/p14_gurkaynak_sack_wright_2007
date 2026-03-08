@@ -152,6 +152,7 @@ def apply_delisting_returns(df):
 
 
 def apply_delisting_returns_alt(df):
+    """Apply delisting returns alt."""
     df["dlret"] = df["dlret"].fillna(0)
     df["ret"] = df["ret"] + df["dlret"]
     df["ret"] = np.where(
@@ -182,18 +183,21 @@ def pull_CRSP_index_files(
 
 
 def load_CRSP_monthly_file(data_dir=DATA_DIR):
+    """Load CRSP monthly file data."""
     path = Path(data_dir) / "CRSP_MSF_INDEX_INPUTS.parquet"
     df = pd.read_parquet(path)
     return df
 
 
 def load_CRSP_index_files(data_dir=DATA_DIR):
+    """Load CRSP index files data."""
     path = Path(data_dir) / "CRSP_MSIX.parquet"
     df = pd.read_parquet(path)
     return df
 
 
 def _demo():
+    """Run a small demo of the module functionality."""
     df_msf = load_CRSP_monthly_file(data_dir=DATA_DIR)
     df_msix = load_CRSP_index_files(data_dir=DATA_DIR)
 

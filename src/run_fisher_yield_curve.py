@@ -28,6 +28,7 @@ OUTPUT_DIR = Path(config("OUTPUT_DIR"))
 
 
 def _collect_results(results):
+    """Collect model outputs into consolidated result tables."""
     curves, nodes, bond_fits, fit_quality = [], [], [], []
     for dt, out in results.items():
         c = out["curve"].copy()

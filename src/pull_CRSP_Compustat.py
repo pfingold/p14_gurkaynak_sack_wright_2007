@@ -194,6 +194,7 @@ description_crsp_comp_link = {
 
 
 def pull_CRSP_Comp_Link_Table(wrds_username=WRDS_USERNAME):
+    """Pull CRSP Comp Link Table data."""
     sql_query = """
         SELECT 
             gvkey, lpermno AS permno, linktype, linkprim, linkdt, linkenddt
@@ -210,6 +211,7 @@ def pull_CRSP_Comp_Link_Table(wrds_username=WRDS_USERNAME):
 
 
 def pull_Fama_French_factors(wrds_username=WRDS_USERNAME):
+    """Pull Fama French factors data."""
     conn = wrds.Connection(wrds_username=wrds_username)
     ff = conn.get_table(library="ff", table="factors_monthly")
     conn.close()
@@ -222,30 +224,35 @@ def pull_Fama_French_factors(wrds_username=WRDS_USERNAME):
 
 
 def load_compustat(data_dir=DATA_DIR):
+    """Load compustat data."""
     path = Path(data_dir) / "Compustat.parquet"
     comp = pd.read_parquet(path)
     return comp
 
 
 def load_CRSP_stock_ciz(data_dir=DATA_DIR):
+    """Load CRSP stock ciz data."""
     path = Path(data_dir) / "CRSP_stock_ciz.parquet"
     crsp = pd.read_parquet(path)
     return crsp
 
 
 def load_CRSP_Comp_Link_Table(data_dir=DATA_DIR):
+    """Load CRSP Comp Link Table data."""
     path = Path(data_dir) / "CRSP_Comp_Link_Table.parquet"
     ccm = pd.read_parquet(path)
     return ccm
 
 
 def load_Fama_French_factors(data_dir=DATA_DIR):
+    """Load Fama French factors data."""
     path = Path(data_dir) / "FF_FACTORS.parquet"
     ff = pd.read_parquet(path)
     return ff
 
 
 def _demo():
+    """Run a small demo of the module functionality."""
     comp = load_compustat(data_dir=DATA_DIR)
     crsp = load_CRSP_stock_ciz(data_dir=DATA_DIR)
     ccm = load_CRSP_Comp_Link_Table(data_dir=DATA_DIR)

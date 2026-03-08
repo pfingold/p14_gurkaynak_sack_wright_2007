@@ -22,6 +22,7 @@ OUTPUT_DIR = Path(config("OUTPUT_DIR"))
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 def CRSP_treasury_plot():
+    """Compute CRSP treasury plot."""
     prices_maturities = load_CRSP_treasury_consolidated(DATA_DIR, with_runness=False)
 
     # fix datetime column
@@ -98,6 +99,7 @@ def CRSP_treasury_plot():
 
 
 def fed_yield_curve_plot():
+    """Compute fed yield curve plot."""
     fed_yield_curve = load_fed_yield_curve_all(DATA_DIR)
 
     # get parameterized curve

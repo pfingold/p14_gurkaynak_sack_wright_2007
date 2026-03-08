@@ -1,3 +1,5 @@
+"""Utilities for fisher1995 yield curve in this project."""
+
 import numpy as np
 import pandas as pd
 from scipy.interpolate import BSpline
@@ -10,6 +12,7 @@ import error_metrics
 # -----------------------------
 
 def fisher_nodes_equal_counts(maturities: np.ndarray) -> np.ndarray:
+    """Compute fisher nodes equal counts."""
     m = np.asarray(maturities, dtype=float)
     m = m[np.isfinite(m) & (m >= 0)]
     if m.size < 2:
@@ -31,6 +34,7 @@ def fisher_nodes_equal_counts(maturities: np.ndarray) -> np.ndarray:
     return np.unique(np.array(nodes, dtype=float))
 
 def bspline_knots_from_nodes(nodes: np.ndarray, degree: int = 3) -> np.ndarray:
+    """Compute bspline knots from nodes."""
     x = np.asarray(nodes, dtype=float)
     x = np.unique(x)
     if x.size < 2 or x[0] != 0.0:
@@ -45,6 +49,7 @@ def bspline_knots_from_nodes(nodes: np.ndarray, degree: int = 3) -> np.ndarray:
     return np.concatenate([left, interior, right]).astype(float)
 
 def n_basis_from_knots(knots: np.ndarray, degree: int = 3) -> int:
+    """Compute n basis from knots."""
     k = int(degree)
     return len(knots) - k - 1
 
@@ -142,6 +147,7 @@ def price_and_jac(beta, bonds, A_all, idx_slices):
 # -----------------------------
 def sqrt_penalty_from_K(K, eps=1e-12):
     # Symmetrize
+    """Compute sqrt penalty from K."""
     Ksym = 0.5 * (K + K.T)
 
     # Eigen-decompose (K should be symmetric)
@@ -197,12 +203,14 @@ def fit_fisher_forward_fixed_lambda(
         beta0 = np.zeros(p)
 
     def fun(beta):
+        """Evaluate the objective function value."""
         P_hat, _ = price_and_jac(beta, bonds, A_all, idx_slices)
         r_price = P_obs - P_hat
         r_pen = np.sqrt(lam) * (L @ beta)
         return np.concatenate([r_price, r_pen])
 
     def jac(beta):
+        """Evaluate the objective function gradient (Jacobian)."""
         _, Jp = price_and_jac(beta, bonds, A_all, idx_slices)
         # r_price = P_obs - P_hat => dr/dbeta = -dP_hat/dbeta = -Jp
         Jr_price = -Jp
@@ -309,6 +317,7 @@ def select_lambda_gcv(
     N = len(bonds)
 
     def eval_gcv(lam: float, beta_init=None):
+        """Compute eval gcv."""
         fit = fit_fisher_forward_fixed_lambda(
             bonds=bonds, knots=knots, lam=lam, degree=degree,
             A_all=A_all, idx_slices=idx_slices, K=K,
@@ -361,6 +370,7 @@ def select_lambda_gcv(
         beta_init = grid_fits[lam0]["beta"]
 
         def objective(loglam, _beta=beta_init):
+            """Evaluate the objective function value."""
             gcv, _ = eval_gcv(10.0 ** loglam, beta_init=_beta)
             return gcv
 

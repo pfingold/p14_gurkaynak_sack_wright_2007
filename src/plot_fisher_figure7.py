@@ -1,4 +1,8 @@
-"""Build a Fisher Figure 7 style replication plot for February 28, 1977 in docs/charts."""
+"""
+Build a Waggoner Paper Fisher Figure 7 style replication 
+plot for February 28, 1977 and output the resulting 
+curve in docs/charts
+"""
 
 from pathlib import Path
 
@@ -19,11 +23,13 @@ OUT_HTML = CHARTS_DIR / "fisher_figure7_1977_02_28.html"
 
 
 def _nearest_curve_point(curve, x_val):
+    """Compute nearest curve point."""
     idx = (curve["t"] - float(x_val)).abs().idxmin()
     return float(curve.loc[idx, "t"]), float(curve.loc[idx, "forward_pct"])
 
 
 def _annotation_block(curve, x_val, label, ax, ay):
+    """Compute annotation block."""
     x_anchor, y_anchor = _nearest_curve_point(curve, x_val)
     return dict(
         x=x_anchor,

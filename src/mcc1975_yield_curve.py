@@ -1,4 +1,8 @@
-"""DOCSTRING"""
+"""
+McCulloch (1975) Yield Curve Model
+- Implements the McCulloch (1975) cubic spline yield curve model, which fits a discount function to bond price 
+data using a cubic spline basis.
+"""
 
 import numpy as np
 import pandas as pd
@@ -9,7 +13,7 @@ import curve_fitting_utils
 from curve_conversions import add_spot_and_forwards
 
 def get_nodes(bonds, maturities):
-    """DOCSTRING"""
+    """Compute nodes"""
     n_bonds = len(bonds)
     n_knots = int(np.sqrt(n_bonds))
     Tmax = max(maturities)
@@ -112,6 +116,7 @@ def build_basis_matrix(m_grid, d, k):
     return F
 
 def discount(beta, t, d, ncoef):
+    """Compute discount."""
     t = np.asarray(t, dtype=float)
 
     # F should be shape (len(t_i), ncoef)
@@ -142,6 +147,7 @@ def predict_prices(beta, cashflows, times, d, ncoef, accrued_interest):
 import numpy as np
 
 def fit(cashflows, times, prices_clean, ai, d, ncoef):
+    """Compute fit."""
     X_rows = []
     rhs = []
     for cf_i, t_i, P_i, ai_i in zip(cashflows, times, prices_clean, ai):
@@ -156,7 +162,7 @@ def fit(cashflows, times, prices_clean, ai, d, ncoef):
     return beta_hat
 
 def discount_curve(bonds, beta_hat, d, ncoef):
-    """DOCSTRING"""
+    """Calculate discount curve using fitted beta"""
     T_grid = np.linspace(0, np.ceil(max(bonds["ttm"])), 1000)
 
     F_nodes = build_basis_matrix(d, d, ncoef)
@@ -175,6 +181,7 @@ def discount_curve(bonds, beta_hat, d, ncoef):
 
 
 def run_mcculloch(sample, pre_trained_results = None):
+    """Run mcculloch using the provided sample data and optional pre-trained results for nodes and beta."""
     results = {}
 
     dates = sample["date"].unique()

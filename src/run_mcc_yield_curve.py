@@ -30,6 +30,7 @@ OUTPUT_DIR = Path(config("OUTPUT_DIR"))
 
 
 def _collect_results(results):
+    """Collect model outputs into consolidated result tables."""
     curves, nodes, bond_fits, fit_quality = [], [], [], []
     for dt, out in results.items():
         c = out["curve"].copy()
@@ -59,6 +60,7 @@ def _collect_results(results):
 
 
 def main(start_date=None, end_date=None, output_prefix=""):
+    """Run the module's main workflow."""
     df = cfu.load_tidy_CRSP_treasury(DATA_DIR)
     filter_kwargs = {}
     if start_date is not None:

@@ -43,6 +43,7 @@ def process_ontherun(df, start_date='1800-01-01'):
         return pd.DataFrame(columns=COLS)
 
     def calculate_run_byterm(df, original_maturity, start_date, dates):
+        """Calculate run byterm."""
         temp_df = df[(df.original_maturity == original_maturity) & (df.maturityDate >= start_date)].sort_values(
             'issueDate', ascending=False)
         res = []

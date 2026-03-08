@@ -253,9 +253,11 @@ def weighted_average(data_col=None, weight_col=None, data=None):
     """
 
     def weights_function(row):
+        """Compute weights function."""
         return data.loc[row.index, weight_col]
 
     def wm(row):
+        """Compute the weighted median value."""
         return np.average(row, weights=weights_function(row))
 
     result = wm(data[data_col])
@@ -353,6 +355,7 @@ def groupby_weighted_std(
     """
 
     def weighted_sd(input_df):
+        """Compute the weighted standard deviation."""
         weights = input_df[weight_col]
         vals = input_df[data_col]
 
@@ -442,6 +445,7 @@ def calc_check_digit(number):
 
 
 def convert_cusips_from_8_to_9_digit(cusip_8dig_series):
+    """Convert cusips from 8 to 9 digit."""
     dig9 = calc_check_digit(cusip_8dig_series)
     new9 = cusip_8dig_series + dig9
     return new9
@@ -752,6 +756,7 @@ def add_vertical_lines_to_plot(
 ):
     # start_date = '2019-09-10'
     # end_date = '2022-09-01'
+    """Add vertical lines to plot."""
     if extend_to_nearest_quarter:
         start_date = get_most_recent_quarter_end(start_date)
         end_date = get_next_quarter_start(end_date)

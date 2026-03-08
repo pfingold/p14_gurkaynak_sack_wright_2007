@@ -1,3 +1,5 @@
+"""Utilities for test misc tools in this project."""
+
 import pandas as pd
 
 from misc_tools import (
@@ -10,6 +12,7 @@ from misc_tools import (
 
 
 def test_weighted_average():
+    """Test weighted average."""
     df_nccb = pd.DataFrame({"rate": [2, 3, 2], "start_leg_amount": [100, 200, 100]})
     result = weighted_average(
         data_col="rate", weight_col="start_leg_amount", data=df_nccb
@@ -19,6 +22,7 @@ def test_weighted_average():
 
 
 def test_groupby_weighted_average():
+    """Test groupby weighted average."""
     df_nccb = pd.DataFrame(
         {
             "trade_direction": ["RECEIVED", "RECEIVED", "DELIVERED"],
@@ -40,6 +44,7 @@ def test_groupby_weighted_average():
 
 
 def test_groupby_weighted_std():
+    """Test groupby weighted std."""
     df_nccb = pd.DataFrame(
         {
             "trade_direction": [
@@ -70,6 +75,7 @@ def test_groupby_weighted_std():
 
 
 def test_get_most_recent_quarter_end():
+    """Test get most recent quarter end."""
     d = pd.to_datetime("2019-10-21")
     result = get_most_recent_quarter_end(d)
     expected = pd.Timestamp("2019-09-30")
@@ -77,6 +83,7 @@ def test_get_most_recent_quarter_end():
 
 
 def test_get_next_quarter_start():
+    """Test get next quarter start."""
     d = pd.to_datetime("2019-10-21")
     result = get_next_quarter_start(d)
     expected = pd.Timestamp("2020-01-01")
