@@ -42,6 +42,7 @@ def pull_CRSP_treasury_daily(
     end_date="2023-12-31",
     wrds_username=WRDS_USERNAME,
 ):
+    """Pull CRSP treasury daily data."""
     query = f"""
     SELECT 
         kytreasno, kycrspid, mcaldt, tmbid, tmask, tmaccint, tmyld,
@@ -59,6 +60,7 @@ def pull_CRSP_treasury_daily(
 
 
 def pull_CRSP_treasury_info(wrds_username=WRDS_USERNAME):
+    """Pull CRSP treasury info data."""
     query = """
         SELECT 
             kytreasno, kycrspid, tcusip, tdatdt, tmatdt, tcouprt, tfcpdt, itype,
@@ -85,6 +87,7 @@ def calc_runness(data):
     """
 
     def _calc_runness(df):
+        """Calculate runness."""
         temp = df.sort_values(by=["mcaldt", "original_maturity", "tdatdt"])
         next_temp = (
             temp.groupby(["mcaldt", "original_maturity"])["tdatdt"].rank(
@@ -186,18 +189,21 @@ def pull_CRSP_treasury_consolidated(
 
 
 def load_CRSP_treasury_daily(data_dir=DATA_DIR):
+    """Load CRSP treasury daily data."""
     path = data_dir / "TFZ_DAILY.parquet"
     df = pd.read_parquet(path)
     return df
 
 
 def load_CRSP_treasury_info(data_dir=DATA_DIR):
+    """Load CRSP treasury info data."""
     path = data_dir / "TFZ_INFO.parquet"
     df = pd.read_parquet(path)
     return df
 
 
 def load_CRSP_treasury_consolidated(data_dir=DATA_DIR, with_runness=True):
+    """Load CRSP treasury consolidated data."""
     if with_runness:
         path = data_dir / "TFZ_with_runness.parquet"
     else:
@@ -207,6 +213,7 @@ def load_CRSP_treasury_consolidated(data_dir=DATA_DIR, with_runness=True):
 
 
 def _demo():
+    """Run a small demo of the module functionality."""
     df = pull_CRSP_treasury_daily(data_dir=DATA_DIR)
     df.info()
     df = pull_CRSP_treasury_info(data_dir=DATA_DIR)

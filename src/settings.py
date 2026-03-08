@@ -114,6 +114,7 @@ else:
 
 # OS type
 def get_os():
+    """Get os."""
     os_name = system()
     if os_name == "Windows":
         return "windows"
@@ -245,6 +246,7 @@ def config(
 
 
 def create_directories():
+    """Create directories."""
     config("DATA_DIR").mkdir(parents=True, exist_ok=True)
     config("OUTPUT_DIR").mkdir(parents=True, exist_ok=True)
 

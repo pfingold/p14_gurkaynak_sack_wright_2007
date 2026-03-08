@@ -60,6 +60,7 @@ def get_coupon_dates(quote_date, maturity_date):
 def filter_treasury_cashflows(
     CF, filter_maturity_dates=False, filter_benchmark_dates=False, filter_CF_strict=True
 ):
+    """Compute filter treasury cashflows."""
     mask_benchmark_dts = []
 
     # Filter by using only benchmark treasury dates
@@ -96,6 +97,7 @@ def filter_treasury_cashflows(
 
 
 def calc_cashflows(quote_data, filter_maturity_dates=False):
+    """Calculate cashflows."""
     CF = pd.DataFrame(
         dtype=float,
         data=0,
@@ -249,6 +251,7 @@ def fit(quote_date, df_all, params0=PARAMS0):
     # will be squared later
 
     def mean_squared_error(params):
+        """Compute mean squared error."""
         predicted_prices = cashflows @ discount(times, params)
         return np.mean(((observed_prices - predicted_prices) * weights) ** 2)
 
@@ -353,6 +356,7 @@ def gurkaynak_sack_wright_filters(dff):
 
 
 def compare_fit(quote_date, df_all, params_star, actual_params, df):
+    """Compute compare fit."""
     predicted_prices = predict_prices(quote_date, df_all, params=params_star)
     gsw_predicted_prices = predict_prices(quote_date, df_all, params=actual_params)
 

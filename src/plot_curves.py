@@ -190,6 +190,7 @@ def _build_set_two_plots(curves_by_method, selected_dates):
 
 
 def main():
+    """Run the module's main workflow."""
     curves_by_method = cm.load_all_method_curves(data_dir=DATA_DIR)
     _, _, selected = cm.compute_and_save_correlation_metrics(curves_by_method=curves_by_method, data_dir=DATA_DIR)
 

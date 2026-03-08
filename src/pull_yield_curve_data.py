@@ -1,3 +1,5 @@
+"""Utilities for pull yield curve data in this project."""
+
 import pandas as pd
 import requests
 from io import BytesIO
@@ -24,16 +26,19 @@ def pull_fed_yield_curve():
     return df_all, df
 
 def load_fed_yield_curve_all(data_dir=DATA_DIR):
+    """Load fed yield curve all data."""
     path = data_dir / "fed_yield_curve_all.parquet"
     _df = pd.read_parquet(path)
     return _df
 
 def load_fed_yield_curve(data_dir=DATA_DIR):
+    """Load fed yield curve data."""
     path = data_dir / "fed_yield_curve.parquet"
     _df = pd.read_parquet(path)
     return _df
 
 def _demo():
+    """Run a small demo of the module functionality."""
     _df = load_fed_yield_curve(data_dir=DATA_DIR)
     
 

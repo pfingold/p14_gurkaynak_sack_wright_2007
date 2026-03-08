@@ -154,6 +154,7 @@ def generate_tidy_CRSP_treasury_data(tidy_df, output_dir):
 
 
 def main(data_dir = DATA_DIR, output_dir = OUTPUT_DIR):
+    """Run the module's main workflow."""
     data_dir = Path(data_dir)
     output_dir = Path(output_dir)
 

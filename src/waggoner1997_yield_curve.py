@@ -1,3 +1,14 @@
+"""
+Utilities for waggoner1997 yield curve in this project:
+- run_waggoner: main wrapper to run the Waggoner (1997) variable roughness penalty 
+    yield curve fitting procedure on the provided sample data, with optional pre-trained 
+    results for nodes and beta.
+- fit_fisher_forward_variable_lambda: core fitting function that implements the variable 
+    roughness penalty optimization for fitting the forward rate curve using a cubic spline basis.
+- vrp_roughness_matrix: computes the variable roughness penalty matrix K based on the 
+    piecewise constant lambda(t) specified in W
+"""
+
 import numpy as np
 import pandas as pd
 from scipy.optimize import least_squares
@@ -85,12 +96,14 @@ def fit_fisher_forward_variable_lambda(
         beta0 = np.zeros(p)
 
     def fun(beta):
+        """Evaluate the objective function value."""
         P_hat, _ = price_and_jac(beta, bonds, A_all, idx_slices)
         r_price = P_obs - P_hat
         r_pen = L @ beta
         return np.concatenate([r_price, r_pen])
 
     def jac(beta):
+        """Evaluate the objective function gradient (Jacobian)."""
         _, Jp = price_and_jac(beta, bonds, A_all, idx_slices)
         Jr_price = -Jp
         Jr_pen = L
@@ -125,7 +138,8 @@ def fit_fisher_forward_variable_lambda(
 # ----------------
 
 def run_waggoner(sample, pre_trained_results=None):
-    """DOCSTRING"""
+    """Runs the Waggoner (1997) variable roughness penalty yield curve fitting procedure 
+    on the provided sample data, with optional pre-trained results for nodes and beta."""
     results = {}
 
     dates = sample["date"].unique()

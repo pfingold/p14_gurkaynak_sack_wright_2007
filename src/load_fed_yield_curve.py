@@ -34,6 +34,7 @@ def pull_fed_yield_curve():
 
 
 def load_fed_yield_curve(data_dir=DATA_DIR):
+    """Load fed yield curve data."""
     path = data_dir / "fed_yield_curve.parquet"
     _df = pd.read_parquet(path)
     return _df

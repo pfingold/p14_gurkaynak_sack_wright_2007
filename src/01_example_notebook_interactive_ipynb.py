@@ -1,3 +1,5 @@
+"""Utilities for 01 example notebook interactive ipynb in this project."""
+
 # ---
 # jupyter:
 #   jupytext:

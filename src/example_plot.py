@@ -15,6 +15,7 @@ OUTPUT_DIR = Path(config("OUTPUT_DIR"))
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 def main():
+    """Run the module's main workflow."""
     df = pd.read_parquet(DATA_DIR / "CRSP_stock_ciz.parquet")
 
     df['shrout'] = df['shrout'] * 1000  # convert to actual shares
