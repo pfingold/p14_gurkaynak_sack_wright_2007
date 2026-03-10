@@ -60,7 +60,7 @@ def _collect_results(results):
     )
 
 
-def main(start_date=None, end_date=None, output_prefix=""):
+def main(start_date=None, end_date=None, output_prefix="", node_ratio=3):
     df = cfu.load_tidy_CRSP_treasury(DATA_DIR)
     filter_kwargs = {}
     if start_date is not None:
@@ -74,7 +74,7 @@ def main(start_date=None, end_date=None, output_prefix=""):
 
     # --- In-sample ---
     print("Running Fisher in-sample...")
-    in_sample_results = fisher.run_fisher(in_sample)
+    in_sample_results = fisher.run_fisher(in_sample, node_ratio=node_ratio)
 
     curves_df, nodes_df, bonds_df, fit_quality_df = _collect_results(in_sample_results)
     err_df = cfu.get_full_error_metrics(in_sample_results).reset_index().rename(columns={"index": "bucket"})

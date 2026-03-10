@@ -22,7 +22,7 @@ from fisher1995_yield_curve import (
     fisher_curve_points_to_dfs, fisher_predict_prices,
 )
 
-def vrp_roughness_matrix(knots, degree: int = 3, grid_size: int = 5000):
+def vrp_roughness_matrix(knots, degree: int = 3, grid_size: int = 1000):
     """
     Waggoner (1997) Variable Roughness Penalty matrix:
 
@@ -62,6 +62,8 @@ def fit_fisher_forward_variable_lambda(
     idx_slices=None,
     K=None,
     beta0=None,
+    c_all=None,
+    bond_idx=None,
 ):
     """
     Fits beta using Waggoner (1997) Variable Roughness Penalty (VRP).
@@ -86,33 +88,45 @@ def fit_fisher_forward_variable_lambda(
     if K is None:
         K = vrp_roughness_matrix(knots, degree=degree)
 
+    if c_all is None or bond_idx is None:
+        c_all = np.concatenate([b["c"] for b in bonds])
+        bond_idx = np.repeat(np.arange(len(bonds)), [len(b["c"]) for b in bonds])
+
     # L s.t. L^T L = K_vrp; lambda weights are baked into K_vrp
     # so ||L beta||^2 = beta^T K_vrp beta = integral lambda(t) [f''(t)]^2 dt
     L = sqrt_penalty_from_K(K, eps=1e-12)
 
     P_obs = np.array([b["P"] for b in bonds], float)
+    N = len(P_obs)
 
     if beta0 is None:
         beta0 = np.zeros(p)
 
+    # Cache price_and_jac between fun() and jac() — scipy calls both with the
+    # same beta on each iteration, so we avoid computing it twice.
+    _cache = {"beta": None, "P_hat": None, "Jp": None}
+
+    def _eval(beta):
+        if _cache["beta"] is None or not np.array_equal(beta, _cache["beta"]):
+            _cache["P_hat"], _cache["Jp"] = price_and_jac(beta, c_all, bond_idx, A_all, N)
+            _cache["beta"] = beta.copy()
+
     def fun(beta):
-        """Evaluate the objective function value."""
-        P_hat, _ = price_and_jac(beta, bonds, A_all, idx_slices)
-        r_price = P_obs - P_hat
+        _eval(beta)
+        r_price = P_obs - _cache["P_hat"]
         r_pen = L @ beta
         return np.concatenate([r_price, r_pen])
 
     def jac(beta):
-        """Evaluate the objective function gradient (Jacobian)."""
-        _, Jp = price_and_jac(beta, bonds, A_all, idx_slices)
-        Jr_price = -Jp
+        _eval(beta)
+        Jr_price = -_cache["Jp"]
         Jr_pen = L
         return np.vstack([Jr_price, Jr_pen])
 
     res = least_squares(fun, beta0, jac=jac, method="trf")
 
     beta_hat = res.x
-    P_hat, J_price = price_and_jac(beta_hat, bonds, A_all, idx_slices)
+    P_hat, J_price = price_and_jac(beta_hat, c_all, bond_idx, A_all, N)
     r_price = P_obs - P_hat
     RSS = float(r_price @ r_price)
 
@@ -137,12 +151,14 @@ def fit_fisher_forward_variable_lambda(
 # Full wrapper for Waggoner
 # ----------------
 
-def run_waggoner(sample, pre_trained_results=None):
+def run_waggoner(sample, pre_trained_results=None, node_ratio:int = 3):
     """Runs the Waggoner (1997) variable roughness penalty yield curve fitting procedure 
     on the provided sample data, with optional pre-trained results for nodes and beta."""
     results = {}
 
     dates = sample["date"].unique()
+
+    prev_beta = None   # warm-start: reuse previous date's solution as beta0
 
     for idx, DATE in enumerate(dates):
         if idx % 50 == 0:
@@ -174,16 +190,19 @@ def run_waggoner(sample, pre_trained_results=None):
             fit_for_curve = {"beta": beta_hat, "knots": knots, "degree": 3}
             curve_df, nodes_df = fisher_curve_points_to_dfs(fit_for_curve)
         else:
-            nodes = fisher_nodes_equal_counts(maturities)
+            nodes = fisher_nodes_equal_counts(maturities, node_ratio=node_ratio)
             knots = bspline_knots_from_nodes(nodes, degree=3)
 
-            out = fit_fisher_forward_variable_lambda(bonds_dict, knots, degree=3)
+            p = len(knots) - 3 - 1
+            beta0 = prev_beta if (prev_beta is not None and len(prev_beta) == p) else None
+            out = fit_fisher_forward_variable_lambda(bonds_dict, knots, degree=3, beta0=beta0)
             beta_hat = out["beta"]
 
             bonds["model_price"] = out["P_hat"] - acc_int
             bonds["resid"] = out["resid_price"]
 
             curve_df, nodes_df = fisher_curve_points_to_dfs(out)
+            prev_beta = beta_hat
 
         wmae = error_metrics.wmae(bonds["model_price"], bonds["bid"], bonds["ask"], bonds["duration"])
         hit_rate = error_metrics.hit_rate(bonds["model_price"], bonds["bid"], bonds["ask"])

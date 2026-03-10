@@ -29,4 +29,4 @@ if __name__ == "__main__":
     df = cfu.load_tidy_CRSP_treasury(DATA_DIR)
     end_date = df["date"].max()
     start_date = end_date - DateOffset(years=20)
-    main(start_date=start_date, end_date=end_date, output_prefix="modern_")
+    main(start_date=start_date, end_date=end_date, output_prefix="modern_", node_ratio=6)
