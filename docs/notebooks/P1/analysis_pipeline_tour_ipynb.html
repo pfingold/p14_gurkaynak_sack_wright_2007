@@ -1,0 +1,1225 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Analysis Pipeline Tour: Treasury Curve Replication &#8212; p14_us_treasury_yield_curve_construction_and_model_comparison</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=206a6f58" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../_static/documentation_options.js?v=b9472d72"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/P1/analysis_pipeline_tour_ipynb';</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Chart List" href="../../charts.html" />
+    <link rel="prev" title="CRSP Treasury Data Overview" href="CRSP_treasury_data_tour_ipynb.html" /> 
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>   
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo.png" class="logo__image only-light" alt="p14_us_treasury_yield_curve_construction_and_model_comparison - Home"/>
+    <script>document.write(`<img src="../../_static/logo.png" class="logo__image only-dark" alt="p14_us_treasury_yield_curve_construction_and_model_comparison - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../index.html">
+                    p14_us_treasury_yield_curve_construction_and_model_comparison
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Notebooks 📖</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="CRSP_treasury_data_tour_ipynb.html">CRSP Treasury Data Overview</a></li>
+
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Analysis Pipeline Tour: Treasury Curve Replication</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Pipeline Charts 📈</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../charts.html">Chart List</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Pipeline Dataframes 📊</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../dataframes/P1/crsp_treasury_consolidated.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P1:crsp_treasury_consolidated</span></code> - CRSP Treasury Consolidated</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../../dataframes/P1/crsp_treasury_daily_prices.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P1:crsp_treasury_daily_prices</span></code> - CRSP Treasury Daily Prices</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../../dataframes/P1/crsp_treasury_issue_info.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P1:crsp_treasury_issue_info</span></code> - CRSP Treasury Issue Info</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../../dataframes/P1/fed_yield_curve.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P1:fed_yield_curve</span></code> - Fed Yield Curve</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../../dataframes/P1/fed_yield_curve_all.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P1:fed_yield_curve_all</span></code> - Fed Yield Curve All</a></li>
+
+</ul>
+
+    </div>
+</nav></div>
+        <div class="sidebar-primary-item">
+<div class="ablog-sidebar-item ablog__categories">
+  <h3>
+    <a href="../../charts/index/category.html">Categories</a>
+  </h3>
+  <ul>
+     
+    <li>
+      <a href="../../charts/index/category/null.html">null (5)</a>
+    </li>
+     
+  </ul>
+</div>
+</div>
+        <div class="sidebar-primary-item">
+<div class="ablog-sidebar-item ablog__tagcloud">
+  <link
+    rel="stylesheet"
+    href="../../_static/ablog/tagcloud.css"
+    type="text/css"
+  />
+  <h3><a href="../../charts/index/tag.html">Tags</a></h3>
+  <ul class="ablog-cloud">
+     
+    <li class="ablog-cloud ablog-cloud-1">
+      <a href="../../charts/index/tag/crsp-treasury-database.html">CRSP Treasury Database</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-5">
+      <a href="../../charts/index/tag/federal-reserve-website.html">Federal Reserve Website</a>
+    </li>
+     
+  </ul>
+</div>
+</div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../_sources/notebooks/P1/analysis_pipeline_tour_ipynb.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Analysis Pipeline Tour: Treasury Curve Replication</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports-and-paths">Imports and Paths</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#process-1-prepare-estimation-input-data">Process 1: Prepare Estimation Input Data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#demo-window-setup">Demo Window Setup:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#spline-method-1-mcculloch-1975">Spline Method #1: McCulloch (1975)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#spline-method-2-fisher-1995">Spline Method #2: Fisher (1995)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#spline-method-3-waggoner-1997">Spline Method #3: Waggoner (1997)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#representative-metric-tables-demo-runs">Representative Metric Tables (Demo Runs)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#representative-method-plots-demo-runs">Representative Method Plots (Demo Runs)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-this-maps-to-the-full-pipeline">How This Maps to the Full Pipeline</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                   <section class="tex2jax_ignore mathjax_ignore" id="analysis-pipeline-tour-treasury-curve-replication">
+<h1>Analysis Pipeline Tour: Treasury Curve Replication<a class="headerlink" href="#analysis-pipeline-tour-treasury-curve-replication" title="Link to this heading">#</a></h1>
+<p>This notebook walks through the spline method (from the Waggoner 1997 paper) replication &amp; analysis
+portions of the project in a lightweight way.
+It covers four processes:</p>
+<ul class="simple">
+<li><p>Prepare cleaned Treasury data for estimation via <code class="docutils literal notranslate"><span class="pre">tidy_CRSP_treasury</span></code></p></li>
+<li><p>Run a short-slice McCulloch replication via <code class="docutils literal notranslate"><span class="pre">run_mcc_yield_curve</span></code></p></li>
+<li><p>Run a short-slice Fisher replication via <code class="docutils literal notranslate"><span class="pre">run_fisher_yield_curve</span></code></p></li>
+<li><p>Run a short-slice Waggoner replication via <code class="docutils literal notranslate"><span class="pre">run_waggoner_yield_curve</span></code></p></li>
+</ul>
+<p>This notebook intentionally does <em>not</em> run the entire project pipeline, so it stays fast enough
+for iterative exploration.</p>
+<section id="imports-and-paths">
+<h2>Imports and Paths<a class="headerlink" href="#imports-and-paths" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">display</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">tidy_CRSP_treasury</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">run_mcc_yield_curve</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">run_fisher_yield_curve</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">run_waggoner_yield_curve</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
+
+<span class="n">ROOT</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
+<span class="n">PROJECT_ROOT</span> <span class="o">=</span> <span class="n">ROOT</span> <span class="k">if</span> <span class="p">(</span><span class="n">ROOT</span> <span class="o">/</span> <span class="s1">&#39;src&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">parent</span>
+<span class="n">DATA_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">config</span><span class="p">(</span><span class="s1">&#39;DATA_DIR&#39;</span><span class="p">))</span>
+<span class="n">OUTPUT_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">config</span><span class="p">(</span><span class="s1">&#39;OUTPUT_DIR&#39;</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;PROJECT_ROOT:&#39;</span><span class="p">,</span> <span class="n">PROJECT_ROOT</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;DATA_DIR:&#39;</span><span class="p">,</span> <span class="n">DATA_DIR</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;OUTPUT_DIR:&#39;</span><span class="p">,</span> <span class="n">OUTPUT_DIR</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>PROJECT_ROOT: /Users/phoebefingold/FINM_Repo/FINM_32900/p14_gurkaynak_sack_wright_2007
+DATA_DIR: /Users/phoebefingold/FINM_Repo/FINM_32900/p14_gurkaynak_sack_wright_2007/_data
+OUTPUT_DIR: /Users/phoebefingold/FINM_Repo/FINM_32900/p14_gurkaynak_sack_wright_2007/_output
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="process-1-prepare-estimation-input-data">
+<h2>Process 1: Prepare Estimation Input Data<a class="headerlink" href="#process-1-prepare-estimation-input-data" title="Link to this heading">#</a></h2>
+<p>All downstream estimators share one cleaned input file: <code class="docutils literal notranslate"><span class="pre">tidy_CRSP_treasury.parquet</span></code>.
+The data cleaning process involves:</p>
+<ul class="simple">
+<li><p>standardizing CRSP fields</p></li>
+<li><p>creating mid-prices and maturity fields</p></li>
+<li><p>adding runness and sample-screen flags</p></li>
+<li><p>writing the tidy dataset for model estimation and diagnostics</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tidy_CRSP_treasury</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">DATA_DIR</span><span class="p">,</span> <span class="n">DATA_DIR</span><span class="p">)</span>
+<span class="n">df_tidy</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s1">&#39;tidy_CRSP_treasury.parquet&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;tidy rows:&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_tidy</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;date range:&#39;</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df_tidy</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">(),</span> <span class="s1">&#39;to&#39;</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df_tidy</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">())</span>
+<span class="n">display</span><span class="p">(</span><span class="n">df_tidy</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Wrote tidy CRSP Treasury data set saved to: /Users/phoebefingold/FINM_Repo/FINM_32900/p14_gurkaynak_sack_wright_2007/_data/tidy_CRSP_treasury.parquet
+tidy rows: 145747
+date range: 1970-01-30 to 2026-01-30
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>date</th>
+      <th>cusip</th>
+      <th>kytreasno</th>
+      <th>kycrspid</th>
+      <th>issue_date</th>
+      <th>maturity_date</th>
+      <th>coupon</th>
+      <th>first_coupon_date</th>
+      <th>itype</th>
+      <th>iflwr</th>
+      <th>...</th>
+      <th>is_under_1y</th>
+      <th>is_20y</th>
+      <th>is_20yr_post_1996</th>
+      <th>is_bond</th>
+      <th>is_note</th>
+      <th>is_bill</th>
+      <th>is_flower</th>
+      <th>valid_quote</th>
+      <th>nonnegative_maturity</th>
+      <th>clean</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1970-01-30</td>
+      <td>912793BQ</td>
+      <td>200639.0</td>
+      <td>19700228.400000</td>
+      <td>1969-02-27</td>
+      <td>1970-02-28</td>
+      <td>0.0</td>
+      <td>NaT</td>
+      <td>4.0</td>
+      <td>1.0</td>
+      <td>...</td>
+      <td>True</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>True</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1970-01-30</td>
+      <td>912793BR</td>
+      <td>200646.0</td>
+      <td>19700331.400000</td>
+      <td>1969-04-01</td>
+      <td>1970-03-31</td>
+      <td>0.0</td>
+      <td>NaT</td>
+      <td>4.0</td>
+      <td>1.0</td>
+      <td>...</td>
+      <td>True</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>True</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1970-01-30</td>
+      <td>912793CG</td>
+      <td>200653.0</td>
+      <td>19700430.400000</td>
+      <td>1969-04-29</td>
+      <td>1970-04-30</td>
+      <td>0.0</td>
+      <td>NaT</td>
+      <td>4.0</td>
+      <td>1.0</td>
+      <td>...</td>
+      <td>True</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>True</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1970-01-30</td>
+      <td>912793CH</td>
+      <td>200660.0</td>
+      <td>19700531.400000</td>
+      <td>1969-05-29</td>
+      <td>1970-05-31</td>
+      <td>0.0</td>
+      <td>NaT</td>
+      <td>4.0</td>
+      <td>1.0</td>
+      <td>...</td>
+      <td>True</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>True</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1970-01-30</td>
+      <td>912793CU</td>
+      <td>200666.0</td>
+      <td>19700630.400000</td>
+      <td>1969-06-26</td>
+      <td>1970-06-30</td>
+      <td>0.0</td>
+      <td>NaT</td>
+      <td>4.0</td>
+      <td>1.0</td>
+      <td>...</td>
+      <td>True</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>True</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 35 columns</p>
+</div></div></div>
+</div>
+</section>
+<section id="demo-window-setup">
+<h2>Demo Window Setup:<a class="headerlink" href="#demo-window-setup" title="Link to this heading">#</a></h2>
+<p>To keep runtime reasonable, we run each method on a short window (about 2 years)
+from the latest available dates and write outputs with a <code class="docutils literal notranslate"><span class="pre">demo_</span></code> prefix.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">latest_date</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df_tidy</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+<span class="n">demo_start</span> <span class="o">=</span> <span class="n">latest_date</span> <span class="o">-</span> <span class="n">pd</span><span class="o">.</span><span class="n">DateOffset</span><span class="p">(</span><span class="n">years</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">demo_end</span> <span class="o">=</span> <span class="n">latest_date</span>
+<span class="n">DEMO_PREFIX</span> <span class="o">=</span> <span class="s1">&#39;demo_&#39;</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Demo window:&#39;</span><span class="p">,</span> <span class="n">demo_start</span><span class="o">.</span><span class="n">date</span><span class="p">(),</span> <span class="s1">&#39;to&#39;</span><span class="p">,</span> <span class="n">demo_end</span><span class="o">.</span><span class="n">date</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Output prefix:&#39;</span><span class="p">,</span> <span class="n">DEMO_PREFIX</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Demo window: 2024-01-30 to 2026-01-30
+Output prefix: demo_
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="spline-method-1-mcculloch-1975">
+<h2>Spline Method #1: McCulloch (1975)<a class="headerlink" href="#spline-method-1-mcculloch-1975" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Fits a discount-curve representation</p></li>
+<li><p>Produces discount/spot/forward outputs, bond fit diagnostics, and WMAE/Hit Rate metrics</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">run_mcc_yield_curve</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">start_date</span><span class="o">=</span><span class="n">demo_start</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">demo_end</span><span class="p">,</span> <span class="n">output_prefix</span><span class="o">=</span><span class="n">DEMO_PREFIX</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Wrote demo_mcc_* artifacts&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Running McCulloch in-sample...
+2024-01: 0 / 25 (0%)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Running McCulloch out-of-sample...
+2024-01: 0 / 25 (0%)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Wrote McCulloch outputs to: /Users/phoebefingold/FINM_Repo/FINM_32900/p14_gurkaynak_sack_wright_2007/_data
+Wrote demo_mcc_* artifacts
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="spline-method-2-fisher-1995">
+<h2>Spline Method #2: Fisher (1995)<a class="headerlink" href="#spline-method-2-fisher-1995" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Fits a forward-curve representation with smoothing</p></li>
+<li><p>Produces curve outputs, lambda/fit diagnostics, and error metrics</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">run_fisher_yield_curve</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">start_date</span><span class="o">=</span><span class="n">demo_start</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">demo_end</span><span class="p">,</span> <span class="n">output_prefix</span><span class="o">=</span><span class="n">DEMO_PREFIX</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Wrote demo_fisher_* artifacts&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Running Fisher in-sample...
+2024-01: 0 / 25 (0%)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Running Fisher out-of-sample...
+2024-01: 0 / 25 (0%)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Wrote Fisher outputs to: /Users/phoebefingold/FINM_Repo/FINM_32900/p14_gurkaynak_sack_wright_2007/_data
+Wrote demo_fisher_* artifacts
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="spline-method-3-waggoner-1997">
+<h2>Spline Method #3: Waggoner (1997)<a class="headerlink" href="#spline-method-3-waggoner-1997" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Fits a flexible forward-curve specification</p></li>
+<li><p>Produces curve outputs, fit diagnostics, and error metrics</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">run_waggoner_yield_curve</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">start_date</span><span class="o">=</span><span class="n">demo_start</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">demo_end</span><span class="p">,</span> <span class="n">output_prefix</span><span class="o">=</span><span class="n">DEMO_PREFIX</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Wrote demo_waggoner_* artifacts&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Running Waggoner in-sample...
+2024-01: 0 / 25 (0%)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Running Waggoner out-of-sample...
+2024-01: 0 / 25 (0%)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Wrote Waggoner outputs to: /Users/phoebefingold/FINM_Repo/FINM_32900/p14_gurkaynak_sack_wright_2007/_data
+Wrote demo_waggoner_* artifacts
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="representative-metric-tables-demo-runs">
+<h2>Representative Metric Tables (Demo Runs)<a class="headerlink" href="#representative-metric-tables-demo-runs" title="Link to this heading">#</a></h2>
+<p>Below we preview in-sample and out-of-sample error summaries for the demo-window runs.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">metric_files</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;MCC (IS)&#39;</span><span class="p">:</span> <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s1">&#39;demo_mcc_error_metrics.csv&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;MCC (OOS)&#39;</span><span class="p">:</span> <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s1">&#39;demo_mcc_oos_error_metrics.csv&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Fisher (IS)&#39;</span><span class="p">:</span> <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s1">&#39;demo_fisher_error_metrics.csv&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Fisher (OOS)&#39;</span><span class="p">:</span> <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s1">&#39;demo_fisher_oos_error_metrics.csv&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Waggoner (IS)&#39;</span><span class="p">:</span> <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s1">&#39;demo_waggoner_error_metrics.csv&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Waggoner (OOS)&#39;</span><span class="p">:</span> <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s1">&#39;demo_waggoner_oos_error_metrics.csv&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">frames</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">metric_files</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;spec&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">label</span>
+        <span class="n">frames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">frames</span><span class="p">:</span>
+    <span class="n">all_metrics</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">display</span><span class="p">(</span><span class="n">all_metrics</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">12</span><span class="p">))</span>
+
+    <span class="n">summary</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">all_metrics</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">all_metrics</span><span class="p">[</span><span class="s1">&#39;bucket&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">]</span>
+        <span class="p">[[</span><span class="s1">&#39;spec&#39;</span><span class="p">,</span> <span class="s1">&#39;wmae&#39;</span><span class="p">,</span> <span class="s1">&#39;hit_rate&#39;</span><span class="p">]]</span>
+        <span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;wmae&#39;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">display</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No demo metrics files found.&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>bucket</th>
+      <th>wmae</th>
+      <th>hit_rate</th>
+      <th>spec</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0-1</td>
+      <td>0.009623</td>
+      <td>0.114019</td>
+      <td>MCC (IS)</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1-3</td>
+      <td>0.033557</td>
+      <td>0.380247</td>
+      <td>MCC (IS)</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3-5</td>
+      <td>0.041631</td>
+      <td>0.352941</td>
+      <td>MCC (IS)</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>5-10</td>
+      <td>0.085360</td>
+      <td>0.183471</td>
+      <td>MCC (IS)</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>&gt;10</td>
+      <td>0.148715</td>
+      <td>0.194043</td>
+      <td>MCC (IS)</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>All</td>
+      <td>0.022471</td>
+      <td>0.264308</td>
+      <td>MCC (IS)</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>0-1</td>
+      <td>0.009760</td>
+      <td>0.128253</td>
+      <td>MCC (OOS)</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>1-3</td>
+      <td>0.035812</td>
+      <td>0.345395</td>
+      <td>MCC (OOS)</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>3-5</td>
+      <td>0.049008</td>
+      <td>0.328000</td>
+      <td>MCC (OOS)</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>5-10</td>
+      <td>0.087539</td>
+      <td>0.181049</td>
+      <td>MCC (OOS)</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>&gt;10</td>
+      <td>0.175857</td>
+      <td>0.176895</td>
+      <td>MCC (OOS)</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>All</td>
+      <td>0.024055</td>
+      <td>0.246966</td>
+      <td>MCC (OOS)</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>spec</th>
+      <th>wmae</th>
+      <th>hit_rate</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Waggoner (IS)</td>
+      <td>0.018069</td>
+      <td>0.316314</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Waggoner (OOS)</td>
+      <td>0.019720</td>
+      <td>0.287176</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Fisher (IS)</td>
+      <td>0.019829</td>
+      <td>0.371408</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Fisher (OOS)</td>
+      <td>0.022128</td>
+      <td>0.300738</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>MCC (IS)</td>
+      <td>0.022471</td>
+      <td>0.264308</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>MCC (OOS)</td>
+      <td>0.024055</td>
+      <td>0.246966</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+</section>
+<section id="representative-method-plots-demo-runs">
+<h2>Representative Method Plots (Demo Runs)<a class="headerlink" href="#representative-method-plots-demo-runs" title="Link to this heading">#</a></h2>
+<p>We create quick representative curve plots directly from the demo output files.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">demo_curve_files</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;McCulloch&#39;</span><span class="p">:</span> <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s1">&#39;demo_mcc_discount_curve.parquet&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Fisher&#39;</span><span class="p">:</span> <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s1">&#39;demo_fisher_forward_curve.parquet&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Waggoner&#39;</span><span class="p">:</span> <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s1">&#39;demo_waggoner_forward_curve.parquet&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">demo_curve_files</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;exists:&#39;</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>McCulloch demo_mcc_discount_curve.parquet exists: True
+Fisher demo_fisher_forward_curve.parquet exists: True
+Waggoner demo_waggoner_forward_curve.parquet exists: True
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="n">demo_curve_files</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">: missing file&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+        <span class="k">continue</span>
+
+    <span class="n">df_curve</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">dmax</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df_curve</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">snap</span> <span class="o">=</span> <span class="n">df_curve</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df_curve</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="n">dmax</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">xcol</span> <span class="o">=</span> <span class="s1">&#39;t&#39;</span> <span class="k">if</span> <span class="s1">&#39;t&#39;</span> <span class="ow">in</span> <span class="n">snap</span><span class="o">.</span><span class="n">columns</span> <span class="k">else</span> <span class="s1">&#39;T&#39;</span>
+
+    <span class="k">if</span> <span class="n">label</span> <span class="o">==</span> <span class="s1">&#39;McCulloch&#39;</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">snap</span><span class="p">[</span><span class="n">xcol</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">snap</span><span class="p">[</span><span class="s1">&#39;discount&#39;</span><span class="p">]</span>
+        <span class="n">ylab</span> <span class="o">=</span> <span class="s1">&#39;Discount&#39;</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> Discount Curve&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">snap</span><span class="p">[</span><span class="n">xcol</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">snap</span><span class="p">[</span><span class="s1">&#39;forward&#39;</span><span class="p">]</span>
+        <span class="n">ylab</span> <span class="o">=</span> <span class="s1">&#39;Forward Rate&#39;</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> Forward Curve&#39;</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Maturity (Years)&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">ylab</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/a60b050daf905de8cd192c68709b07ea5c1a7323532cdf5ff5ca21b73c605d27.png" src="../../_images/a60b050daf905de8cd192c68709b07ea5c1a7323532cdf5ff5ca21b73c605d27.png" />
+</div>
+</div>
+</section>
+<section id="how-this-maps-to-the-full-pipeline">
+<h2>How This Maps to the Full Pipeline<a class="headerlink" href="#how-this-maps-to-the-full-pipeline" title="Link to this heading">#</a></h2>
+<p>This lightweight notebook is for method walkthrough and representative diagnostics.
+For full production artifacts (replication tables, cross-method correlations, report-ready figures),
+run the <code class="docutils literal notranslate"><span class="pre">doit</span></code> tasks in <code class="docutils literal notranslate"><span class="pre">dodo.py</span></code> directly.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">required</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s1">&#39;tidy_CRSP_treasury.parquet&#39;</span><span class="p">,</span>
+    <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s1">&#39;demo_mcc_error_metrics.csv&#39;</span><span class="p">,</span>
+    <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s1">&#39;demo_fisher_error_metrics.csv&#39;</span><span class="p">,</span>
+    <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s1">&#39;demo_waggoner_error_metrics.csv&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="n">check</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;artifact&#39;</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">PROJECT_ROOT</span><span class="p">))</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_relative_to</span><span class="p">(</span><span class="n">PROJECT_ROOT</span><span class="p">)</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">required</span><span class="p">],</span>
+        <span class="s1">&#39;exists&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">required</span><span class="p">],</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">check</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;All lightweight demo artifacts exist:&#39;</span><span class="p">,</span> <span class="nb">bool</span><span class="p">(</span><span class="n">check</span><span class="p">[</span><span class="s1">&#39;exists&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">all</span><span class="p">()))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>artifact</th>
+      <th>exists</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>_data/tidy_CRSP_treasury.parquet</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>_data/demo_mcc_error_metrics.csv</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>_data/demo_fisher_error_metrics.csv</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>_data/demo_waggoner_error_metrics.csv</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>All lightweight demo artifacts exist: True
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+
+<div class="section ablog__blog_comments">
+   
+</div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="CRSP_treasury_data_tour_ipynb.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">CRSP Treasury Data Overview</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../../charts.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Chart List</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports-and-paths">Imports and Paths</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#process-1-prepare-estimation-input-data">Process 1: Prepare Estimation Input Data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#demo-window-setup">Demo Window Setup:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#spline-method-1-mcculloch-1975">Spline Method #1: McCulloch (1975)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#spline-method-2-fisher-1995">Spline Method #2: Fisher (1995)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#spline-method-3-waggoner-1997">Spline Method #3: Waggoner (1997)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#representative-metric-tables-demo-runs">Representative Metric Tables (Demo Runs)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#representative-method-plots-demo-runs">Representative Method Plots (Demo Runs)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-this-maps-to-the-full-pipeline">How This Maps to the Full Pipeline</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Phoebe Fingold, Annie Reynolds
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025, Phoebe Fingold, Annie Reynolds.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

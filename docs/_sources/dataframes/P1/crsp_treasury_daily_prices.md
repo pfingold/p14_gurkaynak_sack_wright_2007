@@ -9,17 +9,16 @@ Placeholder.
 ## DataFrame Glimpse
 
 ```
-Rows: 3183517
-Columns: 9
-$ kytreasno         <f64> 200629.0
-$ kycrspid          <str> '19700108.400000'
-$ caldt             <str> '1970-01-02'
-$ tdbid             <f64> 99.8833333333
-$ tdask             <f64> 99.8966666667
-$ tdaccint          <f64> 0.0
-$ tdyld             <f64> 0.00018343424067218
-$ price             <f64> 99.89
-$ __index_level_0__ <i64> 0
+Rows: 152715
+Columns: 8
+$ kytreasno <f64> 208161.0
+$ kycrspid  <str> '20301231.203750'
+$ mcaldt    <str> '2023-12-29'
+$ tmbid     <f64> 99.1796875
+$ tmask     <f64> 99.2265625
+$ tmaccint  <f64> 0.0
+$ tmyld     <f64> 0.00010514203346256
+$ price     <f64> 99.203125
 
 
 ```
@@ -35,8 +34,8 @@ $ __index_level_0__ <i64> 0
 | Topic Tags                     |                                           |
 | Type of Data Access            |                                   |
 | How is data pulled?            | Pulled via WRDS SQL query and cleaned in Python                                                    |
-| Data available up to (min)     | N/A (large file)                                                             |
-| Data available up to (max)     | N/A (large file)                                                             |
+| Data available up to (min)     | None                                                             |
+| Data available up to (max)     | None                                                             |
 | Dataframe Path                 | /Users/phoebefingold/FINM_Repo/FINM_32900/p14_gurkaynak_sack_wright_2007/_data/TFZ_DAILY.parquet                                                   |
 
 
@@ -54,7 +53,7 @@ $ __index_level_0__ <i64> 0
 | Contributors                    | Phoebe Fingold, Annie Reynolds           |
 | Git Repo URL                    |                         |
 | Pipeline Web Page               | <a href="file:///Users/phoebefingold/FINM_Repo/FINM_32900/p14_gurkaynak_sack_wright_2007/docs/index.html">Pipeline Web Page      |
-| Date of Last Code Update        | 2026-02-09 22:42:02           |
+| Date of Last Code Update        | 2026-03-11 00:04:57           |
 | OS Compatibility                |  |
 | Linked Dataframes               |  [P1:crsp_treasury_daily_prices](../dataframes/P1/crsp_treasury_daily_prices.md)<br>  [P1:crsp_treasury_issue_info](../dataframes/P1/crsp_treasury_issue_info.md)<br>  [P1:crsp_treasury_consolidated](../dataframes/P1/crsp_treasury_consolidated.md)<br>  [P1:fed_yield_curve_all](../dataframes/P1/fed_yield_curve_all.md)<br>  [P1:fed_yield_curve](../dataframes/P1/fed_yield_curve.md)<br>  |
 

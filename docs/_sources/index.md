@@ -8,7 +8,8 @@ Last updated: {sub-ref}`today`
 ```{toctree}
 :maxdepth: 1
 :caption: Notebooks 📖
-
+notebooks/P1/CRSP_treasury_data_tour_ipynb.ipynb
+notebooks/P1/analysis_pipeline_tour_ipynb.ipynb
 ```
 
 
@@ -51,7 +52,7 @@ apidocs/index
 | Contributors                    | Phoebe Fingold, Annie Reynolds           |
 | Git Repo URL                    |                         |
 | Pipeline Web Page               | <a href="file:///Users/phoebefingold/FINM_Repo/FINM_32900/p14_gurkaynak_sack_wright_2007/docs/index.html">Pipeline Web Page      |
-| Date of Last Code Update        | 2026-02-09 22:42:02           |
+| Date of Last Code Update        | 2026-03-11 00:04:57           |
 | OS Compatibility                |  |
 | Linked Dataframes               |  [P1:crsp_treasury_daily_prices](./dataframes/P1/crsp_treasury_daily_prices.md)<br>  [P1:crsp_treasury_issue_info](./dataframes/P1/crsp_treasury_issue_info.md)<br>  [P1:crsp_treasury_consolidated](./dataframes/P1/crsp_treasury_consolidated.md)<br>  [P1:fed_yield_curve_all](./dataframes/P1/fed_yield_curve_all.md)<br>  [P1:fed_yield_curve](./dataframes/P1/fed_yield_curve.md)<br>  |
 
@@ -62,6 +63,12 @@ apidocs/index
 ## About this project
 
 This project studies how the U.S. Treasury yield curve is constructed and how different modeling choices affect its shape and interpretation.
+
+## High Level Summary of Our Project: The U.S. Treasury Yield Curve: Construction and Model Comparison
+
+This project studies how the U.S. Treasury yield curve is constructed and how different modeling choices affect its shape and interpretation. We were given working code that reproduces the Gurkaynak-Sack-Wright (GSW) zero-coupon Treasury yield curve, which is widely used in academic and policy work. The GSW curve is based on the Nelson-Siegel-Svensson parametric framework. Our main task in this project is to extend the provided code by estimating and comparing alternative yield-curve methodologies that use interpolation rather than parameterization, as surveyed in Waggoner (1997), including spline-based and arbitrage-free approaches used by central banks. In particular, we seek to replicate the McCulloch (regression splines) and Fisher & VRP (smoothed spline with roughness penalty) approaches outlined by Waggoner. Following a successful replication of these approaches, we compare models in terms of in-sample and out-of-sample fits, smoothness, and behavior across maturities.
+
+This chartbook page provides a further look into the visuals and charts we created to understand the data, how the various replication methods behaved over time, and how they varied on days with low, median, and high correlation.
 
 ## Quick Start
 
@@ -213,4 +220,3 @@ To update the requirements file after adding new packages:
 ```bash
 pip freeze > requirements.txt
 ```
-
