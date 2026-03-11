@@ -6,14 +6,12 @@ Inputs:
 
 Outputs (in-sample):
   - DATA_DIR/fisher_forward_curve.parquet
-  - DATA_DIR/fisher_forward_curve_nodes.csv
   - DATA_DIR/fisher_bond_fits.parquet
   - DATA_DIR/fisher_fit_quality_by_date.csv
   - DATA_DIR/fisher_error_metrics.csv
 
 Outputs (out-of-sample):
   - DATA_DIR/fisher_oos_bond_fits.parquet
-  - DATA_DIR/fisher_oos_fit_quality_by_date.csv
   - DATA_DIR/fisher_oos_error_metrics.csv
 """
 from pathlib import Path
@@ -76,12 +74,11 @@ def main(start_date=None, end_date=None, output_prefix="", node_ratio=3):
     print("Running Fisher in-sample...")
     in_sample_results = fisher.run_fisher(in_sample, node_ratio=node_ratio)
 
-    curves_df, nodes_df, bonds_df, fit_quality_df = _collect_results(in_sample_results)
+    curves_df, _, bonds_df, fit_quality_df = _collect_results(in_sample_results)
     err_df = cfu.get_full_error_metrics(in_sample_results).reset_index().rename(columns={"index": "bucket"})
 
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     curves_df.to_parquet(DATA_DIR / f"{p}fisher_forward_curve.parquet", index=False)
-    nodes_df.to_csv(DATA_DIR / f"{p}fisher_forward_curve_nodes.csv", index=False)
     bonds_df.to_parquet(DATA_DIR / f"{p}fisher_bond_fits.parquet", index=False)
     fit_quality_df.to_csv(DATA_DIR / f"{p}fisher_fit_quality_by_date.csv", index=False)
     err_df.to_csv(DATA_DIR / f"{p}fisher_error_metrics.csv", index=False)
@@ -90,11 +87,10 @@ def main(start_date=None, end_date=None, output_prefix="", node_ratio=3):
     print("Running Fisher out-of-sample...")
     oos_results = fisher.run_fisher(out_of_sample, pre_trained_results=in_sample_results)
 
-    _, _, oos_bonds_df, oos_fit_quality_df = _collect_results(oos_results)
+    _, _, oos_bonds_df, _ = _collect_results(oos_results)
     oos_err_df = cfu.get_full_error_metrics(oos_results).reset_index().rename(columns={"index": "bucket"})
 
     oos_bonds_df.to_parquet(DATA_DIR / f"{p}fisher_oos_bond_fits.parquet", index=False)
-    oos_fit_quality_df.to_csv(DATA_DIR / f"{p}fisher_oos_fit_quality_by_date.csv", index=False)
     oos_err_df.to_csv(DATA_DIR / f"{p}fisher_oos_error_metrics.csv", index=False)
 
     print("Wrote Fisher outputs to:", DATA_DIR.resolve())

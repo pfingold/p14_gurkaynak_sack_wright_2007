@@ -311,12 +311,7 @@ def task_build_mcc_yield_curve():
         ],
         "targets":[
             DATA_DIR / "mcc_discount_curve.parquet",
-            DATA_DIR / "mcc_discount_curve_nodes.csv",
-            DATA_DIR / "mcc_bond_fits.parquet",
-            DATA_DIR / "mcc_fit_quality_by_date.csv",
             DATA_DIR / "mcc_error_metrics.csv",
-            DATA_DIR / "mcc_oos_bond_fits.parquet",
-            DATA_DIR / "mcc_oos_fit_quality_by_date.csv",
             DATA_DIR / "mcc_oos_error_metrics.csv",
         ],
         "file_dep":[
@@ -342,12 +337,10 @@ def task_build_fisher_yield_curve():
         ],
         "targets": [
             DATA_DIR / "fisher_forward_curve.parquet",
-            DATA_DIR / "fisher_forward_curve_nodes.csv",
             DATA_DIR / "fisher_bond_fits.parquet",
             DATA_DIR / "fisher_fit_quality_by_date.csv",
             DATA_DIR / "fisher_error_metrics.csv",
             DATA_DIR / "fisher_oos_bond_fits.parquet",
-            DATA_DIR / "fisher_oos_fit_quality_by_date.csv",
             DATA_DIR / "fisher_oos_error_metrics.csv",
         ],
         "file_dep": [
@@ -372,12 +365,7 @@ def task_build_waggoner_yield_curve():
         ],
         "targets": [
             DATA_DIR / "waggoner_forward_curve.parquet",
-            DATA_DIR / "waggoner_forward_curve_nodes.csv",
-            DATA_DIR / "waggoner_bond_fits.parquet",
-            DATA_DIR / "waggoner_fit_quality_by_date.csv",
             DATA_DIR / "waggoner_error_metrics.csv",
-            DATA_DIR / "waggoner_oos_bond_fits.parquet",
-            DATA_DIR / "waggoner_oos_fit_quality_by_date.csv",
             DATA_DIR / "waggoner_oos_error_metrics.csv",
         ],
         "file_dep": [
@@ -403,12 +391,7 @@ def task_build_mcc_yield_curve_modern():
         ],
         "targets": [
             DATA_DIR / "modern_mcc_discount_curve.parquet",
-            DATA_DIR / "modern_mcc_discount_curve_nodes.csv",
-            DATA_DIR / "modern_mcc_bond_fits.parquet",
-            DATA_DIR / "modern_mcc_fit_quality_by_date.csv",
             DATA_DIR / "modern_mcc_error_metrics.csv",
-            DATA_DIR / "modern_mcc_oos_bond_fits.parquet",
-            DATA_DIR / "modern_mcc_oos_fit_quality_by_date.csv",
             DATA_DIR / "modern_mcc_oos_error_metrics.csv",
         ],
         "file_dep": [
@@ -435,12 +418,10 @@ def task_build_fisher_yield_curve_modern():
         ],
         "targets": [
             DATA_DIR / "modern_fisher_forward_curve.parquet",
-            DATA_DIR / "modern_fisher_forward_curve_nodes.csv",
             DATA_DIR / "modern_fisher_bond_fits.parquet",
             DATA_DIR / "modern_fisher_fit_quality_by_date.csv",
             DATA_DIR / "modern_fisher_error_metrics.csv",
             DATA_DIR / "modern_fisher_oos_bond_fits.parquet",
-            DATA_DIR / "modern_fisher_oos_fit_quality_by_date.csv",
             DATA_DIR / "modern_fisher_oos_error_metrics.csv",
         ],
         "file_dep": [
@@ -466,12 +447,7 @@ def task_build_waggoner_yield_curve_modern():
         ],
         "targets": [
             DATA_DIR / "modern_waggoner_forward_curve.parquet",
-            DATA_DIR / "modern_waggoner_forward_curve_nodes.csv",
-            DATA_DIR / "modern_waggoner_bond_fits.parquet",
-            DATA_DIR / "modern_waggoner_fit_quality_by_date.csv",
             DATA_DIR / "modern_waggoner_error_metrics.csv",
-            DATA_DIR / "modern_waggoner_oos_bond_fits.parquet",
-            DATA_DIR / "modern_waggoner_oos_fit_quality_by_date.csv",
             DATA_DIR / "modern_waggoner_oos_error_metrics.csv",
         ],
         "file_dep": [
@@ -745,35 +721,16 @@ def task_run_notebooks():
 def task_compile_latex_docs():
     """Compile the LaTeX documents to PDFs"""
     file_dep = [
-        "./reports/report_example.tex",
-        "./reports/my_article_header.sty",
-        "./reports/slides_example.tex",
-        "./reports/my_beamer_header.sty",
-        "./reports/my_common_header.sty",
-        "./reports/report_simple_example.tex",
-        "./reports/slides_simple_example.tex",
-        "./src/example_plot.py",
-        "./src/example_table.py",
+        "./reports/report.tex",
     ]
     targets = [
-        "./reports/report_example.pdf",
-        "./reports/slides_example.pdf",
-        "./reports/report_simple_example.pdf",
-        "./reports/slides_simple_example.pdf",
+        "./reports/report.pdf",
     ]
 
     return {
         "actions": [
-            # My custom LaTeX templates
-            "latexmk -xelatex -halt-on-error -cd ./reports/report_example.tex",  # Compile
-            "latexmk -xelatex -halt-on-error -c -cd ./reports/report_example.tex",  # Clean
-            "latexmk -xelatex -halt-on-error -cd ./reports/slides_example.tex",  # Compile
-            "latexmk -xelatex -halt-on-error -c -cd ./reports/slides_example.tex",  # Clean
-            # Simple templates based on small adjustments to Overleaf templates
-            "latexmk -xelatex -halt-on-error -cd ./reports/report_simple_example.tex",  # Compile
-            "latexmk -xelatex -halt-on-error -c -cd ./reports/report_simple_example.tex",  # Clean
-            "latexmk -xelatex -halt-on-error -cd ./reports/slides_simple_example.tex",  # Compile
-            "latexmk -xelatex -halt-on-error -c -cd ./reports/slides_simple_example.tex",  # Clean
+            "latexmk -xelatex -halt-on-error -cd ./reports/report.tex",  # Compile
+            "latexmk -xelatex -halt-on-error -c -cd ./reports/report.tex",  # Clean
         ],
         "targets": targets,
         "file_dep": file_dep,

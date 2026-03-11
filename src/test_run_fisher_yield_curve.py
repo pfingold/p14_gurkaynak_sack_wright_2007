@@ -90,12 +90,10 @@ def test_main_writes_expected_fisher_artifacts(tmp_path, monkeypatch):
 
     expected = [
         "ut_fisher_forward_curve.parquet",
-        "ut_fisher_forward_curve_nodes.csv",
         "ut_fisher_bond_fits.parquet",
         "ut_fisher_fit_quality_by_date.csv",
         "ut_fisher_error_metrics.csv",
         "ut_fisher_oos_bond_fits.parquet",
-        "ut_fisher_oos_fit_quality_by_date.csv",
         "ut_fisher_oos_error_metrics.csv",
     ]
     for fname in expected:

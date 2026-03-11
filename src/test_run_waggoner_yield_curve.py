@@ -89,12 +89,7 @@ def test_main_writes_expected_waggoner_artifacts(tmp_path, monkeypatch):
 
     expected = [
         "ut_waggoner_forward_curve.parquet",
-        "ut_waggoner_forward_curve_nodes.csv",
-        "ut_waggoner_bond_fits.parquet",
-        "ut_waggoner_fit_quality_by_date.csv",
         "ut_waggoner_error_metrics.csv",
-        "ut_waggoner_oos_bond_fits.parquet",
-        "ut_waggoner_oos_fit_quality_by_date.csv",
         "ut_waggoner_oos_error_metrics.csv",
     ]
     for fname in expected:

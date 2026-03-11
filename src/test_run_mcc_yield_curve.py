@@ -81,12 +81,7 @@ def test_main_writes_expected_mcc_artifacts(tmp_path, monkeypatch):
 
     expected = [
         "ut_mcc_discount_curve.parquet",
-        "ut_mcc_discount_curve_nodes.csv",
-        "ut_mcc_bond_fits.parquet",
-        "ut_mcc_fit_quality_by_date.csv",
         "ut_mcc_error_metrics.csv",
-        "ut_mcc_oos_bond_fits.parquet",
-        "ut_mcc_oos_fit_quality_by_date.csv",
         "ut_mcc_oos_error_metrics.csv",
     ]
     for fname in expected:

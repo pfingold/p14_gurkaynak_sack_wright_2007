@@ -7,14 +7,12 @@ Inputs:
 
 Outputs (in-sample):
   - DATA_DIR/modern_fisher_forward_curve.parquet
-  - DATA_DIR/modern_fisher_forward_curve_nodes.csv
   - DATA_DIR/modern_fisher_bond_fits.parquet
   - DATA_DIR/modern_fisher_fit_quality_by_date.csv
   - DATA_DIR/modern_fisher_error_metrics.csv
 
 Outputs (out-of-sample):
   - DATA_DIR/modern_fisher_oos_bond_fits.parquet
-  - DATA_DIR/modern_fisher_oos_fit_quality_by_date.csv
   - DATA_DIR/modern_fisher_oos_error_metrics.csv
 """
 from pathlib import Path
