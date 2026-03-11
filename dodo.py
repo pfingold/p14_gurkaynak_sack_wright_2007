@@ -553,8 +553,8 @@ def task_build_correlation_metrics():
             DATA_DIR / "method_pairwise_correlation_detail.csv",
             DATA_DIR / "method_pairwise_correlation_spot_cc.csv",
             DATA_DIR / "method_pairwise_correlation_forward_instant_cc.csv",
-            BASE_DIR / "docs" / "charts" / "method_corr_heatmap_spot_cc.html",
-            BASE_DIR / "docs" / "charts" / "method_corr_heatmap_forward_instant_cc.html",
+            OUTPUT_DIR / "method_corr_heatmap_spot_cc.html",
+            OUTPUT_DIR / "method_corr_heatmap_forward_instant_cc.html",
         ],
         "file_dep": [
             "./src/settings.py",

@@ -6,7 +6,7 @@ Compute two sets of date-level correlation metrics:
 This module loads saved curve outputs from `_data`, converts each method to a
 common representation, computes correlations on a shared maturity grid, and
 writes summary artifacts to `_data`. 
-The correlation heatmaps are saved to `docs/charts`.
+The correlation heatmaps are saved to `_output`.
 """
 from pathlib import Path
 
@@ -19,8 +19,7 @@ import pull_yield_curve_data
 from settings import config
 
 DATA_DIR = Path(config("DATA_DIR"))
-ROOT_DIR = Path(__file__).resolve().parent.parent
-CHARTS_DIR = ROOT_DIR / "docs" / "charts"
+CHARTS_DIR = Path(config("OUTPUT_DIR"))
 CHARTS_DIR.mkdir(parents=True, exist_ok=True)
 
 METHOD_FILE_MAP = {
