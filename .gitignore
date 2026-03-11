@@ -254,6 +254,7 @@ vignettes/*.pdf
 .doit-db.sqlite
 
 src/z_scratch_project_template.ipynb
+anaconda_projects/
 
 *Thumbs.db
 
