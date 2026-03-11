@@ -85,12 +85,12 @@ def classify_lambda_regime(
     labels = []
     for i in range(n_regimes):
         if i == 0:
-            labels.append(f"≤ {thresholds[0]:.3f})")
+            labels.append(f"$\\leq$ {thresholds[0]:.3f}")
         elif i == n_regimes - 1:
-            labels.append(f"> {thresholds[-1]:.3f}")
+            labels.append(f"$>$ {thresholds[-1]:.3f}")
         else:
             labels.append(
-                f"{thresholds[i-1]:.3f} – {thresholds[i]:.3f}"
+                f"{thresholds[i-1]:.3f}--{thresholds[i]:.3f}"
             )
 
     out["regime"] = pd.cut(out[col], bins=bins, labels=labels)
@@ -388,11 +388,11 @@ def _build_decade_display(df: pd.DataFrame) -> pd.DataFrame:
         "count": "N",
         "mean":  r"$\bar{x}$",
         "std":   r"$\sigma$",
-        "p10":   "p10",
-        "p25":   "p25",
-        "p50":   "p50",
-        "p75":   "p75",
-        "p90":   "p90",
+        "p10":   "10",
+        "p25":   "25",
+        "p50":   "50",
+        "p75":   "75",
+        "p90":   "90",
     }
     display = df.rename(columns={k: v for k, v in col_rename.items() if k in df.columns})
     display.index.name = "Decade"
@@ -405,17 +405,17 @@ def _build_regime_display(df: pd.DataFrame) -> pd.DataFrame:
     display = df[mean_cols].copy()
     col_rename = {
         "n_dates":           "N",
-        "log10_lambda_mean": r"$\overline{\log_{10}\lambda}$",
-        "wmae_mean":         r"$\overline{\mathrm{WMAE}}$",
-        "hit_rate_mean":     r"$\overline{\mathrm{HR}}$",
-        "market_level_mean": r"$\overline{y_{\mathrm{lvl}}}$",
-        "market_slope_mean": r"$\overline{y_{\mathrm{slp}}}$",
-        "n_bonds_mean":      r"$\overline{N_{\mathrm{bonds}}}$",
+        "log10_lambda_mean": r"Mean $\log_{10}\lambda$",
+        "wmae_mean":         r"Mean WMAE",
+        "hit_rate_mean":     r"Mean Hit Rate",
+        "market_level_mean": r"Mean $y_{\mathrm{lvl}}$",
+        "market_slope_mean": r"Mean $y_{\mathrm{slp}}$",
+        "n_bonds_mean":      r"Mean $N_{\mathrm{bonds}}$",
     }
     display = display.rename(columns={k: v for k, v in col_rename.items() if k in display.columns})
     display.index.name = "Regime"
 
-    hr_col = r"$\overline{\mathrm{HR}}$"
+    hr_col = r"Mean Hit Rate"
     if hr_col in display.columns:
         display[hr_col] = display[hr_col].apply(
             lambda x: f"{100 * x:.1f}\\%" if pd.notna(x) else ""
@@ -451,8 +451,10 @@ def format_combined_decade_table_latex(
     disp_modern = _build_decade_display(modern_df)
 
     ncols = 1 + len(disp_orig.columns)  # index col + data cols
+    n_pct_cols   = 5   # p10, p25, p50, p75, p90
+    n_other_cols = len(disp_orig.columns) - n_pct_cols  # N, mean, std
 
-    col_fmt = "l" + "r" * len(disp_orig.columns)
+    col_fmt = "l" + "r" * n_other_cols + "|" + "r" * n_pct_cols
 
     tab_orig   = disp_orig.to_latex(index=True, escape=False, na_rep="",
                                     float_format="{:.3f}".format, column_format=col_fmt)
@@ -462,13 +464,28 @@ def format_combined_decade_table_latex(
     begin_line, col_header, body_orig,   footer = _split_tabular(tab_orig)
     _,          _,          body_modern, _      = _split_tabular(tab_modern)
 
+    # Insert multicolumn header spanning the percentile columns
+    n_before_pct = 1 + n_other_cols  # index col + N + mean + std
+    pct_start    = n_before_pct + 1  # 1-based column index of first pct col
+    pct_end      = ncols
+    multispan = (
+        f"\\multicolumn{{{n_before_pct}}}{{l}}{{}} & "
+        f"\\multicolumn{{{n_pct_cols}}}{{c}}{{$n$-th Percentile}} \\\\"
+    )
+    cmidrule = f"\\cmidrule(lr){{{pct_start}-{pct_end}}}"
+    ch_lines = col_header.splitlines()
+    toprule_i = next(i for i, l in enumerate(ch_lines) if l.strip() == r"\toprule")
+    ch_lines.insert(toprule_i + 1, multispan)
+    ch_lines.insert(toprule_i + 2, cmidrule)
+    col_header = "\n".join(ch_lines)
+
     tabular = "\n".join([
         begin_line,
         col_header,
-        _panel_header(ncols, "Panel A: Original Sample (1970\u20131995)"),
+        _panel_header(ncols, "Panel A: Original Sample (1970--1995)"),
         body_orig,
         "\\midrule",
-        _panel_header(ncols, "Panel B: Modern Sample (2006\u20132026)"),
+        _panel_header(ncols, "Panel B: Modern Sample (2006--2026)"),
         body_modern,
         footer,
     ])
@@ -515,10 +532,10 @@ def format_combined_regime_table_latex(
     tabular = "\n".join([
         begin_line,
         col_header,
-        _panel_header(ncols, "Panel A: Original Sample (1970\u20131995)"),
+        _panel_header(ncols, "Panel A: Original Sample (1970--1995)"),
         body_orig,
         "\\midrule",
-        _panel_header(ncols, "Panel B: Modern Sample (2006\u20132026)"),
+        _panel_header(ncols, "Panel B: Modern Sample (2006--2026)"),
         body_modern,
         footer,
     ])

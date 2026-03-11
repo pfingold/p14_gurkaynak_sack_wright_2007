@@ -666,7 +666,7 @@ def task_build_fisher_figure7_plot():
             DATA_DIR / "fisher_oos_bond_fits.parquet",
         ],
         "task_dep": [
-            "build_fisher_yield_curve",
+            "build_fisher_figure7",
         ],
         "clean": True,
     }

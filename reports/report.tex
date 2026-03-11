@@ -56,27 +56,30 @@ One challenge we encountered during the project related to our Git workflow and 
 
 \subsection{Learning Spline Methods \& Matching Waggonner's Results}
 
-ANNIE TO ADD!
+Implementing spline-based yield curve methods from scratch proved considerably more challenging than the terse notation in the original papers suggested. Building correct cubic B-spline bases—with properly clamped knot vectors, correct boundary behavior, and numerically stable second-derivative penalty matrices—required working carefully through the spline literature alongside the papers themselves, since the published descriptions leave many implementation details implicit. The Fisher generalized cross-variance (GCV) pipeline (where the lambda parameter is chosen) introduced additional complexity: a naive grid search over lambda values was both slow and unreliable, because the GCV score surface is often flat or multimodal in log-lambda space and the selected lambda can jump discontinuously across dates. Achieving a pipeline that selected lambda efficiently and stably required a two-stage approach—an initial coarse log-spaced grid search to identify a candidate neighborhood, followed by a bounded scalar optimization using Brent's method in log-lambda space—and careful numerical handling of the effective parameters variable that enters the GCV denominator.
+
 
 \section{Replication Tables}
 
 \subsection{Methodology}
 
-ANNIE TO ADD!
+McCulloch (1975) fits a piecewise cubic spline to the discount function, estimating spline coefficients by ordinary least squares after projecting each bond's cashflows onto the basis. The number and placement of knot points are chosen adaptively from the cross-section of available maturities on each date, with interior knots scaled to the square root of the bond count and placed at equal-count quantiles of the maturity distribution. Fisher, Nychka, and Zervos (1995) take a different approach: they model the instantaneous forward rate curve directly as a cubic B-spline and add a roughness penalty—proportional to the integrated squared curvature of the forward curve—to the pricing objective. The tradeoff between fit and smoothness is governed by a regularization parameter $\lambda$, which our implementation selects automatically for each date by minimizing the Generalized Cross-Validation (GCV) criterion of Fisher et al. using a two-stage grid-plus-refinement search in log-$\lambda$ space.
+
+Waggoner (1997) extends Fisher's smoothed-spline framework by replacing the single scalar $\lambda$ with a Variable Roughness Penalty (VRP): a piecewise-constant function of maturity that applies light smoothing at the short end of the curve (under one year), moderate smoothing over intermediate maturities (one to ten years), and heavy smoothing at long maturities (beyond ten years). This maturity-varying penalty is baked directly into the roughness penalty matrix via numerical quadrature, and the resulting penalized least-squares system is solved once per date without any lambda search. Both the Fisher and Waggoner implementations use the same B-spline node-selection rule and warm-start from the previous date's estimated coefficients to promote temporal stability.
 
 \subsection{Direct Replication Results}
 
 \begin{table}[htbp]
 \centering
 \input{../_output/table_1a_fit.tex}
-\caption{CAPTION}
+\caption{In-Sample results on replicated fitted spline curves vs. Waggonner's paper}
 \label{tab:1a}
 \end{table}
 
 \begin{table}[htbp]
 \centering
 \input{../_output/table_1b_fit.tex}
-\caption{CAPTION}
+\caption{Out-of-sample results on replicated fitted spline curves vs. Waggonner's paper}
 \label{tab:1b}
 \end{table}
 
@@ -87,20 +90,27 @@ ANNIE TO ADD!
 \begin{table}[htbp]
 \centering
 \input{../_output/table_2a_fit.tex}
-\caption{CAPTION}
+\caption{In-Sample results on replicated fitted spline curves using data from the past 20 years}
 \label{tab:2a}
 \end{table}
 
 \begin{table}[htbp]
 \centering
 \input{../_output/table_2b_fit.tex}
-\caption{CAPTION}
+\caption{Out-of-sample results on replicated fitted spline curves using data from the past 20 years}
 \label{tab:2b}
 \end{table}
 
 \textbf{Note on Modern Sample Replication:} Because there are many more bond issues for each day in the 2000's compared to the late 1900s, the number of nodes in the Fisher and Waggoner spline methods was decreased so that the optimization could occur in a reasonable amount of time. This is also why only the last twenty years are used rather than the full 1970-2026 time period.
 
 \subsection{Waggonner's Figure 7: xxx}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../_output/methods_vs_gsw_low_corr_discount.png}
+\caption{CAPTION}
+\label{fig:waggonner}
+\end{figure}
 
 \section{Interesting Findings \& Additional Data Analysis}
 
@@ -148,13 +158,36 @@ In the second metric, we examine the similarity of the spline-based replication 
 
 \textbf{Heatmap Observations:} The spline-based methods produce highly correlated estimates for both spot and instantaneous forward curves. While spot curves are extremely similar across methods (correlations $\approx 0.90-0.95$), forward curves exhibit slightly lower, but still strong, correlations, reflecting greater sensitivity of forward rates to small differences in curve fitting.
 
+\textbf{Interesting Finding: High Correlation Across Spline-Based Methods} Despite meaningful differences in their construction, the various spline-based yield curve methods produced highly correlated results. The McCulloch regression spline and the Fisher–VRP smoothing spline approach differ in how they control the smoothness of the fitted curve. In particular, the Fisher method includes a roughness penalty parameter that regulates curvature, while the McCulloch spline does not impose an explicit smoothing penalty. Even with these structural differences, the resulting fitted yield curves were extremely similar across most maturities. This suggests that the underlying Treasury price data strongly anchors the shape of the curve regardless of the specific spline methodology used.
 
 \subsection{Lambda Selection in Fisher Curves}
 
-here we will insert the figures/tables with captions
+Having constructed the GCV pipeline, it became natural to ask whether the lambda values it selected were behaving sensibly: whether they were stable across time, whether they varied systematically with market conditions, and whether higher or lower smoothing was associated with better or worse model fit. Lambda is not merely a nuisance parameter: it encodes how much data complexity the GCV criterion judges the bond market to exhibit on a given date. As Waggonner highlights in his paper, the choice of lambda represents a trade-off between flexibility on the short end and dampening oscillations on the long end—can we identify any patterns in when this trade-off goes one way or another?
 
-add the discussion of the tables
+The two lambda tables show a clear pattern in how the model behaves. The decade summary indicates that the 1980s require the most smoothing, with much higher lambda values than other periods. In more recent years (2006 onward), lambda values are generally lower and less variable, suggesting the data require less smoothing overall.
 
-and the insteresting findings about the node constructions (since they affect the lambda differences between modern and original samples)
+The regime table shows a simple relationship between lambda and model fit. When lambda is low, pricing errors are smaller and a larger share of model prices fall within the bid–ask spread. When lambda is high, errors increase and hit rates decline. This indicates that the model fits the data better on low-lambda dates and struggles more on high-lambda dates.
+
+\textbf{Interesting Finding: Treasury Issuance Patterns and the Long End of the Curve} One interesting observation from the data was that the more recent portion of the sample contains a greater number of long-maturity Treasury securities. This increase in long-term issuance improves the amount of information available for estimating the far end of the yield curve. As a result, curve-fitting procedures tend to produce more stable estimates for long maturities in later years of the sample. Earlier periods contain fewer long-dated bonds, which can make the long end of the curve more difficult to estimate reliably. This difference highlights how, especially when using interpolation methods for curve estimation, the composition of the Treasury market itself can influence yield curve estimation.
+
+
+\begin{table}[htbp]
+\centering
+\resizebox{0.75\textwidth}{!}{
+\input{../_output/lambda_decade_table.tex}
+}
+\caption{Summary statistics of the GCV-selected smoothing parameter ($\log_{10}\lambda$) by decade for the 1970--1995 and 2006--present samples. The 1980s stand out as requiring noticeably more smoothing, while the modern sample shows lower and more stable values.}
+\label{tab:lambda_decade}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\resizebox{0.75\textwidth}{!}{
+\input{../_output/lambda_regime_table.tex}
+}
+\caption{Average fit metrics—weighted mean absolute pricing error (WMAE) and the share of model prices within the observed bid--ask spread (hit rate)—across five equal-frequency regimes of the GCV-selected $\lambda$. Fit quality generally worsens as the level of smoothing increases.}
+\label{tab:lambda_regime}
+\end{table}
+
 
 \end{document}
