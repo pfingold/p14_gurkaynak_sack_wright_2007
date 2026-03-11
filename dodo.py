@@ -11,7 +11,9 @@ import sys
 
 sys.path.insert(1, "./src/")
 
+import json
 import shutil
+import uuid
 from os import environ, getcwd, path
 from pathlib import Path
 
@@ -84,6 +86,88 @@ def jupyter_clear_output(notebook_path):
     """Clear the output of a notebook"""
     return f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --ClearMetadataPreprocessor.enabled=True --inplace {notebook_path}"
 # fmt: on
+
+
+def py_percent_to_notebook(pyfile_path, notebook_path):
+    """Convert a percent-format Jupytext .py file into a .ipynb file."""
+    pyfile_path = Path(pyfile_path)
+    notebook_path = Path(notebook_path)
+
+    lines = pyfile_path.read_text(encoding="utf-8").splitlines()
+
+    cells = []
+    current_type = None
+    current_lines = []
+
+    def flush_cell():
+        nonlocal current_type, current_lines
+        if current_type is None:
+            return
+
+        if current_type == "markdown":
+            md_lines = []
+            for line in current_lines:
+                if line.startswith("# "):
+                    md_lines.append(line[2:])
+                elif line.startswith("#"):
+                    md_lines.append(line[1:])
+                else:
+                    md_lines.append(line)
+            source = "\n".join(md_lines).rstrip("\n")
+            cells.append(
+                {
+                    "cell_type": "markdown",
+                    "id": uuid.uuid4().hex[:8],
+                    "metadata": {},
+                    "source": source,
+                }
+            )
+        else:
+            source = "\n".join(current_lines).rstrip("\n")
+            cells.append(
+                {
+                    "cell_type": "code",
+                    "id": uuid.uuid4().hex[:8],
+                    "execution_count": None,
+                    "metadata": {},
+                    "outputs": [],
+                    "source": source,
+                }
+            )
+
+        current_type = None
+        current_lines = []
+
+    for line in lines:
+        if line.startswith("# %%"):
+            flush_cell()
+            current_type = "markdown" if "[markdown]" in line else "code"
+            current_lines = []
+            continue
+
+        if current_type is not None:
+            current_lines.append(line)
+
+    flush_cell()
+
+    notebook = {
+        "cells": cells,
+        "metadata": {
+            "kernelspec": {
+                "display_name": "Python 3",
+                "language": "python",
+                "name": "python3",
+            },
+            "language_info": {
+                "name": "python",
+            },
+        },
+        "nbformat": 4,
+        "nbformat_minor": 5,
+    }
+
+    notebook_path.parent.mkdir(parents=True, exist_ok=True)
+    notebook_path.write_text(json.dumps(notebook, indent=1), encoding="utf-8")
 
 
 def mv(from_path, to_path):
@@ -545,10 +629,14 @@ def DISABLE_task_summary_stats_disabled():
         "clean": True,
     }
 
+###############################################################
+## Task below is for Notebook Execution and Conversion to HTML
+###############################################################
 
 notebook_tasks = {
-    "01_example_notebook_interactive_ipynb": {
-        "path": "./src/01_example_notebook_interactive_ipynb.py",
+    #CRSP Treasury Data Tour Notebook
+    "CRSP_treasury_data_tour_ipynb": {
+        "path": "./src/CRSP_treasury_data_tour_ipynb.py",
         "file_dep": [],
         "targets": [],
     },
@@ -567,7 +655,7 @@ def task_run_notebooks():
             "name": notebook,
             "actions": [
                 """python -c "import sys; from datetime import datetime; print(f'Start """ + notebook + """: {datetime.now()}', file=sys.stderr)" """,
-                f"jupytext --to notebook --output {notebook_path} {pyfile_path}",
+                (py_percent_to_notebook, [pyfile_path, notebook_path]),
                 jupyter_execute_notebook(notebook_path),
                 jupyter_to_html(notebook_path),
                 mv(notebook_path, OUTPUT_DIR),
