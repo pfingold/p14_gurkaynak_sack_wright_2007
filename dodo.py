@@ -468,9 +468,11 @@ def task_build_waggoner_yield_curve_modern():
         "clean": True,
     }
 
-### Build Replication Fit Tables (Table 1a and Table 1b) ###
+### Build Replication Fit Tables (Table 1a and Table 1b, plus 2a/2b with modern data) ###
 def task_build_replication_tables():
-    """Build replication fit tables (Table 1a and Table 1b) from saved method outputs"""
+    """Build replication fit tables (Table 1a and Table 1b) 
+    and replication fit tables with modern data (Table 2a and 2b) 
+    from saved method outputs"""
     return {
         "actions": [
             "ipython ./src/settings.py",
@@ -479,6 +481,8 @@ def task_build_replication_tables():
         "targets": [
             OUTPUT_DIR / "table_1a_fit.tex",
             OUTPUT_DIR / "table_1b_fit.tex",
+            OUTPUT_DIR / "table_2a_fit.tex",
+            OUTPUT_DIR / "table_2b_fit.tex",
         ],
         "file_dep": [
             "./src/settings.py",
@@ -491,11 +495,45 @@ def task_build_replication_tables():
             DATA_DIR / "fisher_oos_error_metrics.csv",
             DATA_DIR / "waggoner_error_metrics.csv",
             DATA_DIR / "waggoner_oos_error_metrics.csv",
+
+            DATA_DIR / "modern_mcc_error_metrics.csv",
+            DATA_DIR / "modern_mcc_oos_error_metrics.csv",
+            DATA_DIR / "modern_fisher_error_metrics.csv",
+            DATA_DIR / "modern_fisher_oos_error_metrics.csv",
+            DATA_DIR / "modern_waggoner_error_metrics.csv",
+            DATA_DIR / "modern_waggoner_oos_error_metrics.csv",
         ],
         "task_dep": [
             "build_mcc_yield_curve",
             "build_fisher_yield_curve",
             "build_waggoner_yield_curve",
+        ],
+        "clean": True,
+    }
+
+
+def task_build_fisher_lambda_tables():
+    """Build Fisher lambda summary tables (decade and regime) for original and modern samples"""
+    return {
+        "actions": [
+            "ipython ./src/settings.py",
+            "ipython ./src/fisher_lambda_exploration.py",
+        ],
+        "targets": [
+            OUTPUT_DIR / "lambda_decade_table_original.tex",
+            OUTPUT_DIR / "lambda_regime_table_original.tex",
+            OUTPUT_DIR / "lambda_decade_table_modern.tex",
+            OUTPUT_DIR / "lambda_regime_table_modern.tex",
+        ],
+        "file_dep": [
+            "./src/settings.py",
+            "./src/fisher_lambda_exploration.py",
+            DATA_DIR / "fisher_fit_quality_by_date.csv",
+            DATA_DIR / "modern_fisher_fit_quality_by_date.csv",
+        ],
+        "task_dep": [
+            "build_fisher_yield_curve",
+            "build_fisher_yield_curve_modern",
         ],
         "clean": True,
     }

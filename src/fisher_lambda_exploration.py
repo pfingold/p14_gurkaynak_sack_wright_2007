@@ -328,3 +328,189 @@ def plot_compare_distributions(
         **_PLOTLY_LAYOUT_DEFAULTS,
     )
     return fig
+
+
+# ---------------------------------------------------------------------------
+# LaTeX table export
+# ---------------------------------------------------------------------------
+
+def _wrap_latex_table(tabular: str, caption: str = "", label: str = "") -> str:
+    """Wrap a pandas-generated tabular string with standard LaTeX boilerplate."""
+    caption_line = f"\\caption{{{caption}}}\n" if caption else ""
+    label_line = f"\\label{{{label}}}\n" if label else ""
+    return (
+        "\\begingroup\n"
+        "\\setlength{\\tabcolsep}{4pt}\n"
+        "\\renewcommand{\\arraystretch}{1.15}\n"
+        "\\scriptsize\n"
+        "\\resizebox{\\textwidth}{!}{%\n"
+        f"{tabular.rstrip()}\n"
+        "}\n"
+        "\\endgroup\n"
+    )
+
+
+def format_decade_table_latex(
+    df: pd.DataFrame,
+    caption: str = r"$\log_{10}(\lambda)$ by Decade",
+    label: str = "tab:lambda_decade",
+) -> str:
+    """Format the output of ``lambda_summary_by_decade()`` as a LaTeX string.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Output of :func:`lambda_summary_by_decade`.
+    caption, label : str
+        LaTeX caption and label strings.
+
+    Returns
+    -------
+    str
+        Complete LaTeX fragment (``\\begingroup`` … ``\\endgroup``).
+    """
+    display = df.copy()
+    col_rename = {
+        "count": "N",
+        "mean":  r"$\bar{x}$",
+        "std":   r"$\sigma$",
+        "p10":   "p10",
+        "p25":   "p25",
+        "p50":   "p50",
+        "p75":   "p75",
+        "p90":   "p90",
+    }
+    display = display.rename(columns={k: v for k, v in col_rename.items() if k in display.columns})
+    display.index.name = "Decade"
+    display.columns = [f"\\textbf{{{c}}}" for c in display.columns]
+
+    tabular = display.to_latex(
+        index=True,
+        escape=False,
+        na_rep="",
+        float_format="{:.3f}".format,
+        column_format="l" + "r" * len(display.columns),
+    )
+    return _wrap_latex_table(tabular, caption=caption, label=label)
+
+
+def format_regime_table_latex(
+    df: pd.DataFrame,
+    caption: str = r"$\log_{10}(\lambda)$ and Fit Quality by Regime",
+    label: str = "tab:lambda_regime",
+) -> str:
+    """Format the output of ``lambda_summary_by_regime()`` as a LaTeX string.
+
+    Only mean columns are included (std dropped for compactness). Hit rate is
+    displayed as a percentage.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Output of :func:`lambda_summary_by_regime`.
+    caption, label : str
+
+    Returns
+    -------
+    str
+        Complete LaTeX fragment.
+    """
+    mean_cols = ["n_dates"] + [c for c in df.columns if c.endswith("_mean")]
+    display = df[mean_cols].copy()
+
+    col_rename = {
+        "n_dates":           "N",
+        "log10_lambda_mean": r"$\overline{\log_{10}\lambda}$",
+        "wmae_mean":         r"$\overline{\mathrm{WMAE}}$",
+        "hit_rate_mean":     r"$\overline{\mathrm{HR}}$",
+        "market_level_mean": r"$\overline{y_{\mathrm{lvl}}}$",
+        "market_slope_mean": r"$\overline{y_{\mathrm{slp}}}$",
+        "n_bonds_mean":      r"$\overline{N_{\mathrm{bonds}}}$",
+    }
+    display = display.rename(columns={k: v for k, v in col_rename.items() if k in display.columns})
+    display.index.name = "Regime"
+
+    hr_col = r"$\overline{\mathrm{HR}}$"
+    if hr_col in display.columns:
+        display[hr_col] = display[hr_col].apply(
+            lambda x: f"{100 * x:.1f}\\%" if pd.notna(x) else ""
+        )
+
+    display.columns = [f"\\textbf{{{c}}}" for c in display.columns]
+
+    tabular = display.to_latex(
+        index=True,
+        escape=False,
+        na_rep="",
+        float_format="{:.3f}".format,
+        column_format="l" + "r" * len(display.columns),
+    )
+    return _wrap_latex_table(tabular, caption=caption, label=label)
+
+
+def export_lambda_table(latex_str: str, out_path: Path) -> None:
+    """Write a LaTeX string to disk, creating parent directories as needed.
+
+    Parameters
+    ----------
+    latex_str : str
+        LaTeX content to write.
+    out_path : Path
+        Destination file path.
+    """
+    out_path = Path(out_path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(latex_str, encoding="utf-8")
+
+
+# ---------------------------------------------------------------------------
+# Main entry point
+# ---------------------------------------------------------------------------
+
+def main() -> None:
+    """Build and export Fisher lambda summary tables for both samples.
+
+    Reads DATA_DIR and OUTPUT_DIR from the project settings. Writes four
+    ``.tex`` files to OUTPUT_DIR::
+
+        lambda_decade_table_original.tex
+        lambda_regime_table_original.tex
+        lambda_decade_table_modern.tex
+        lambda_regime_table_modern.tex
+    """
+    from settings import config
+
+    data_dir = Path(config("DATA_DIR"))
+    out_dir  = Path(config("OUTPUT_DIR"))
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    samples = [
+        ("original", "1970\u20131995"),
+        ("modern",   "2006\u20132026"),
+    ]
+    for sample, date_range in samples:
+        df = load_lambda_data(data_dir, sample=sample)
+        df = add_log_lambda(df)
+        df = classify_lambda_regime(df)
+
+        decade_df = lambda_summary_by_decade(df)
+        decade_latex = format_decade_table_latex(
+            decade_df,
+            caption=rf"$\log_{{10}}(\lambda)$ by Decade \textemdash\ {date_range} Sample",
+            label=f"tab:lambda_decade_{sample}",
+        )
+        export_lambda_table(decade_latex, out_dir / f"lambda_decade_table_{sample}.tex")
+
+        regime_df = lambda_summary_by_regime(df)
+        regime_latex = format_regime_table_latex(
+            regime_df,
+            caption=rf"$\log_{{10}}(\lambda)$ and Fit Quality by Regime \textemdash\ {date_range} Sample",
+            label=f"tab:lambda_regime_{sample}",
+        )
+        export_lambda_table(regime_latex, out_dir / f"lambda_regime_table_{sample}.tex")
+
+    print("Fisher lambda tables written to", out_dir)
+
+
+if __name__ == "__main__":
+    main()
