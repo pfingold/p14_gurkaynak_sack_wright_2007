@@ -7,14 +7,9 @@ Inputs:
 
 Outputs (in-sample):
     - DATA_DIR/modern_mcc_discount_curve.parquet
-    - DATA_DIR/modern_mcc_discount_curve_nodes.csv
-    - DATA_DIR/modern_mcc_bond_fits.parquet
-    - DATA_DIR/modern_mcc_fit_quality_by_date.csv
     - DATA_DIR/modern_mcc_error_metrics.csv
 
 Outputs (out-of-sample):
-    - DATA_DIR/modern_mcc_oos_bond_fits.parquet
-    - DATA_DIR/modern_mcc_oos_fit_quality_by_date.csv
     - DATA_DIR/modern_mcc_oos_error_metrics.csv
 """
 from pathlib import Path

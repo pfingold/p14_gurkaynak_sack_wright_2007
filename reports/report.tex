@@ -1,0 +1,160 @@
+\documentclass{article}
+
+% Language setting
+% Replace `english' with e.g. `spanish' to change the document language
+\usepackage[english]{babel}
+
+% Set page size and margins
+% Replace `letterpaper' with`a4paper' for UK/EU standard size
+\usepackage[letterpaper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+% Useful packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage{subcaption}
+\usepackage{booktabs}
+\usepackage{multirow}
+
+\title{Your Paper}
+\author{You}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\textbf{High-Level Summary of Our Project:} This project studies how the U.S. Treasury yield curve is constructed and how different modeling choices affect its shape and interpretation. We were given working code that reproduces the Gurkaynak–Sack–Wright (GSW) zero-coupon Treasury yield curve, which is widely used in academic and policy work. The GSW curve is based on the Nelson–Siegel–Svensson parametric framework. Our main task in this project is to extend the provided code by estimating and comparing alternative yield-curve methodologies that use interpolation rather than parameterization, as surveyed in Waggonner (1997), including spline-based and arbitrage-free approaches used by central banks. In particular, we seek to replicate the approaches outlined by Waggonner: McCulloch (regression splines), Fisher \& Waggonner's own VRP (smoothed spline with roughness penalty). Following a successful replication of these approaches, we compare models in terms of in-sample \& out-of-sample  fits, smoothness, and behavior across maturities.
+\end{abstract}
+
+\section{Data Sources}
+
+\textbf{CRSP Treasury Data:}
+
+The CRSP US Treasury Database is a comprehensive source of historical Treasury security data maintained by the Center for Research in Security Prices at the University of Chicago's Booth School of Business. This dataset provides comprehensive historical information on U.S. Treasury securities, including security characteristics, market prices, yields, accrued interest, and duration measures. The database begins in 1961 and is updated regularly, making it one of the most widely used sources for empirical research on Treasury markets. Using the WRDS platform, we accessed the relevant CRSP Treasury files and constructed a dataset suitable for yield curve estimation. These data form the foundation for all curve-fitting methods implemented in this project.
+
+\section{Successes \& Challenges}
+
+\subsection{Successes}
+
+\subsubsection{Working with WRDS and CRSP Treasury Data}
+
+One of the major successes of this project was gaining experience working with the WRDS platform and the CRSP U.S. Treasury Database. Accessing and processing this dataset required understanding the structure of several underlying files, including security characteristics and daily pricing information. We were able to successfully retrieve, clean, and merge these datasets into a format suitable for yield curve estimation. In particular, constructing a consistent dataset required filtering securities, handling missing observations, and calculating time-to-maturity measures. This process provided valuable hands-on experience working with large institutional financial datasets that are widely used in academic research.
+
+\subsubsection{Building on Foundations from Fixed Income (FINM 37400)}
+
+This project built directly on concepts introduced in the Fixed Income course (FINM 37400), where we studied yield curve construction and parametric curve-fitting methods such as the Nelson–Siegel model. Having previously learned the intuition behind yield curve dynamics made it easier to understand the structure of the Gurkaynak–Sack–Wright (GSW) methodology used in the baseline code. The replication project provided an opportunity to translate those theoretical ideas into practical implementation. In particular, it allowed us to see how yield curve models are estimated using real Treasury market data rather than stylized examples. Extending the analysis to additional approaches surveyed in Waggonner (1997) helped deepen our understanding of the trade-offs between parametric and spline-based methods.
+
+\subsubsection{Applying Skills from FINM 32900 (Automation with pydoit)}
+
+Another key success was applying the workflow and automation tools introduced in FINM 32900. The project was structured around a reproducible pipeline using pydoit, which allowed us to organize data retrieval, cleaning, estimation, and output generation into a series of automated tasks. This structure made it much easier to rerun the entire analysis when code or data changed. Automation also ensured that all tables and figures were generated directly from the latest outputs of the replication code. As a result, the project followed a clean and reproducible workflow that mirrors best practices in empirical financial research.
+
+\subsection{Challenges}
+
+\subsubsection{Git Workflow}
+
+One challenge we encountered during the project related to our Git workflow and version control practices. For most of the early stages of the project, we collaborated directly on the main branch while building the core infrastructure of the repository. Although this approach worked in practice because we communicated frequently and coordinated changes, it is not the recommended workflow for collaborative development. Ideally, each contributor should work on separate feature branches and merge changes into the main branch through pull requests. We eventually adopted this structure later in the project by creating individual branches, but implementing it earlier would likely have prevented some small conflicts and improved the clarity of our development history. This experience reinforced the importance of establishing a structured Git workflow from the start of a collaborative coding project.
+
+\subsection{Learning Spline Methods \& Matching Waggonner's Results}
+
+ANNIE TO ADD!
+
+\section{Replication Tables}
+
+\subsection{Methodology}
+
+ANNIE TO ADD!
+
+\subsection{Direct Replication Results}
+
+\begin{table}[htbp]
+\centering
+\input{../_output/table_1a_fit.tex}
+\caption{CAPTION}
+\label{tab:1a}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\input{../_output/table_1b_fit.tex}
+\caption{CAPTION}
+\label{tab:1b}
+\end{table}
+
+\textbf{Note on Replication Tables:} To evaluate the success of our replication, we compared our estimated results to those reported in the original paper using two key performance metrics: Hit Rate and Weighted Mean Absolute Error (WMAE). Because minor implementation differences, numerical optimization procedures, and sample construction can lead to small deviations from published results, we adopted a tolerance-based approach to assessing replication accuracy. Specifically, we required that at least 90\% of the results across both the in-sample (IS) and out-of-sample (OOS) periods fall within a predefined threshold of the original paper’s values. The thresholds were set at 8% for Hit Rate and 10% for WMAE relative to the published results. Using this criterion, our replication results are broadly consistent with those reported in the paper, indicating that our implementation successfully reproduces the key empirical findings of the original study.
+
+\subsection{Replication Results Using Modern Data Sample}
+
+\begin{table}[htbp]
+\centering
+\input{../_output/table_2a_fit.tex}
+\caption{CAPTION}
+\label{tab:2a}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\input{../_output/table_2b_fit.tex}
+\caption{CAPTION}
+\label{tab:2b}
+\end{table}
+
+\textbf{Note on Modern Sample Replication:} Because there are many more bond issues for each day in the 2000's compared to the late 1900s, the number of nodes in the Fisher and Waggoner spline methods was decreased so that the optimization could occur in a reasonable amount of time. This is also why only the last twenty years are used rather than the full 1970-2026 time period.
+
+\subsection{Waggonner's Figure 7: xxx}
+
+\section{Interesting Findings \& Additional Data Analysis}
+
+To complement the replication tables, we produced a series of charts to provide a clearer visual comparison of the Gurkaynak–Sack–Wright (GSW) curve and the three replication methods based on Waggonner (1997). These charts allow us to evaluate how the different methodologies behave across the term structure and highlight where the models produce similar or diverging estimates. 
+
+\subsection{Comparison Between Curves}
+
+\subsubsection{Metric \#1: GSW vs Spline Methods}
+
+This sub-series of charts overlays all replication methods for selected dates representing the highest, lowest, and median levels of correlation between the Waggonner methods and the GSW curve. In this context, correlation is defined as the aggregate correlation between the fitted curves produced by the Waggonner methods and the GSW benchmark across maturities. These visual comparisons help illustrate when the alternative spline approaches closely track the benchmark curve and when the methods diverge more noticeably. Together, these charts provide an intuitive way to assess the similarities and differences across the yield curve estimation approaches beyond the numerical performance metrics presented in the replication tables.
+
+Two such charts are shown and analyzed below:
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../_output/methods_vs_gsw_low_corr_discount.png}
+\caption{CAPTION}
+\label{fig:discount_low_corr}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../_output/methods_vs_gsw_high_corr_fwd_instant_cc.png}
+\caption{CAPTION}
+\label{fig:forward_high_corr}
+\end{figure}
+
+\subsubsection{Metric \#2: Spline Methods against each other}
+
+In the second metric, we examine the similarity of the spline-based replication methods relative to each other. Here, we compute pairwise method-vs-method correlations after interpolating each curve onto the same maturity grid. The results are summarized using two correlation heatmaps, one for the spot rate curves and one for the forward rate curves. These visualizations highlight the degree to which the spline approaches produce similar yield curve estimates despite their methodological differences.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.6\textwidth]{../_output/method_corr_heatmap_forward_instant_cc.png}
+\caption{Pairwise correlations of instantaneous forward rate curves across spline methods on a common maturity grid.}
+\label{fig:forward_corr}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.6\textwidth]{../_output/method_corr_heatmap_spot_cc.png}
+\caption{Pairwise correlations of continuously compounded spot rate curves across spline methods on a common maturity grid}
+\label{fig:spot_corr}
+\end{figure}
+
+\textbf{Heatmap Observations:} The spline-based methods produce highly correlated estimates for both spot and instantaneous forward curves. While spot curves are extremely similar across methods (correlations $\approx 0.90-0.95$), forward curves exhibit slightly lower, but still strong, correlations, reflecting greater sensitivity of forward rates to small differences in curve fitting.
+
+
+\subsection{Lambda Selection in Fisher Curves}
+
+here we will insert the figures/tables with captions
+
+add the discussion of the tables
+
+and the insteresting findings about the node constructions (since they affect the lambda differences between modern and original samples)
+
+\end{document}

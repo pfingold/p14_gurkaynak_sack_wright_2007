@@ -7,14 +7,9 @@ Inputs:
 
 Outputs (in-sample):
     - DATA_DIR/mcc_discount_curve.parquet
-    - DATA_DIR/mcc_discount_curve_nodes.csv
-    - DATA_DIR/mcc_bond_fits.parquet
-    - DATA_DIR/mcc_fit_quality_by_date.csv
     - DATA_DIR/mcc_error_metrics.csv
 
 Outputs (out-of-sample):
-    - DATA_DIR/mcc_oos_bond_fits.parquet
-    - DATA_DIR/mcc_oos_fit_quality_by_date.csv
     - DATA_DIR/mcc_oos_error_metrics.csv
 """
 
@@ -81,20 +76,15 @@ def main(start_date=None, end_date=None, output_prefix=""):
 
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     curves_df.to_parquet(DATA_DIR / f"{p}mcc_discount_curve.parquet", index=False)
-    nodes_df.to_csv(DATA_DIR / f"{p}mcc_discount_curve_nodes.csv", index=False)
-    bonds_df.to_parquet(DATA_DIR / f"{p}mcc_bond_fits.parquet", index=False)
-    fit_quality_df.to_csv(DATA_DIR / f"{p}mcc_fit_quality_by_date.csv", index=False)
     err_df.to_csv(DATA_DIR / f"{p}mcc_error_metrics.csv", index=False)
 
     # --- Out-of-sample ---
     print("Running McCulloch out-of-sample...")
     oos_results = mcc.run_mcculloch(out_of_sample, pre_trained_results=in_sample_results)
 
-    _, _, oos_bonds_df, oos_fit_quality_df = _collect_results(oos_results)
+    _, _, _, _ = _collect_results(oos_results)
     oos_err_df = cfu.get_full_error_metrics(oos_results).reset_index().rename(columns={"index": "bucket"})
 
-    oos_bonds_df.to_parquet(DATA_DIR / f"{p}mcc_oos_bond_fits.parquet", index=False)
-    oos_fit_quality_df.to_csv(DATA_DIR / f"{p}mcc_oos_fit_quality_by_date.csv", index=False)
     oos_err_df.to_csv(DATA_DIR / f"{p}mcc_oos_error_metrics.csv", index=False)
 
     print("Wrote McCulloch outputs to:", DATA_DIR.resolve())

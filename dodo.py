@@ -311,12 +311,7 @@ def task_build_mcc_yield_curve():
         ],
         "targets":[
             DATA_DIR / "mcc_discount_curve.parquet",
-            DATA_DIR / "mcc_discount_curve_nodes.csv",
-            DATA_DIR / "mcc_bond_fits.parquet",
-            DATA_DIR / "mcc_fit_quality_by_date.csv",
             DATA_DIR / "mcc_error_metrics.csv",
-            DATA_DIR / "mcc_oos_bond_fits.parquet",
-            DATA_DIR / "mcc_oos_fit_quality_by_date.csv",
             DATA_DIR / "mcc_oos_error_metrics.csv",
         ],
         "file_dep":[
@@ -342,12 +337,10 @@ def task_build_fisher_yield_curve():
         ],
         "targets": [
             DATA_DIR / "fisher_forward_curve.parquet",
-            DATA_DIR / "fisher_forward_curve_nodes.csv",
             DATA_DIR / "fisher_bond_fits.parquet",
             DATA_DIR / "fisher_fit_quality_by_date.csv",
             DATA_DIR / "fisher_error_metrics.csv",
             DATA_DIR / "fisher_oos_bond_fits.parquet",
-            DATA_DIR / "fisher_oos_fit_quality_by_date.csv",
             DATA_DIR / "fisher_oos_error_metrics.csv",
         ],
         "file_dep": [
@@ -372,12 +365,7 @@ def task_build_waggoner_yield_curve():
         ],
         "targets": [
             DATA_DIR / "waggoner_forward_curve.parquet",
-            DATA_DIR / "waggoner_forward_curve_nodes.csv",
-            DATA_DIR / "waggoner_bond_fits.parquet",
-            DATA_DIR / "waggoner_fit_quality_by_date.csv",
             DATA_DIR / "waggoner_error_metrics.csv",
-            DATA_DIR / "waggoner_oos_bond_fits.parquet",
-            DATA_DIR / "waggoner_oos_fit_quality_by_date.csv",
             DATA_DIR / "waggoner_oos_error_metrics.csv",
         ],
         "file_dep": [
@@ -403,12 +391,7 @@ def task_build_mcc_yield_curve_modern():
         ],
         "targets": [
             DATA_DIR / "modern_mcc_discount_curve.parquet",
-            DATA_DIR / "modern_mcc_discount_curve_nodes.csv",
-            DATA_DIR / "modern_mcc_bond_fits.parquet",
-            DATA_DIR / "modern_mcc_fit_quality_by_date.csv",
             DATA_DIR / "modern_mcc_error_metrics.csv",
-            DATA_DIR / "modern_mcc_oos_bond_fits.parquet",
-            DATA_DIR / "modern_mcc_oos_fit_quality_by_date.csv",
             DATA_DIR / "modern_mcc_oos_error_metrics.csv",
         ],
         "file_dep": [
@@ -435,12 +418,10 @@ def task_build_fisher_yield_curve_modern():
         ],
         "targets": [
             DATA_DIR / "modern_fisher_forward_curve.parquet",
-            DATA_DIR / "modern_fisher_forward_curve_nodes.csv",
             DATA_DIR / "modern_fisher_bond_fits.parquet",
             DATA_DIR / "modern_fisher_fit_quality_by_date.csv",
             DATA_DIR / "modern_fisher_error_metrics.csv",
             DATA_DIR / "modern_fisher_oos_bond_fits.parquet",
-            DATA_DIR / "modern_fisher_oos_fit_quality_by_date.csv",
             DATA_DIR / "modern_fisher_oos_error_metrics.csv",
         ],
         "file_dep": [
@@ -466,12 +447,7 @@ def task_build_waggoner_yield_curve_modern():
         ],
         "targets": [
             DATA_DIR / "modern_waggoner_forward_curve.parquet",
-            DATA_DIR / "modern_waggoner_forward_curve_nodes.csv",
-            DATA_DIR / "modern_waggoner_bond_fits.parquet",
-            DATA_DIR / "modern_waggoner_fit_quality_by_date.csv",
             DATA_DIR / "modern_waggoner_error_metrics.csv",
-            DATA_DIR / "modern_waggoner_oos_bond_fits.parquet",
-            DATA_DIR / "modern_waggoner_oos_fit_quality_by_date.csv",
             DATA_DIR / "modern_waggoner_oos_error_metrics.csv",
         ],
         "file_dep": [
