@@ -12,15 +12,13 @@ Outputs: plots saved to _output directory
 """
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import plotly.graph_objects as go
 
 import correlation_metrics as cm
 from settings import config
 
-SRC_DIR = Path(__file__).resolve().parent
-ROOT_DIR = SRC_DIR.parent
 CHARTS_DIR = Path(config("OUTPUT_DIR"))
 CHARTS_DIR.mkdir(parents=True, exist_ok=True)
 DATA_DIR = Path(config("DATA_DIR"))
@@ -65,42 +63,39 @@ def _curve_for_date(curve_df, date):
     return curve_df.loc[pd.to_datetime(curve_df["date"]).dt.normalize() == target].copy()
 
 
-def plot_named_curves(named_curves, x_col, y_col, title, y_axis_title, out_html, extra_traces=None):
-    """Plot multiple curves on the same figure with the specified x and y columns, title, and output 
-        HTML file path. Optionally include extra traces with custom styling."""
-    fig = go.Figure()
+def plot_named_curves(
+    named_curves, x_col, y_col, title, y_axis_title, out_image, extra_traces=None
+):
+    """Plot multiple curves and save as a static PNG image."""
+    fig, ax = plt.subplots(figsize=(11, 6))
 
     for name, df in named_curves.items():
-        fig.add_trace(
-            go.Scatter(
-                x=df[x_col],
-                y=df[y_col],
-                mode="lines",
-                name=name,
-            )
-        )
+        ax.plot(df[x_col], df[y_col], label=name, linewidth=2)
 
     if extra_traces:
         for tr in extra_traces:
-            fig.add_trace(
-                go.Scatter(
-                    x=tr["df"][tr.get("x_col", x_col)],
-                    y=tr["df"][tr.get("y_col", y_col)],
-                    mode="lines",
-                    name=tr["name"],
-                    line=dict(dash=tr.get("dash", "dash"), width=tr.get("width", 2)),
-                )
+            x_vals = tr["df"][tr.get("x_col", x_col)]
+            y_vals = tr["df"][tr.get("y_col", y_col)]
+            ax.plot(
+                x_vals,
+                y_vals,
+                label=tr["name"],
+                linewidth=tr.get("width", 2),
+                linestyle="--" if tr.get("dash", "dash") == "dash" else "-",
             )
 
-    fig.update_layout(
-        title=title,
-        xaxis_title="Time to Maturity (Years)",
-        yaxis_title=y_axis_title,
-        legend_title="Series",
-        template="plotly_white",
-    )
-    fig.write_html(out_html, include_plotlyjs="cdn")
-    return fig
+    ax.set_title(title)
+    ax.set_xlabel("Time to Maturity (Years)")
+    ax.set_ylabel(y_axis_title)
+    ax.grid(alpha=0.25)
+    ax.legend(title="Series")
+
+    out_image = Path(out_image)
+    out_image.parent.mkdir(parents=True, exist_ok=True)
+    fig.tight_layout()
+    fig.savefig(out_image, dpi=220, bbox_inches="tight")
+    plt.close(fig)
+    return out_image
 
 
 def _selected_date_map(selected_df):
@@ -134,14 +129,14 @@ def _build_set_one_plots(curves_by_method, selected_dates):
         gsw_txt = pd.to_datetime(actual_gsw_date).date()
 
         for spec in CURVE_SPECS.values():
-            out_path = CHARTS_DIR / f"methods_vs_gsw_{label}_{spec['slug']}.html"
+            out_path = CHARTS_DIR / f"methods_vs_gsw_{label}_{spec['slug']}.png"
             plot_named_curves(
                 named_curves=named_method_curves,
                 x_col="T",
                 y_col=spec["col"],
                 title=f"{spec['title']}: Methods vs GSW ({label_text}, date={dt_txt}, GSW={gsw_txt})",
                 y_axis_title=spec["yaxis"],
-                out_html=out_path,
+                out_image=out_path,
                 extra_traces=[
                     {
                         "name": f"GSW ({gsw_txt})",
@@ -175,14 +170,14 @@ def _build_set_two_plots(curves_by_method, selected_dates):
             if not named_curves:
                 continue
 
-            out_path = CHARTS_DIR / f"{method}_{spec['slug']}_selected_dates.html"
+            out_path = CHARTS_DIR / f"{method}_{spec['slug']}_selected_dates.png"
             plot_named_curves(
                 named_curves=named_curves,
                 x_col="T",
                 y_col=spec["col"],
                 title=f"{METHOD_DISPLAY[method]} {spec['title']} (selected dates)",
                 y_axis_title=spec["yaxis"],
-                out_html=out_path,
+                out_image=out_path,
             )
             generated.append(out_path)
 

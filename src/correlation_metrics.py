@@ -10,9 +10,9 @@ The correlation heatmaps are saved to `_output`.
 """
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import plotly.graph_objects as go
 
 import curve_conversions as cc
 import pull_yield_curve_data
@@ -302,16 +302,16 @@ def compute_and_save_correlation_metrics(curves_by_method=None, data_dir=DATA_DI
     pairwise_overall.loc[pairwise_overall["curve_type"] == "spot_cc"].to_csv(pairwise_spot_path, index=False)
     pairwise_overall.loc[pairwise_overall["curve_type"] == "forward_instant_cc"].to_csv(pairwise_forward_path, index=False)
 
-    _write_method_heatmap_html(
+    _write_method_heatmap_image(
         pairwise_overall=pairwise_overall,
         curve_type="spot_cc",
-        out_path=CHARTS_DIR / "method_corr_heatmap_spot_cc.html",
+        out_path=CHARTS_DIR / "method_corr_heatmap_spot_cc.png",
         title="Method Correlation Heatmap: Spot (CC)",
     )
-    _write_method_heatmap_html(
+    _write_method_heatmap_image(
         pairwise_overall=pairwise_overall,
         curve_type="forward_instant_cc",
-        out_path=CHARTS_DIR / "method_corr_heatmap_forward_instant_cc.html",
+        out_path=CHARTS_DIR / "method_corr_heatmap_forward_instant_cc.png",
         title="Method Correlation Heatmap: Instantaneous Forward (CC)",
     )
 
@@ -383,37 +383,36 @@ def _pairwise_matrix(pairwise_overall, curve_type):
     return mat
 
 
-def _write_method_heatmap_html(pairwise_overall, curve_type, out_path, title):
-    """Write an interactive heatmap of method pairwise correlations for the specified curve type to an HTML file."""
+def _write_method_heatmap_image(pairwise_overall, curve_type, out_path, title):
+    """Write a static heatmap image of method pairwise correlations."""
     mat = _pairwise_matrix(pairwise_overall, curve_type=curve_type)
     label_map = {k: v for k, v in METHOD_LABELS.items()}
-    x_labels = [label_map[m] for m in mat.columns]
-    y_labels = [label_map[m] for m in mat.index]
-
+    x_labels = [label_map[m] for m in mat.columns.tolist()]
+    y_labels = [label_map[m] for m in mat.index.tolist()]
     z = mat.to_numpy(dtype=float)
-    z_text = np.round(z, 3).astype(str)
 
-    fig = go.Figure(
-        data=go.Heatmap(
-            z=z,
-            x=x_labels,
-            y=y_labels,
-            zmin=-1,
-            zmax=1,
-            colorscale="Spectral",
-            reversescale=True,
-            text=z_text,
-            texttemplate="%{text}",
-            hovertemplate="Method X: %{x}<br>Method Y: %{y}<br>Corr: %{z:.3f}<extra></extra>",
-        )
-    )
-    fig.update_layout(
-        title=title,
-        xaxis_title="Method",
-        yaxis_title="Method",
-        template="plotly_white",
-    )
-    fig.write_html(out_path, include_plotlyjs="cdn")
+    fig, ax = plt.subplots(figsize=(7, 6))
+    im = ax.imshow(z, vmin=-1, vmax=1, cmap="RdYlBu_r")
+    cbar = fig.colorbar(im, ax=ax)
+    cbar.set_label("Correlation")
+
+    ax.set_xticks(np.arange(len(x_labels)))
+    ax.set_yticks(np.arange(len(y_labels)))
+    ax.set_xticklabels(x_labels, rotation=30, ha="right")
+    ax.set_yticklabels(y_labels)
+    ax.set_title(title)
+    ax.set_xlabel("Method")
+    ax.set_ylabel("Method")
+
+    for i in range(z.shape[0]):
+        for j in range(z.shape[1]):
+            ax.text(j, i, f"{z[i, j]:.3f}", ha="center", va="center", color="black")
+
+    out_path = Path(out_path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.tight_layout()
+    fig.savefig(out_path, dpi=220, bbox_inches="tight")
+    plt.close(fig)
 
 
 def main():
