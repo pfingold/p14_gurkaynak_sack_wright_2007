@@ -9,14 +9,15 @@ Placeholder.
 ## DataFrame Glimpse
 
 ```
-Rows: 2264
-Columns: 8
-$ kytreasno                  <f64> 208504.0
-$ kycrspid                   <str> '20321231.203880'
-$ tcusip                     <str> '91282CPQ'
-$ tdatdt            <datetime[ns]> 2025-12-31 00:00:00
-$ tmatdt            <datetime[ns]> 2032-12-31 00:00:00
-$ tcouprt                    <f64> 3.875
+Rows: 7938
+Columns: 9
+$ kytreasno                  <f64> 208515.0
+$ kycrspid                   <str> '20330131.204000'
+$ tcusip                     <str> '91282CPY'
+$ tdatdt            <datetime[ns]> 2026-01-31 00:00:00
+$ tmatdt            <datetime[ns]> 2033-01-31 00:00:00
+$ tcouprt                    <f64> 4.0
+$ tfcpdt            <datetime[ns]> 2026-07-31 00:00:00
 $ itype                      <f64> 2.0
 $ original_maturity          <f64> 7.0
 
@@ -34,8 +35,8 @@ $ original_maturity          <f64> 7.0
 | Topic Tags                     |                                           |
 | Type of Data Access            |                                   |
 | How is data pulled?            | Pulled via WRDS SQL query and stored as issue-level metadata                                                    |
-| Data available up to (min)     | 2025-12-31 00:00:00                                                             |
-| Data available up to (max)     | 2025-12-31 00:00:00                                                             |
+| Data available up to (min)     | 2026-01-31 00:00:00                                                             |
+| Data available up to (max)     | 2026-02-03 00:00:00                                                             |
 | Dataframe Path                 | /Users/phoebefingold/FINM_Repo/FINM_32900/p14_gurkaynak_sack_wright_2007/_data/TFZ_INFO.parquet                                                   |
 
 
@@ -53,7 +54,7 @@ $ original_maturity          <f64> 7.0
 | Contributors                    | Phoebe Fingold, Annie Reynolds           |
 | Git Repo URL                    |                         |
 | Pipeline Web Page               | <a href="file:///Users/phoebefingold/FINM_Repo/FINM_32900/p14_gurkaynak_sack_wright_2007/docs/index.html">Pipeline Web Page      |
-| Date of Last Code Update        | 2026-02-09 22:42:02           |
+| Date of Last Code Update        | 2026-03-11 00:04:57           |
 | OS Compatibility                |  |
 | Linked Dataframes               |  [P1:crsp_treasury_daily_prices](../dataframes/P1/crsp_treasury_daily_prices.md)<br>  [P1:crsp_treasury_issue_info](../dataframes/P1/crsp_treasury_issue_info.md)<br>  [P1:crsp_treasury_consolidated](../dataframes/P1/crsp_treasury_consolidated.md)<br>  [P1:fed_yield_curve_all](../dataframes/P1/fed_yield_curve_all.md)<br>  [P1:fed_yield_curve](../dataframes/P1/fed_yield_curve.md)<br>  |
 

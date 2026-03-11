@@ -1,0 +1,1733 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>CRSP Treasury Data Overview &#8212; p14_us_treasury_yield_curve_construction_and_model_comparison</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=206a6f58" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../_static/documentation_options.js?v=b9472d72"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/P1/CRSP_treasury_data_tour_ipynb';</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Analysis Pipeline Tour: Treasury Curve Replication" href="analysis_pipeline_tour_ipynb.html" />
+    <link rel="prev" title="p14_us_treasury_yield_curve_construction_and_model_comparison" href="../../index.html" /> 
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>   
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo.png" class="logo__image only-light" alt="p14_us_treasury_yield_curve_construction_and_model_comparison - Home"/>
+    <script>document.write(`<img src="../../_static/logo.png" class="logo__image only-dark" alt="p14_us_treasury_yield_curve_construction_and_model_comparison - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../index.html">
+                    p14_us_treasury_yield_curve_construction_and_model_comparison
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Notebooks 📖</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">CRSP Treasury Data Overview</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="analysis_pipeline_tour_ipynb.html">Analysis Pipeline Tour: Treasury Curve Replication</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Pipeline Charts 📈</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../charts.html">Chart List</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Pipeline Dataframes 📊</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../dataframes/P1/crsp_treasury_consolidated.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P1:crsp_treasury_consolidated</span></code> - CRSP Treasury Consolidated</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../../dataframes/P1/crsp_treasury_daily_prices.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P1:crsp_treasury_daily_prices</span></code> - CRSP Treasury Daily Prices</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../../dataframes/P1/crsp_treasury_issue_info.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P1:crsp_treasury_issue_info</span></code> - CRSP Treasury Issue Info</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../../dataframes/P1/fed_yield_curve.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P1:fed_yield_curve</span></code> - Fed Yield Curve</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../../dataframes/P1/fed_yield_curve_all.html">Dataframe: <code class="docutils literal notranslate"><span class="pre">P1:fed_yield_curve_all</span></code> - Fed Yield Curve All</a></li>
+
+</ul>
+
+    </div>
+</nav></div>
+        <div class="sidebar-primary-item">
+<div class="ablog-sidebar-item ablog__categories">
+  <h3>
+    <a href="../../charts/index/category.html">Categories</a>
+  </h3>
+  <ul>
+     
+    <li>
+      <a href="../../charts/index/category/null.html">null (5)</a>
+    </li>
+     
+  </ul>
+</div>
+</div>
+        <div class="sidebar-primary-item">
+<div class="ablog-sidebar-item ablog__tagcloud">
+  <link
+    rel="stylesheet"
+    href="../../_static/ablog/tagcloud.css"
+    type="text/css"
+  />
+  <h3><a href="../../charts/index/tag.html">Tags</a></h3>
+  <ul class="ablog-cloud">
+     
+    <li class="ablog-cloud ablog-cloud-1">
+      <a href="../../charts/index/tag/crsp-treasury-database.html">CRSP Treasury Database</a>
+    </li>
+      
+    <li class="ablog-cloud ablog-cloud-5">
+      <a href="../../charts/index/tag/federal-reserve-website.html">Federal Reserve Website</a>
+    </li>
+     
+  </ul>
+</div>
+</div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../_sources/notebooks/P1/CRSP_treasury_data_tour_ipynb.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>CRSP Treasury Data Overview</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">CRSP Treasury Data Overview</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#database-description">Database Description</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#raw-crsp-treasury-inputs">1. Raw CRSP Treasury Inputs</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#key-columns-we-care-about-downstream">Key columns we care about downstream:</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#cleaning-pipeline-via-tidy-crsp-treasury-py">Cleaning Pipeline via <code class="docutils literal notranslate"><span class="pre">tidy_CRSP_treasury.py</span></code></a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#run-the-pipeline-end-to-end">Run the pipeline end-to-end:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-by-step-tour-via-intermediate-dataframes">Step-by-step tour via Intermediate DataFrames</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sanity-checks">3. Sanity Checks</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#runness-indicators-maturity-flags">4. Runness Indicators &amp; Maturity Flags</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#yield-curve-snapshot">5. Yield Curve Snapshot</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-output-how-it-is-used">6. The Output &amp; How It Is Used</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#downstream-analysis-example-fit-error-metrics">7. Downstream Analysis Example: Fit Error Metrics</a></li>
+</ul>
+</li>
+</ul>
+
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                   <section class="tex2jax_ignore mathjax_ignore" id="crsp-treasury-data-overview">
+<h1>CRSP Treasury Data Overview<a class="headerlink" href="#crsp-treasury-data-overview" title="Link to this heading">#</a></h1>
+<p>The CRSP US Treasury Database is a comprehensive source of historical Treasury security data maintained by the Center for Research in Security Prices at the University of Chicago’s Booth School of Business. This section provides an essential overview of this critical dataset, which will serve as the foundation for our subsequent replication of the Gürkaynak, Sack, and Wright (2006) &amp; Waggoner (1997) yield curve estimation methodologies.</p>
+<section id="database-description">
+<h2>Database Description<a class="headerlink" href="#database-description" title="Link to this heading">#</a></h2>
+<p>The CRSP US Treasury Database provides complete historical descriptive information and market data for US Treasury securities, including:</p>
+<ul class="simple">
+<li><p>Prices</p></li>
+<li><p>Returns</p></li>
+<li><p>Accrued interest</p></li>
+<li><p>Yields</p></li>
+<li><p>Durations</p></li>
+</ul>
+<p>The database begins in 1961 and is updated monthly. The data is available in ASCII, Excel, and SAS formats.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">ROOT</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
+<span class="n">PROJECT_ROOT</span> <span class="o">=</span> <span class="n">ROOT</span> <span class="k">if</span> <span class="p">(</span><span class="n">ROOT</span> <span class="o">/</span> <span class="s1">&#39;src&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">parent</span>
+<span class="n">DATA_DIR</span> <span class="o">=</span> <span class="n">PROJECT_ROOT</span> <span class="o">/</span> <span class="s1">&#39;_data&#39;</span>
+<span class="n">OUTPUT_DIR</span> <span class="o">=</span> <span class="n">PROJECT_ROOT</span> <span class="o">/</span> <span class="s1">&#39;_output&#39;</span>
+
+<span class="n">TREASURY_FILES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;TFZ_consolidated.parquet&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;TFZ_DAILY.parquet&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;TFZ_INFO.parquet&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;TFZ_with_runness.parquet&#39;</span>
+<span class="p">]</span>
+
+<span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">TREASURY_FILES</span><span class="p">:</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">DATA_DIR</span> <span class="o">/</span> <span class="n">file</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Columns in </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Columns in TFZ_consolidated.parquet: [&#39;kytreasno&#39;, &#39;kycrspid&#39;, &#39;tcusip&#39;, &#39;mcaldt&#39;, &#39;tdatdt&#39;, &#39;tmatdt&#39;, &#39;tfcaldt&#39;, &#39;tfcpdt&#39;, &#39;tmbid&#39;, &#39;tmask&#39;, &#39;tmaccint&#39;, &#39;tmyld&#39;, &#39;price&#39;, &#39;tcouprt&#39;, &#39;itype&#39;, &#39;original_maturity&#39;, &#39;iflwr&#39;, &#39;years_to_maturity&#39;, &#39;tmduratn&#39;, &#39;tmretnua&#39;, &#39;days_to_maturity&#39;, &#39;callable&#39;]
+Columns in TFZ_DAILY.parquet: [&#39;kytreasno&#39;, &#39;kycrspid&#39;, &#39;mcaldt&#39;, &#39;tmbid&#39;, &#39;tmask&#39;, &#39;tmaccint&#39;, &#39;tmyld&#39;, &#39;price&#39;]
+Columns in TFZ_INFO.parquet: [&#39;kytreasno&#39;, &#39;kycrspid&#39;, &#39;tcusip&#39;, &#39;tdatdt&#39;, &#39;tmatdt&#39;, &#39;tcouprt&#39;, &#39;tfcpdt&#39;, &#39;itype&#39;, &#39;original_maturity&#39;]
+Columns in TFZ_with_runness.parquet: [&#39;kytreasno&#39;, &#39;kycrspid&#39;, &#39;tcusip&#39;, &#39;mcaldt&#39;, &#39;tdatdt&#39;, &#39;tmatdt&#39;, &#39;tfcaldt&#39;, &#39;tfcpdt&#39;, &#39;tmbid&#39;, &#39;tmask&#39;, &#39;tmaccint&#39;, &#39;tmyld&#39;, &#39;price&#39;, &#39;tcouprt&#39;, &#39;itype&#39;, &#39;original_maturity&#39;, &#39;iflwr&#39;, &#39;years_to_maturity&#39;, &#39;tmduratn&#39;, &#39;tmretnua&#39;, &#39;days_to_maturity&#39;, &#39;callable&#39;, &#39;run&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="raw-crsp-treasury-inputs">
+<h2>1. Raw CRSP Treasury Inputs<a class="headerlink" href="#raw-crsp-treasury-inputs" title="Link to this heading">#</a></h2>
+<p>The CRSP US Treasury database is delivered in several “building block” files:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">TFZ_DAILY</span></code>: daily quotes</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TFZ_INFO</span></code>: bond characteristics</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TFZ_consolidated</span></code>: merged quotes + characteristics</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TFZ_with_runness</span></code>: merged quotes + characteristics + runness indicators</p></li>
+</ul>
+<p>For our analysis, we will focus on the <code class="docutils literal notranslate"><span class="pre">TFZ_with_runness</span></code> file, as it contains all of the required fields for curve estimation in one location: quotes, bond characteristics, duration, maturity, and runness.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#Peek at the TFZ_with_runness raw file</span>
+<span class="n">tfz_with_runness_raw</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s1">&#39;TFZ_with_runness.parquet&#39;</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">tfz_with_runness_raw</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>kytreasno</th>
+      <th>kycrspid</th>
+      <th>tcusip</th>
+      <th>mcaldt</th>
+      <th>tdatdt</th>
+      <th>tmatdt</th>
+      <th>tfcaldt</th>
+      <th>tfcpdt</th>
+      <th>tmbid</th>
+      <th>tmask</th>
+      <th>...</th>
+      <th>tcouprt</th>
+      <th>itype</th>
+      <th>original_maturity</th>
+      <th>iflwr</th>
+      <th>years_to_maturity</th>
+      <th>tmduratn</th>
+      <th>tmretnua</th>
+      <th>days_to_maturity</th>
+      <th>callable</th>
+      <th>run</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>200641.0</td>
+      <td>19700312.400000</td>
+      <td>912793DC</td>
+      <td>1970-02-27</td>
+      <td>1969-09-10</td>
+      <td>1970-03-12</td>
+      <td>0</td>
+      <td>NaT</td>
+      <td>99.763474</td>
+      <td>99.787666</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>4.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>13.0</td>
+      <td>0.006565</td>
+      <td>13</td>
+      <td>False</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>200634.0</td>
+      <td>19700205.400000</td>
+      <td>912793CW</td>
+      <td>1970-01-30</td>
+      <td>1969-08-07</td>
+      <td>1970-02-05</td>
+      <td>0</td>
+      <td>NaT</td>
+      <td>99.866669</td>
+      <td>99.883331</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>4.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>6.0</td>
+      <td>0.0061</td>
+      <td>6</td>
+      <td>False</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>200635.0</td>
+      <td>19700213.400000</td>
+      <td>912793CX</td>
+      <td>1970-01-30</td>
+      <td>1969-08-14</td>
+      <td>1970-02-13</td>
+      <td>0</td>
+      <td>NaT</td>
+      <td>99.700554</td>
+      <td>99.727776</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>4.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>14.0</td>
+      <td>0.006317</td>
+      <td>14</td>
+      <td>False</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>200636.0</td>
+      <td>19700215.104000</td>
+      <td>912810AE</td>
+      <td>1970-01-30</td>
+      <td>1965-01-15</td>
+      <td>1970-02-15</td>
+      <td>0</td>
+      <td>1965-08-15</td>
+      <td>99.96875</td>
+      <td>100.03125</td>
+      <td>...</td>
+      <td>4.0</td>
+      <td>1.0</td>
+      <td>5.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>16.0</td>
+      <td>0.008491</td>
+      <td>16</td>
+      <td>False</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>200637.0</td>
+      <td>19700219.400000</td>
+      <td>912793CY</td>
+      <td>1970-01-30</td>
+      <td>1969-08-21</td>
+      <td>1970-02-19</td>
+      <td>0</td>
+      <td>NaT</td>
+      <td>99.580559</td>
+      <td>99.610001</td>
+      <td>...</td>
+      <td>0.0</td>
+      <td>4.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>20.0</td>
+      <td>0.006479</td>
+      <td>20</td>
+      <td>False</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 23 columns</p>
+</div></div></div>
+</div>
+<section id="key-columns-we-care-about-downstream">
+<h3>Key columns we care about downstream:<a class="headerlink" href="#key-columns-we-care-about-downstream" title="Link to this heading">#</a></h3>
+<p>The cleaning code focuses on:</p>
+<ul class="simple">
+<li><p><strong>Identifiers:</strong> date, CUSIP, CRSP IDs</p></li>
+<li><p><strong>Bond characteristics:</strong> coupon, issue date, maturity date, instrument type</p></li>
+<li><p><strong>Quotes:</strong> bid, ask, yield, accrued interest</p></li>
+<li><p><strong>Maturity measures:</strong> time-to-maturity in days/years</p></li>
+<li><p><strong>Runness:</strong> on-the-run / off-the-run indicators (used for sample selection)</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#compact overview</span>
+<span class="n">tfz_compact</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">tfz_with_runness_raw</span><span class="o">.</span><span class="n">dtypes</span>
+    <span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="s1">&#39;column&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span> <span class="s1">&#39;dtype&#39;</span><span class="p">})</span>
+    <span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;column&#39;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">tfz_compact</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>column</th>
+      <th>dtype</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>callable</td>
+      <td>bool</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>days_to_maturity</td>
+      <td>int64</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>iflwr</td>
+      <td>Float64</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>itype</td>
+      <td>Float64</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>kycrspid</td>
+      <td>string</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>kytreasno</td>
+      <td>Float64</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>mcaldt</td>
+      <td>datetime64[ns]</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>original_maturity</td>
+      <td>Float64</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>price</td>
+      <td>Float64</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>run</td>
+      <td>int64</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>tcouprt</td>
+      <td>Float64</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>tcusip</td>
+      <td>string</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>tdatdt</td>
+      <td>datetime64[ns]</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>tfcaldt</td>
+      <td>int64</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>tfcpdt</td>
+      <td>datetime64[ns]</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>tmaccint</td>
+      <td>Float64</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>tmask</td>
+      <td>Float64</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>tmatdt</td>
+      <td>datetime64[ns]</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>tmbid</td>
+      <td>Float64</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>tmduratn</td>
+      <td>Float64</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>tmretnua</td>
+      <td>Float64</td>
+    </tr>
+    <tr>
+      <th>21</th>
+      <td>tmyld</td>
+      <td>Float64</td>
+    </tr>
+    <tr>
+      <th>22</th>
+      <td>years_to_maturity</td>
+      <td>Float64</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+</section>
+</section>
+</section>
+<section class="tex2jax_ignore mathjax_ignore" id="cleaning-pipeline-via-tidy-crsp-treasury-py">
+<h1>Cleaning Pipeline via <code class="docutils literal notranslate"><span class="pre">tidy_CRSP_treasury.py</span></code><a class="headerlink" href="#cleaning-pipeline-via-tidy-crsp-treasury-py" title="Link to this heading">#</a></h1>
+<p>The file <code class="docutils literal notranslate"><span class="pre">tidy_CRSP_treasury.py</span></code> implements a small explicit pipeline to prepare the <code class="docutils literal notranslate"><span class="pre">TFZ_with_runness.parquet</span></code> file for curve estimation via the following steps:</p>
+<ol class="arabic simple">
+<li><p>Load*<code class="docutils literal notranslate"><span class="pre">TFZ_with_runness.parquet</span></code></p></li>
+<li><p>Standardize column names (rename CRSP-style names to readable ones)</p></li>
+<li><p>Add derived fields used in later curve work:</p>
+<ul class="simple">
+<li><p>mid price = (bid + ask) / 2</p></li>
+<li><p>time-to-maturity (days &amp; years)</p></li>
+<li><p>sanity-check flags (valid quotes, nonnegative maturity)</p></li>
+<li><p>runness indicators (on-the-run, first-off, off-the-run)</p></li>
+<li><p>maturity flags (&lt;30d, &lt;3m, &lt;1y, 20y post-1996)</p></li>
+<li><p>instrument type flags (bond/note/bill) and “flower bond” flag</p></li>
+</ul>
+</li>
+<li><p>Select the minimal relevant columns</p></li>
+<li><p>Write <code class="docutils literal notranslate"><span class="pre">tidy_CRSP_treasury.parquet</span></code> to the project data directory (<code class="docutils literal notranslate"><span class="pre">_data</span></code>)</p></li>
+</ol>
+<section id="run-the-pipeline-end-to-end">
+<h2>Run the pipeline end-to-end:<a class="headerlink" href="#run-the-pipeline-end-to-end" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">tidy_CRSP_treasury</span>
+<span class="n">tidy_CRSP_treasury</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">DATA_DIR</span><span class="p">,</span> <span class="n">DATA_DIR</span><span class="p">)</span>
+<span class="n">df_tidy</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;tidy_CRSP_treasury.parquet&quot;</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">df_tidy</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Wrote tidy CRSP Treasury data set saved to: /Users/phoebefingold/FINM_Repo/FINM_32900/p14_gurkaynak_sack_wright_2007/_data/tidy_CRSP_treasury.parquet
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>date</th>
+      <th>cusip</th>
+      <th>kytreasno</th>
+      <th>kycrspid</th>
+      <th>issue_date</th>
+      <th>maturity_date</th>
+      <th>coupon</th>
+      <th>first_coupon_date</th>
+      <th>itype</th>
+      <th>iflwr</th>
+      <th>...</th>
+      <th>is_under_1y</th>
+      <th>is_20y</th>
+      <th>is_20yr_post_1996</th>
+      <th>is_bond</th>
+      <th>is_note</th>
+      <th>is_bill</th>
+      <th>is_flower</th>
+      <th>valid_quote</th>
+      <th>nonnegative_maturity</th>
+      <th>clean</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1970-01-30</td>
+      <td>912793BQ</td>
+      <td>200639.0</td>
+      <td>19700228.400000</td>
+      <td>1969-02-27</td>
+      <td>1970-02-28</td>
+      <td>0.0</td>
+      <td>NaT</td>
+      <td>4.0</td>
+      <td>1.0</td>
+      <td>...</td>
+      <td>True</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>True</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1970-01-30</td>
+      <td>912793BR</td>
+      <td>200646.0</td>
+      <td>19700331.400000</td>
+      <td>1969-04-01</td>
+      <td>1970-03-31</td>
+      <td>0.0</td>
+      <td>NaT</td>
+      <td>4.0</td>
+      <td>1.0</td>
+      <td>...</td>
+      <td>True</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>True</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1970-01-30</td>
+      <td>912793CG</td>
+      <td>200653.0</td>
+      <td>19700430.400000</td>
+      <td>1969-04-29</td>
+      <td>1970-04-30</td>
+      <td>0.0</td>
+      <td>NaT</td>
+      <td>4.0</td>
+      <td>1.0</td>
+      <td>...</td>
+      <td>True</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>True</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1970-01-30</td>
+      <td>912793CH</td>
+      <td>200660.0</td>
+      <td>19700531.400000</td>
+      <td>1969-05-29</td>
+      <td>1970-05-31</td>
+      <td>0.0</td>
+      <td>NaT</td>
+      <td>4.0</td>
+      <td>1.0</td>
+      <td>...</td>
+      <td>True</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>True</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1970-01-30</td>
+      <td>912793CU</td>
+      <td>200666.0</td>
+      <td>19700630.400000</td>
+      <td>1969-06-26</td>
+      <td>1970-06-30</td>
+      <td>0.0</td>
+      <td>NaT</td>
+      <td>4.0</td>
+      <td>1.0</td>
+      <td>...</td>
+      <td>True</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>True</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 35 columns</p>
+</div></div></div>
+</div>
+</section>
+<section id="step-by-step-tour-via-intermediate-dataframes">
+<h2>Step-by-step tour via Intermediate DataFrames<a class="headerlink" href="#step-by-step-tour-via-intermediate-dataframes" title="Link to this heading">#</a></h2>
+<p>Below we walk through the exact functions of <code class="docutils literal notranslate"><span class="pre">tidy_CRSP_treasury.py</span></code> to demonstrate how the raw data gets transformed into the curve estimation-ready data</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">df0</span> <span class="o">=</span> <span class="n">tidy_CRSP_treasury</span><span class="o">.</span><span class="n">load_CRSP_treasury_data</span><span class="p">(</span><span class="n">DATA_DIR</span><span class="p">)</span>
+<span class="n">df1</span> <span class="o">=</span> <span class="n">tidy_CRSP_treasury</span><span class="o">.</span><span class="n">standardize_column_names</span><span class="p">(</span><span class="n">df0</span><span class="p">)</span>
+<span class="n">df2</span> <span class="o">=</span> <span class="n">tidy_CRSP_treasury</span><span class="o">.</span><span class="n">add_relevant_fields</span><span class="p">(</span><span class="n">df1</span><span class="p">)</span>
+<span class="n">df3</span> <span class="o">=</span> <span class="n">tidy_CRSP_treasury</span><span class="o">.</span><span class="n">select_relevant_cols</span><span class="p">(</span><span class="n">df2</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TFZ raw:&quot;</span><span class="p">,</span> <span class="n">df0</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;standardized:&quot;</span><span class="p">,</span> <span class="n">df1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;with derived fields:&quot;</span><span class="p">,</span> <span class="n">df2</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;selected cols (tidy):&quot;</span><span class="p">,</span> <span class="n">df3</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+<span class="n">df3</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>TFZ raw: (145747, 23)
+standardized: (145747, 23)
+with derived fields: (145747, 39)
+selected cols (tidy): (145747, 35)
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>date</th>
+      <th>cusip</th>
+      <th>kytreasno</th>
+      <th>kycrspid</th>
+      <th>issue_date</th>
+      <th>maturity_date</th>
+      <th>coupon</th>
+      <th>first_coupon_date</th>
+      <th>itype</th>
+      <th>iflwr</th>
+      <th>...</th>
+      <th>is_under_1y</th>
+      <th>is_20y</th>
+      <th>is_20yr_post_1996</th>
+      <th>is_bond</th>
+      <th>is_note</th>
+      <th>is_bill</th>
+      <th>is_flower</th>
+      <th>valid_quote</th>
+      <th>nonnegative_maturity</th>
+      <th>clean</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>6</th>
+      <td>1970-01-30</td>
+      <td>912793BQ</td>
+      <td>200639.0</td>
+      <td>19700228.400000</td>
+      <td>1969-02-27</td>
+      <td>1970-02-28</td>
+      <td>0.0</td>
+      <td>NaT</td>
+      <td>4.0</td>
+      <td>1.0</td>
+      <td>...</td>
+      <td>True</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>True</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>1970-01-30</td>
+      <td>912793BR</td>
+      <td>200646.0</td>
+      <td>19700331.400000</td>
+      <td>1969-04-01</td>
+      <td>1970-03-31</td>
+      <td>0.0</td>
+      <td>NaT</td>
+      <td>4.0</td>
+      <td>1.0</td>
+      <td>...</td>
+      <td>True</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>True</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>27</th>
+      <td>1970-01-30</td>
+      <td>912793CG</td>
+      <td>200653.0</td>
+      <td>19700430.400000</td>
+      <td>1969-04-29</td>
+      <td>1970-04-30</td>
+      <td>0.0</td>
+      <td>NaT</td>
+      <td>4.0</td>
+      <td>1.0</td>
+      <td>...</td>
+      <td>True</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>True</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>54</th>
+      <td>1970-01-30</td>
+      <td>912793CH</td>
+      <td>200660.0</td>
+      <td>19700531.400000</td>
+      <td>1969-05-29</td>
+      <td>1970-05-31</td>
+      <td>0.0</td>
+      <td>NaT</td>
+      <td>4.0</td>
+      <td>1.0</td>
+      <td>...</td>
+      <td>True</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>True</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>78</th>
+      <td>1970-01-30</td>
+      <td>912793CU</td>
+      <td>200666.0</td>
+      <td>19700630.400000</td>
+      <td>1969-06-26</td>
+      <td>1970-06-30</td>
+      <td>0.0</td>
+      <td>NaT</td>
+      <td>4.0</td>
+      <td>1.0</td>
+      <td>...</td>
+      <td>True</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>True</td>
+      <td>False</td>
+      <td>True</td>
+      <td>True</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 35 columns</p>
+</div></div></div>
+</div>
+</section>
+<section id="sanity-checks">
+<h2>3. Sanity Checks<a class="headerlink" href="#sanity-checks" title="Link to this heading">#</a></h2>
+<p>The cleaning step creates a few flags that prevent downstream errors:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">valid_quote</span></code>: bid/ask are finite, positive, and <code class="docutils literal notranslate"><span class="pre">ask</span> <span class="pre">&gt;=</span> <span class="pre">bid</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nonnegative_maturity</span></code>: time-to-maturity is finite and nonnegative</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">clean</span></code>: conjunction of the above</p></li>
+</ul>
+<p>These are not necessarily “final sample selection” rules. Rather, they help ensure we can safely compute mid prices, maturities, and do curve estimation without obvious data errors.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#Check problematic rows (if they exist)</span>
+<span class="n">problematic_rows</span> <span class="o">=</span> <span class="n">df2</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">df2</span><span class="p">[</span><span class="s1">&#39;clean&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="s1">&#39;cusip&#39;</span><span class="p">,</span> <span class="s1">&#39;bid&#39;</span><span class="p">,</span> <span class="s1">&#39;ask&#39;</span><span class="p">,</span><span class="s1">&#39;maturity_date&#39;</span><span class="p">,</span> <span class="s1">&#39;ttm_days&#39;</span><span class="p">,</span> <span class="s1">&#39;valid_quote&#39;</span><span class="p">,</span> <span class="s1">&#39;nonnegative_maturity&#39;</span><span class="p">]]</span>
+<span class="n">display</span><span class="p">(</span><span class="n">problematic_rows</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>date</th>
+      <th>cusip</th>
+      <th>bid</th>
+      <th>ask</th>
+      <th>maturity_date</th>
+      <th>ttm_days</th>
+      <th>valid_quote</th>
+      <th>nonnegative_maturity</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Above, we observe that the cleaning process removed all problematic data points.</p>
+</section>
+<section id="runness-indicators-maturity-flags">
+<h2>4. Runness Indicators &amp; Maturity Flags<a class="headerlink" href="#runness-indicators-maturity-flags" title="Link to this heading">#</a></h2>
+<p>In our cleaning process, we added runness indicators &amp; maturity flags to easily align with GSW and Waggoners’ estimation processes:</p>
+<p>Runness Indicators:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">is_on_the_run</span></code>: <code class="docutils literal notranslate"><span class="pre">run</span> <span class="pre">==</span> <span class="pre">0</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">is_first_off_the_run</span></code>: <code class="docutils literal notranslate"><span class="pre">run</span> <span class="pre">==</span> <span class="pre">1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">is_off_the_run</span></code>: <code class="docutils literal notranslate"><span class="pre">run</span> <span class="pre">&gt;=</span> <span class="pre">2</span></code></p></li>
+</ul>
+<p>Maturity Flags:</p>
+<ul class="simple">
+<li><p>We also create maturity flags (e.g., <code class="docutils literal notranslate"><span class="pre">&lt;30d</span></code>, <code class="docutils literal notranslate"><span class="pre">&lt;1y</span></code>) that are common in curve estimation sample rules (many papers exclude ultra-short maturities, and some handle 20-year reintroductions separately).</p></li>
+</ul>
+<p>Waggoner-specific Flags:</p>
+<ul class="simple">
+<li><p>Exclude bills with less than 30 days to maturity: <code class="docutils literal notranslate"><span class="pre">is_bill</span> <span class="pre">&amp;</span> <span class="pre">is_under_30d</span></code></p></li>
+<li><p>Exclude notes/bonds with less than 1 year to maturity: <code class="docutils literal notranslate"><span class="pre">(is_note</span> <span class="pre">|</span> <span class="pre">is_bond)</span> <span class="pre">&amp;</span> <span class="pre">is_under_1y</span></code></p></li>
+<li><p>Exclude flower bonds: <code class="docutils literal notranslate"><span class="pre">is_flower</span></code></p></li>
+<li><p>Exclude callable bonds: add a callable flag when available from bond characteristics, then filter on it (for example <code class="docutils literal notranslate"><span class="pre">is_callable</span></code>)</p></li>
+</ul>
+<p>This framing makes it clear that the paper’s sample restrictions are implemented as reusable boolean flags rather than hard-coded one-off filters.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#Shares by runness category</span>
+<span class="n">runness_shares</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span>
+    <span class="s1">&#39;is_on_the_run&#39;</span><span class="p">:</span> <span class="n">df2</span><span class="p">[</span><span class="s1">&#39;is_on_the_run&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+    <span class="s1">&#39;is_first_off_the_run&#39;</span><span class="p">:</span> <span class="n">df2</span><span class="p">[</span><span class="s1">&#39;is_first_off_the_run&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+    <span class="s1">&#39;is_off_the_run&#39;</span><span class="p">:</span> <span class="n">df2</span><span class="p">[</span><span class="s1">&#39;is_off_the_run&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+<span class="p">})</span>
+<span class="n">display</span><span class="p">(</span><span class="n">runness_shares</span><span class="o">.</span><span class="n">to_frame</span><span class="p">(</span><span class="s1">&#39;share&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>share</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>is_on_the_run</th>
+      <td>0.122438</td>
+    </tr>
+    <tr>
+      <th>is_first_off_the_run</th>
+      <td>0.035603</td>
+    </tr>
+    <tr>
+      <th>is_off_the_run</th>
+      <td>0.841959</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#Shares over time (monthly)</span>
+<span class="n">tmp</span> <span class="o">=</span> <span class="n">df2</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df2</span><span class="p">[</span><span class="s1">&#39;clean&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;month&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">to_period</span><span class="p">(</span><span class="s1">&#39;M&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">to_timestamp</span><span class="p">()</span>
+<span class="n">monthly</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;month&#39;</span><span class="p">)[[</span><span class="s1">&#39;is_on_the_run&#39;</span><span class="p">,</span> <span class="s1">&#39;is_first_off_the_run&#39;</span><span class="p">,</span> <span class="s1">&#39;is_off_the_run&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">monthly</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">monthly</span><span class="p">[</span><span class="s1">&#39;is_on_the_run&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;On-the-Run&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">monthly</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">monthly</span><span class="p">[</span><span class="s1">&#39;is_first_off_the_run&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;First Off-the-Run&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">monthly</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">monthly</span><span class="p">[</span><span class="s1">&#39;is_off_the_run&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Off-the-Run&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Runness Shares Over Time (Cleaned Treasury Quotes)&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Share of Securities&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/10e4a5cce24ec45b6785ccfea2d3f62552bab627dc7e5be8a58bc77828599864.png" src="../../_images/10e4a5cce24ec45b6785ccfea2d3f62552bab627dc7e5be8a58bc77828599864.png" />
+</div>
+</div>
+<p>Above, we observe how before the early 1980s, all cleaned quotes are classified as “on-the-run.” This reflects limitations in historical issuance coverage &amp; runnness identification in the early CRSP data. After 1980, the cross-section stabilizes, with ~80-95% of bonds off-the-run, and small shares of on-the-run and first-off-the-run securities.</p>
+</section>
+<section id="yield-curve-snapshot">
+<h2>5. Yield Curve Snapshot<a class="headerlink" href="#yield-curve-snapshot" title="Link to this heading">#</a></h2>
+<p>To connect our cleaned dataset to the analysis code, we can build a quick yield curve snapshot figure via GSW’s implementation. This is <strong>not</strong> a full GSW curve estimation, but it illustrates why we want clean maturities, clean quotes, and runness labels for estimation.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Choose a representative date (latest in sample)</span>
+<span class="n">snap_date</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df_tidy</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+<span class="n">snap</span> <span class="o">=</span> <span class="n">df_tidy</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df_tidy</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="n">snap_date</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="c1"># Basic &quot;safe&quot; screen for plotting</span>
+<span class="n">snap</span> <span class="o">=</span> <span class="n">snap</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="n">snap</span><span class="p">[</span><span class="s1">&#39;clean&#39;</span><span class="p">]</span> <span class="o">&amp;</span>
+    <span class="p">(</span><span class="o">~</span><span class="n">snap</span><span class="p">[</span><span class="s1">&#39;is_flower&#39;</span><span class="p">])</span> <span class="o">&amp;</span>
+    <span class="p">(</span><span class="o">~</span><span class="n">snap</span><span class="p">[</span><span class="s1">&#39;is_under_30d&#39;</span><span class="p">])</span> <span class="o">&amp;</span>
+    <span class="p">(</span><span class="o">~</span><span class="n">snap</span><span class="p">[</span><span class="s1">&#39;is_20yr_post_1996&#39;</span><span class="p">])</span>
+<span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;snapshot date:&#39;</span><span class="p">,</span> <span class="n">snap_date</span><span class="o">.</span><span class="n">date</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;number of securities:&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">snap</span><span class="p">))</span>
+
+<span class="c1"># Scatter: yield vs maturity (years)</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">snap</span><span class="p">[</span><span class="s1">&#39;ttm_years&#39;</span><span class="p">],</span> <span class="n">snap</span><span class="p">[</span><span class="s1">&#39;yield&#39;</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;all (screened)&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Snapshot: yield vs time-to-maturity&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;TTM (years)&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Yield&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>snapshot date: 2026-01-30
+number of securities: 368
+</pre></div>
+</div>
+<img alt="../../_images/74fba0a9eb3ee51f4d095a9de516fd6005a5c53940e4a1f56a8b70d3e03fd8bd.png" src="../../_images/74fba0a9eb3ee51f4d095a9de516fd6005a5c53940e4a1f56a8b70d3e03fd8bd.png" />
+</div>
+</div>
+<p>The first figure plots yield against time-to-maturity for all screened securities on the most recent date in the sample. Several features confirm the integrity of the cleaned dataset:</p>
+<ul class="simple">
+<li><p>The cross section spans the full maturity spectrum, confirming that the time-to-maturity calculation and maturity filtering steps in the pipeline are functioning as intended</p></li>
+<li><p>The curve has a smooth upward-sloping shape across most maturities, consistent with a typical positive term premium environment</p></li>
+<li><p>An absence of extreme outliers or discontinuities reflects the effectiveness of the cleaning flags</p></li>
+<li><p>Tight clustering of points at key maturity buckets reflects Treasury issuance conventions</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#on-the-run vs off-the-run on same snapshot</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">on</span> <span class="o">=</span> <span class="n">snap</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">snap</span><span class="p">[</span><span class="s1">&#39;is_on_the_run&#39;</span><span class="p">]]</span>
+<span class="n">off</span> <span class="o">=</span> <span class="n">snap</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">snap</span><span class="p">[</span><span class="s1">&#39;is_off_the_run&#39;</span><span class="p">]]</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">on</span><span class="p">[</span><span class="s1">&#39;ttm_years&#39;</span><span class="p">],</span> <span class="n">on</span><span class="p">[</span><span class="s1">&#39;yield&#39;</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;on-the-run&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">off</span><span class="p">[</span><span class="s1">&#39;ttm_years&#39;</span><span class="p">],</span> <span class="n">off</span><span class="p">[</span><span class="s1">&#39;yield&#39;</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.35</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;off-the-run&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Snapshot: yield vs time-to-maturity&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;TTM (years)&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Yield&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/64387046dfd02bbf077440dde745ab35121688e0906a0a7b166dc41995d3ade8.png" src="../../_images/64387046dfd02bbf077440dde745ab35121688e0906a0a7b166dc41995d3ade8.png" />
+</div>
+</div>
+<p>The second figure separates on-the-run and off-the-run securities within the same snapshot and highlights one of our motivations for constructing runness classifications in the cleaning pipeline. On-the-run securities are fewer in number and typically cluster at standard benchmark maturities. Off-the-run securities are much more numerous and fill in the maturity spectrum between benchmarks. In many maturity buckets, off-the-run securities exhibit slightly higher yields relative to nearby on-the-run bonds. This cross-sectional dispersion is exactly why runnness indicators are valuable inputs for term structure analysis.</p>
+</section>
+<section id="the-output-how-it-is-used">
+<h2>6. The Output &amp; How It Is Used<a class="headerlink" href="#the-output-how-it-is-used" title="Link to this heading">#</a></h2>
+<p>The pipeline writes the <code class="docutils literal notranslate"><span class="pre">tidy_CRSP_treasury.parquet</span></code> file. This tidy dataset is intended to be the single cleaned input for later steps, including:</p>
+<ul class="simple">
+<li><p>filtering to a curve-estimation sample (e.g., exclude bills / flower bonds / ultra-short maturities)</p></li>
+<li><p>estimating curve performance via Weighted Mean Absolute Errors (WMAE) &amp; Hit Rates</p></li>
+<li><p>analyze differences between on-the-run and off-the-run securities</p></li>
+</ul>
+<p>In other words, this tidy dataset serves as the foundation for all downstream term structure analysis. By consolidating cleaning and feature engineering into a single pipeline, later code can focus on estimation and evaluation rather than repeated data preparation.</p>
+</section>
+<section id="downstream-analysis-example-fit-error-metrics">
+<h2>7. Downstream Analysis Example: Fit Error Metrics<a class="headerlink" href="#downstream-analysis-example-fit-error-metrics" title="Link to this heading">#</a></h2>
+<p>To connect this notebook to the replication code, we can inspect model fit metrics generated by:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">run_mcc_yield_curve.py</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">run_fisher_yield_curve.py</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">run_waggoner_yield_curve.py</span></code></p></li>
+</ul>
+<p>These scripts write error summaries into <code class="docutils literal notranslate"><span class="pre">_data</span></code> (for example <code class="docutils literal notranslate"><span class="pre">mcc_error_metrics.csv</span></code>). Below we load whichever files are available and compare average in-sample error across methods.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">metrics_files</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;MCC&#39;</span><span class="p">:</span> <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s1">&#39;mcc_error_metrics.csv&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Fisher&#39;</span><span class="p">:</span> <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s1">&#39;fisher_error_metrics.csv&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Waggoner&#39;</span><span class="p">:</span> <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s1">&#39;waggoner_error_metrics.csv&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">frames</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">method</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">metrics_files</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">tmp</span><span class="p">[</span><span class="s1">&#39;method&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">method</span>
+        <span class="n">frames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">frames</span><span class="p">:</span>
+    <span class="n">metrics</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">display</span><span class="p">(</span><span class="n">metrics</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+
+    <span class="n">numeric_cols</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">preferred</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;wmae&#39;</span><span class="p">,</span> <span class="s1">&#39;mae&#39;</span><span class="p">,</span> <span class="s1">&#39;rmse&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">numeric_cols</span><span class="p">]</span>
+    <span class="n">score_col</span> <span class="o">=</span> <span class="n">preferred</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">preferred</span> <span class="k">else</span> <span class="p">(</span><span class="n">numeric_cols</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">numeric_cols</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">score_col</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">metrics</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;method&#39;</span><span class="p">,</span> <span class="n">as_index</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="n">score_col</span><span class="p">]</span>
+            <span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">score_col</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">score_col</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;avg_</span><span class="si">{</span><span class="n">score_col</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">})</span>
+        <span class="p">)</span>
+        <span class="n">display</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
+
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s1">&#39;method&#39;</span><span class="p">],</span> <span class="n">summary</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;avg_</span><span class="si">{</span><span class="n">score_col</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Average In-Sample Fit Error by Method (</span><span class="si">{</span><span class="n">score_col</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">13</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Average </span><span class="si">{</span><span class="n">score_col</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error-metric files found, but no numeric score column was detected.&#39;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="s1">&#39;No error metric files found yet. Run curve tasks first, e.g. &#39;</span>
+        <span class="s1">&#39;`doit build_mcc_yield_curve build_fisher_yield_curve build_waggoner_yield_curve`.&#39;</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>bucket</th>
+      <th>wmae</th>
+      <th>hit_rate</th>
+      <th>method</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0-1</td>
+      <td>0.027273</td>
+      <td>0.340641</td>
+      <td>MCC</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1-3</td>
+      <td>0.106646</td>
+      <td>0.450051</td>
+      <td>MCC</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3-5</td>
+      <td>0.271146</td>
+      <td>0.273383</td>
+      <td>MCC</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>5-10</td>
+      <td>0.421262</td>
+      <td>0.200919</td>
+      <td>MCC</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>&gt;10</td>
+      <td>0.322544</td>
+      <td>0.288101</td>
+      <td>MCC</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>method</th>
+      <th>avg_wmae</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2</th>
+      <td>Waggoner</td>
+      <td>0.187894</td>
+    </tr>
+    <tr>
+      <th>0</th>
+      <td>Fisher</td>
+      <td>0.200445</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>MCC</td>
+      <td>0.202326</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><img alt="../../_images/ca332fe7da9544390c2b40414f0f3c4ca5ac33d9f82cb34022d4715a71e0c094.png" src="../../_images/ca332fe7da9544390c2b40414f0f3c4ca5ac33d9f82cb34022d4715a71e0c094.png" />
+</div>
+</div>
+</section>
+</section>
+
+<div class="section ablog__blog_comments">
+   
+</div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../../index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">p14_us_treasury_yield_curve_construction_and_model_comparison</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="analysis_pipeline_tour_ipynb.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Analysis Pipeline Tour: Treasury Curve Replication</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">CRSP Treasury Data Overview</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#database-description">Database Description</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#raw-crsp-treasury-inputs">1. Raw CRSP Treasury Inputs</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#key-columns-we-care-about-downstream">Key columns we care about downstream:</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#cleaning-pipeline-via-tidy-crsp-treasury-py">Cleaning Pipeline via <code class="docutils literal notranslate"><span class="pre">tidy_CRSP_treasury.py</span></code></a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#run-the-pipeline-end-to-end">Run the pipeline end-to-end:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-by-step-tour-via-intermediate-dataframes">Step-by-step tour via Intermediate DataFrames</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sanity-checks">3. Sanity Checks</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#runness-indicators-maturity-flags">4. Runness Indicators &amp; Maturity Flags</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#yield-curve-snapshot">5. Yield Curve Snapshot</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-output-how-it-is-used">6. The Output &amp; How It Is Used</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#downstream-analysis-example-fit-error-metrics">7. Downstream Analysis Example: Fit Error Metrics</a></li>
+</ul>
+</li>
+</ul>
+
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Phoebe Fingold, Annie Reynolds
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2025, Phoebe Fingold, Annie Reynolds.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

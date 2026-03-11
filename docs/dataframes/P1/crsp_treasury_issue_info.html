@@ -172,7 +172,13 @@
                 </a>
             </li>
         </ul>
-        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Pipeline Charts 📈</span></p>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Notebooks 📖</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/P1/CRSP_treasury_data_tour_ipynb.html">CRSP Treasury Data Overview</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks/P1/analysis_pipeline_tour_ipynb.html">Analysis Pipeline Tour: Treasury Curve Replication</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Pipeline Charts 📈</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../../charts.html">Chart List</a></li>
 </ul>
@@ -200,7 +206,7 @@
   <ul>
      
     <li>
-      <a href="../../charts/index/category/null.html">null (2)</a>
+      <a href="../../charts/index/category/null.html">null (5)</a>
     </li>
      
   </ul>
@@ -216,11 +222,11 @@
   <h3><a href="../../charts/index/tag.html">Tags</a></h3>
   <ul class="ablog-cloud">
      
-    <li class="ablog-cloud ablog-cloud-3">
+    <li class="ablog-cloud ablog-cloud-1">
       <a href="../../charts/index/tag/crsp-treasury-database.html">CRSP Treasury Database</a>
     </li>
       
-    <li class="ablog-cloud ablog-cloud-3">
+    <li class="ablog-cloud ablog-cloud-5">
       <a href="../../charts/index/tag/federal-reserve-website.html">Federal Reserve Website</a>
     </li>
      
@@ -397,14 +403,15 @@ document.write(`
 <p>Placeholder.</p>
 <section id="dataframe-glimpse">
 <h2>DataFrame Glimpse<a class="headerlink" href="#dataframe-glimpse" title="Link to this heading">#</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Rows: 2264
-Columns: 8
-$ kytreasno                  &lt;f64&gt; 208504.0
-$ kycrspid                   &lt;str&gt; &#39;20321231.203880&#39;
-$ tcusip                     &lt;str&gt; &#39;91282CPQ&#39;
-$ tdatdt            &lt;datetime[ns]&gt; 2025-12-31 00:00:00
-$ tmatdt            &lt;datetime[ns]&gt; 2032-12-31 00:00:00
-$ tcouprt                    &lt;f64&gt; 3.875
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Rows: 7938
+Columns: 9
+$ kytreasno                  &lt;f64&gt; 208515.0
+$ kycrspid                   &lt;str&gt; &#39;20330131.204000&#39;
+$ tcusip                     &lt;str&gt; &#39;91282CPY&#39;
+$ tdatdt            &lt;datetime[ns]&gt; 2026-01-31 00:00:00
+$ tmatdt            &lt;datetime[ns]&gt; 2033-01-31 00:00:00
+$ tcouprt                    &lt;f64&gt; 4.0
+$ tfcpdt            &lt;datetime[ns]&gt; 2026-07-31 00:00:00
 $ itype                      &lt;f64&gt; 2.0
 $ original_maturity          &lt;f64&gt; 7.0
 
@@ -443,10 +450,10 @@ $ original_maturity          &lt;f64&gt; 7.0
 <td><p>Pulled via WRDS SQL query and stored as issue-level metadata</p></td>
 </tr>
 <tr class="row-odd"><td><p>Data available up to (min)</p></td>
-<td><p>2025-12-31 00:00:00</p></td>
+<td><p>2026-01-31 00:00:00</p></td>
 </tr>
 <tr class="row-even"><td><p>Data available up to (max)</p></td>
-<td><p>2025-12-31 00:00:00</p></td>
+<td><p>2026-02-03 00:00:00</p></td>
 </tr>
 <tr class="row-odd"><td><p>Dataframe Path</p></td>
 <td><p>/Users/phoebefingold/FINM_Repo/FINM_32900/p14_gurkaynak_sack_wright_2007/_data/TFZ_INFO.parquet</p></td>
@@ -484,7 +491,7 @@ $ original_maturity          &lt;f64&gt; 7.0
 <td><p><a href="file:///Users/phoebefingold/FINM_Repo/FINM_32900/p14_gurkaynak_sack_wright_2007/docs/index.html">Pipeline Web Page</p></td>
 </tr>
 <tr class="row-odd"><td><p>Date of Last Code Update</p></td>
-<td><p>2026-02-09 22:42:02</p></td>
+<td><p>2026-03-11 00:04:57</p></td>
 </tr>
 <tr class="row-even"><td><p>OS Compatibility</p></td>
 <td><p></p></td>
