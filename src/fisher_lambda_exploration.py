@@ -350,26 +350,40 @@ def _wrap_latex_table(tabular: str, caption: str = "", label: str = "") -> str:
     )
 
 
-def format_decade_table_latex(
-    df: pd.DataFrame,
-    caption: str = r"$\log_{10}(\lambda)$ by Decade",
-    label: str = "tab:lambda_decade",
-) -> str:
-    """Format the output of ``lambda_summary_by_decade()`` as a LaTeX string.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Output of :func:`lambda_summary_by_decade`.
-    caption, label : str
-        LaTeX caption and label strings.
+def _split_tabular(tabular: str) -> tuple[str, str, str, str]:
+    """Split a pandas tabular string into (begin_line, col_header, body, footer).
 
     Returns
     -------
-    str
-        Complete LaTeX fragment (``\\begingroup`` … ``\\endgroup``).
+    begin_line : str
+        The ``\\begin{tabular}{...}`` line.
+    col_header : str
+        Lines from ``\\toprule`` through the first ``\\midrule`` (inclusive).
+    body : str
+        Data rows between the first ``\\midrule`` and ``\\bottomrule``.
+    footer : str
+        Lines from ``\\bottomrule`` through ``\\end{tabular}`` (inclusive).
     """
-    display = df.copy()
+    lines = tabular.splitlines()
+    begin_idx     = next(i for i, l in enumerate(lines) if l.startswith(r"\begin{tabular}"))
+    toprule_idx   = next(i for i, l in enumerate(lines) if l.strip() == r"\toprule")
+    midrule_idx   = next(i for i, l in enumerate(lines) if l.strip() == r"\midrule")
+    bottomrule_idx = next(i for i, l in enumerate(lines) if l.strip() == r"\bottomrule")
+    end_idx       = next(i for i, l in enumerate(lines) if l.startswith(r"\end{tabular}"))
+
+    begin_line = lines[begin_idx]
+    col_header = "\n".join(lines[toprule_idx : midrule_idx + 1])
+    body       = "\n".join(lines[midrule_idx + 1 : bottomrule_idx])
+    footer     = "\n".join(lines[bottomrule_idx : end_idx + 1])
+    return begin_line, col_header, body, footer
+
+
+def _panel_header(ncols: int, text: str) -> str:
+    """Return a LaTeX row that spans all columns as an italicised panel label."""
+    return f"\\multicolumn{{{ncols}}}{{l}}{{\\textit{{{text}}}}} \\\\\n\\midrule"
+
+
+def _build_decade_display(df: pd.DataFrame) -> pd.DataFrame:
     col_rename = {
         "count": "N",
         "mean":  r"$\bar{x}$",
@@ -380,44 +394,15 @@ def format_decade_table_latex(
         "p75":   "p75",
         "p90":   "p90",
     }
-    display = display.rename(columns={k: v for k, v in col_rename.items() if k in display.columns})
+    display = df.rename(columns={k: v for k, v in col_rename.items() if k in df.columns})
     display.index.name = "Decade"
     display.columns = [f"\\textbf{{{c}}}" for c in display.columns]
-
-    tabular = display.to_latex(
-        index=True,
-        escape=False,
-        na_rep="",
-        float_format="{:.3f}".format,
-        column_format="l" + "r" * len(display.columns),
-    )
-    return _wrap_latex_table(tabular, caption=caption, label=label)
+    return display
 
 
-def format_regime_table_latex(
-    df: pd.DataFrame,
-    caption: str = r"$\log_{10}(\lambda)$ and Fit Quality by Regime",
-    label: str = "tab:lambda_regime",
-) -> str:
-    """Format the output of ``lambda_summary_by_regime()`` as a LaTeX string.
-
-    Only mean columns are included (std dropped for compactness). Hit rate is
-    displayed as a percentage.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Output of :func:`lambda_summary_by_regime`.
-    caption, label : str
-
-    Returns
-    -------
-    str
-        Complete LaTeX fragment.
-    """
+def _build_regime_display(df: pd.DataFrame) -> pd.DataFrame:
     mean_cols = ["n_dates"] + [c for c in df.columns if c.endswith("_mean")]
     display = df[mean_cols].copy()
-
     col_rename = {
         "n_dates":           "N",
         "log10_lambda_mean": r"$\overline{\log_{10}\lambda}$",
@@ -437,14 +422,106 @@ def format_regime_table_latex(
         )
 
     display.columns = [f"\\textbf{{{c}}}" for c in display.columns]
+    return display
 
-    tabular = display.to_latex(
-        index=True,
-        escape=False,
-        na_rep="",
-        float_format="{:.3f}".format,
-        column_format="l" + "r" * len(display.columns),
-    )
+
+def format_combined_decade_table_latex(
+    orig_df: pd.DataFrame,
+    modern_df: pd.DataFrame,
+    caption: str = r"$\log_{10}(\lambda)$ by Decade",
+    label: str = "tab:lambda_decade",
+) -> str:
+    """Format decade summary tables for both samples into a single LaTeX artifact.
+
+    Panel A covers the original (1970–1995) sample; Panel B covers the modern
+    (2006–2026) sample.
+
+    Parameters
+    ----------
+    orig_df, modern_df : pd.DataFrame
+        Outputs of :func:`lambda_summary_by_decade` for each sample.
+    caption, label : str
+
+    Returns
+    -------
+    str
+        Complete LaTeX fragment (``\\begingroup`` … ``\\endgroup``).
+    """
+    disp_orig   = _build_decade_display(orig_df)
+    disp_modern = _build_decade_display(modern_df)
+
+    ncols = 1 + len(disp_orig.columns)  # index col + data cols
+
+    col_fmt = "l" + "r" * len(disp_orig.columns)
+
+    tab_orig   = disp_orig.to_latex(index=True, escape=False, na_rep="",
+                                    float_format="{:.3f}".format, column_format=col_fmt)
+    tab_modern = disp_modern.to_latex(index=True, escape=False, na_rep="",
+                                      float_format="{:.3f}".format, column_format=col_fmt)
+
+    begin_line, col_header, body_orig,   footer = _split_tabular(tab_orig)
+    _,          _,          body_modern, _      = _split_tabular(tab_modern)
+
+    tabular = "\n".join([
+        begin_line,
+        col_header,
+        _panel_header(ncols, "Panel A: Original Sample (1970\u20131995)"),
+        body_orig,
+        "\\midrule",
+        _panel_header(ncols, "Panel B: Modern Sample (2006\u20132026)"),
+        body_modern,
+        footer,
+    ])
+    return _wrap_latex_table(tabular, caption=caption, label=label)
+
+
+def format_combined_regime_table_latex(
+    orig_df: pd.DataFrame,
+    modern_df: pd.DataFrame,
+    caption: str = r"$\log_{10}(\lambda)$ and Fit Quality by Regime",
+    label: str = "tab:lambda_regime",
+) -> str:
+    """Format regime summary tables for both samples into a single LaTeX artifact.
+
+    Panel A covers the original (1970–1995) sample; Panel B covers the modern
+    (2006–2026) sample.
+
+    Parameters
+    ----------
+    orig_df, modern_df : pd.DataFrame
+        Outputs of :func:`lambda_summary_by_regime` for each sample.
+    caption, label : str
+
+    Returns
+    -------
+    str
+        Complete LaTeX fragment.
+    """
+    disp_orig   = _build_regime_display(orig_df)
+    disp_modern = _build_regime_display(modern_df)
+
+    ncols = 1 + len(disp_orig.columns)
+
+    col_fmt = "l" + "r" * len(disp_orig.columns)
+
+    tab_orig   = disp_orig.to_latex(index=True, escape=False, na_rep="",
+                                    float_format="{:.3f}".format, column_format=col_fmt)
+    tab_modern = disp_modern.to_latex(index=True, escape=False, na_rep="",
+                                      float_format="{:.3f}".format, column_format=col_fmt)
+
+    begin_line, col_header, body_orig,   footer = _split_tabular(tab_orig)
+    _,          _,          body_modern, _      = _split_tabular(tab_modern)
+
+    tabular = "\n".join([
+        begin_line,
+        col_header,
+        _panel_header(ncols, "Panel A: Original Sample (1970\u20131995)"),
+        body_orig,
+        "\\midrule",
+        _panel_header(ncols, "Panel B: Modern Sample (2006\u20132026)"),
+        body_modern,
+        footer,
+    ])
     return _wrap_latex_table(tabular, caption=caption, label=label)
 
 
@@ -468,15 +545,14 @@ def export_lambda_table(latex_str: str, out_path: Path) -> None:
 # ---------------------------------------------------------------------------
 
 def main() -> None:
-    """Build and export Fisher lambda summary tables for both samples.
+    """Build and export combined Fisher lambda summary tables.
 
-    Reads DATA_DIR and OUTPUT_DIR from the project settings. Writes four
-    ``.tex`` files to OUTPUT_DIR::
+    Reads DATA_DIR and OUTPUT_DIR from the project settings. Writes two
+    ``.tex`` files to OUTPUT_DIR, each containing Panel A (original,
+    1970–1995) and Panel B (modern, 2006–2026)::
 
-        lambda_decade_table_original.tex
-        lambda_regime_table_original.tex
-        lambda_decade_table_modern.tex
-        lambda_regime_table_modern.tex
+        lambda_decade_table.tex
+        lambda_regime_table.tex
     """
     from settings import config
 
@@ -484,30 +560,23 @@ def main() -> None:
     out_dir  = Path(config("OUTPUT_DIR"))
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    samples = [
-        ("original", "1970\u20131995"),
-        ("modern",   "2006\u20132026"),
-    ]
-    for sample, date_range in samples:
+    def _load_and_prepare(sample: str) -> tuple[pd.DataFrame, pd.DataFrame]:
         df = load_lambda_data(data_dir, sample=sample)
         df = add_log_lambda(df)
         df = classify_lambda_regime(df)
+        return lambda_summary_by_decade(df), lambda_summary_by_regime(df)
 
-        decade_df = lambda_summary_by_decade(df)
-        decade_latex = format_decade_table_latex(
-            decade_df,
-            caption=rf"$\log_{{10}}(\lambda)$ by Decade \textemdash\ {date_range} Sample",
-            label=f"tab:lambda_decade_{sample}",
-        )
-        export_lambda_table(decade_latex, out_dir / f"lambda_decade_table_{sample}.tex")
+    decade_orig,  regime_orig   = _load_and_prepare("original")
+    decade_modern, regime_modern = _load_and_prepare("modern")
 
-        regime_df = lambda_summary_by_regime(df)
-        regime_latex = format_regime_table_latex(
-            regime_df,
-            caption=rf"$\log_{{10}}(\lambda)$ and Fit Quality by Regime \textemdash\ {date_range} Sample",
-            label=f"tab:lambda_regime_{sample}",
-        )
-        export_lambda_table(regime_latex, out_dir / f"lambda_regime_table_{sample}.tex")
+    export_lambda_table(
+        format_combined_decade_table_latex(decade_orig, decade_modern),
+        out_dir / "lambda_decade_table.tex",
+    )
+    export_lambda_table(
+        format_combined_regime_table_latex(regime_orig, regime_modern),
+        out_dir / "lambda_regime_table.tex",
+    )
 
     print("Fisher lambda tables written to", out_dir)
 
