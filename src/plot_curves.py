@@ -7,7 +7,7 @@ create overlays of all methods plus GSW.
 Set (2): For each method, plot discount/spot/forward curves across those
 selected dates.
 
-Outputs: plots saved to docs/charts directory
+Outputs: plots saved to _output directory
 
 """
 from pathlib import Path
@@ -21,7 +21,7 @@ from settings import config
 
 SRC_DIR = Path(__file__).resolve().parent
 ROOT_DIR = SRC_DIR.parent
-CHARTS_DIR = ROOT_DIR / "docs" / "charts"
+CHARTS_DIR = Path(config("OUTPUT_DIR"))
 CHARTS_DIR.mkdir(parents=True, exist_ok=True)
 DATA_DIR = Path(config("DATA_DIR"))
 
