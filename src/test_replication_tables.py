@@ -15,6 +15,7 @@ MIN_PASS_RATE = 0.90
 
 
 def _collect_diffs(sample_label, paper_values):
+    """Collect absolute paper-vs-replication differences for one sample label."""
     replication_values = compute_replication_values(sample_label)
     diffs = []
     for key, paper_value in paper_values.items():
