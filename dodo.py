@@ -551,6 +551,8 @@ def task_build_correlation_metrics():
             DATA_DIR / "method_pairwise_correlation_forward_instant_cc.csv",
             OUTPUT_DIR / "method_corr_heatmap_spot_cc.png",
             OUTPUT_DIR / "method_corr_heatmap_forward_instant_cc.png",
+            BASE_DIR / "docs" / "charts" / "method_corr_heatmap_spot_cc.html",
+            BASE_DIR / "docs" / "charts" / "method_corr_heatmap_forward_instant_cc.html",
         ],
         "file_dep": [
             "./src/settings.py",
@@ -574,7 +576,7 @@ def task_build_correlation_metrics():
 
 def task_build_curve_plots():
     """Create all method curve plots and method-vs-GSW overlays"""
-    chart_targets = [
+    chart_targets_png = [
         "methods_vs_gsw_low_corr_discount.png",
         "methods_vs_gsw_low_corr_spot_cc.png",
         "methods_vs_gsw_low_corr_fwd_instant_cc.png",
@@ -593,6 +595,28 @@ def task_build_curve_plots():
         "waggoner_discount_selected_dates.png",
         "waggoner_spot_cc_selected_dates.png",
         "waggoner_fwd_instant_cc_selected_dates.png",
+    ]
+    chart_targets_html = [
+        "methods_vs_gsw_low_corr_discount.html",
+        "methods_vs_gsw_low_corr_spot_cc.html",
+        "methods_vs_gsw_low_corr_fwd_instant_cc.html",
+        "methods_vs_gsw_median_corr_discount.html",
+        "methods_vs_gsw_median_corr_spot_cc.html",
+        "methods_vs_gsw_median_corr_fwd_instant_cc.html",
+        "methods_vs_gsw_high_corr_discount.html",
+        "methods_vs_gsw_high_corr_spot_cc.html",
+        "methods_vs_gsw_high_corr_fwd_instant_cc.html",
+        "mcc_discount_selected_dates.html",
+        "mcc_spot_cc_selected_dates.html",
+        "mcc_fwd_instant_cc_selected_dates.html",
+        "fisher_discount_selected_dates.html",
+        "fisher_spot_cc_selected_dates.html",
+        "fisher_fwd_instant_cc_selected_dates.html",
+        "waggoner_discount_selected_dates.html",
+        "waggoner_spot_cc_selected_dates.html",
+        "waggoner_fwd_instant_cc_selected_dates.html",
+    ]
+    chart_targets_other = [
         "curve_plot_manifest.csv",
     ]
     return {
@@ -600,7 +624,11 @@ def task_build_curve_plots():
             "ipython ./src/settings.py",
             "ipython ./src/plot_curves.py",
         ],
-        "targets": [OUTPUT_DIR / f for f in chart_targets],
+        "targets": [
+            *[OUTPUT_DIR / f for f in chart_targets_png],
+            *[BASE_DIR / "docs" / "charts" / f for f in chart_targets_html],
+            *[OUTPUT_DIR / f for f in chart_targets_other],
+        ],
         "file_dep": [
             "./src/settings.py",
             "./src/plot_curves.py",
@@ -639,6 +667,50 @@ def task_build_fisher_figure7_plot():
         ],
         "task_dep": [
             "build_fisher_yield_curve",
+        ],
+        "clean": True,
+    }
+
+
+def task_build_chartbook_replication_pages():
+    """Build aggregate chartbook HTML pages for replication figures."""
+    return {
+        "actions": [
+            "ipython ./src/settings.py",
+            "ipython ./src/build_chartbook_replication_pages.py",
+        ],
+        "targets": [
+            BASE_DIR / "docs" / "charts" / "replication_method_curves.html",
+            BASE_DIR / "docs" / "charts" / "replication_gsw_overlays.html",
+            BASE_DIR / "docs" / "charts" / "replication_correlation_heatmaps.html",
+        ],
+        "file_dep": [
+            "./src/settings.py",
+            "./src/build_chartbook_replication_pages.py",
+            BASE_DIR / "_output" / "mcc_discount_selected_dates.png",
+            BASE_DIR / "_output" / "mcc_spot_cc_selected_dates.png",
+            BASE_DIR / "_output" / "mcc_fwd_instant_cc_selected_dates.png",
+            BASE_DIR / "_output" / "fisher_discount_selected_dates.png",
+            BASE_DIR / "_output" / "fisher_spot_cc_selected_dates.png",
+            BASE_DIR / "_output" / "fisher_fwd_instant_cc_selected_dates.png",
+            BASE_DIR / "_output" / "waggoner_discount_selected_dates.png",
+            BASE_DIR / "_output" / "waggoner_spot_cc_selected_dates.png",
+            BASE_DIR / "_output" / "waggoner_fwd_instant_cc_selected_dates.png",
+            BASE_DIR / "_output" / "methods_vs_gsw_low_corr_discount.png",
+            BASE_DIR / "_output" / "methods_vs_gsw_low_corr_spot_cc.png",
+            BASE_DIR / "_output" / "methods_vs_gsw_low_corr_fwd_instant_cc.png",
+            BASE_DIR / "_output" / "methods_vs_gsw_median_corr_discount.png",
+            BASE_DIR / "_output" / "methods_vs_gsw_median_corr_spot_cc.png",
+            BASE_DIR / "_output" / "methods_vs_gsw_median_corr_fwd_instant_cc.png",
+            BASE_DIR / "_output" / "methods_vs_gsw_high_corr_discount.png",
+            BASE_DIR / "_output" / "methods_vs_gsw_high_corr_spot_cc.png",
+            BASE_DIR / "_output" / "methods_vs_gsw_high_corr_fwd_instant_cc.png",
+            BASE_DIR / "_output" / "method_corr_heatmap_spot_cc.png",
+            BASE_DIR / "_output" / "method_corr_heatmap_forward_instant_cc.png",
+        ],
+        "task_dep": [
+            "build_curve_plots",
+            "build_correlation_metrics",
         ],
         "clean": True,
     }
@@ -763,6 +835,7 @@ def task_build_chartbook_site():
         "task_dep": [
             #"run_notebooks",
             "create_diagnostic_charts",
+            "build_chartbook_replication_pages",
         ],
         "clean": True,
     }

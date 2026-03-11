@@ -15,12 +15,15 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import plotly.graph_objects as go
 
 import correlation_metrics as cm
 from settings import config
 
-CHARTS_DIR = Path(config("OUTPUT_DIR"))
-CHARTS_DIR.mkdir(parents=True, exist_ok=True)
+OUTPUT_CHARTS_DIR = Path(config("OUTPUT_DIR"))
+DOCS_CHARTS_DIR = Path(config("BASE_DIR")) / "docs" / "charts"
+OUTPUT_CHARTS_DIR.mkdir(parents=True, exist_ok=True)
+DOCS_CHARTS_DIR.mkdir(parents=True, exist_ok=True)
 DATA_DIR = Path(config("DATA_DIR"))
 
 METHOD_DISPLAY = {
@@ -64,9 +67,16 @@ def _curve_for_date(curve_df, date):
 
 
 def plot_named_curves(
-    named_curves, x_col, y_col, title, y_axis_title, out_image, extra_traces=None
+    named_curves,
+    x_col,
+    y_col,
+    title,
+    y_axis_title,
+    out_image,
+    out_html=None,
+    extra_traces=None,
 ):
-    """Plot multiple curves and save as a static PNG image."""
+    """Plot multiple curves and save as PNG, and optionally as interactive HTML."""
     fig, ax = plt.subplots(figsize=(11, 6))
 
     for name, df in named_curves.items():
@@ -95,6 +105,43 @@ def plot_named_curves(
     fig.tight_layout()
     fig.savefig(out_image, dpi=220, bbox_inches="tight")
     plt.close(fig)
+
+    if out_html is not None:
+        fig_html = go.Figure()
+        for name, df in named_curves.items():
+            fig_html.add_trace(
+                go.Scatter(
+                    x=df[x_col],
+                    y=df[y_col],
+                    mode="lines",
+                    name=name,
+                )
+            )
+        if extra_traces:
+            for tr in extra_traces:
+                fig_html.add_trace(
+                    go.Scatter(
+                        x=tr["df"][tr.get("x_col", x_col)],
+                        y=tr["df"][tr.get("y_col", y_col)],
+                        mode="lines",
+                        name=tr["name"],
+                        line=dict(
+                            dash=tr.get("dash", "dash"),
+                            width=tr.get("width", 2),
+                        ),
+                    )
+                )
+        fig_html.update_layout(
+            title=title,
+            xaxis_title="Time to Maturity (Years)",
+            yaxis_title=y_axis_title,
+            legend_title="Series",
+            template="plotly_white",
+        )
+        out_html = Path(out_html)
+        out_html.parent.mkdir(parents=True, exist_ok=True)
+        fig_html.write_html(out_html, include_plotlyjs="cdn")
+
     return out_image
 
 
@@ -129,14 +176,16 @@ def _build_set_one_plots(curves_by_method, selected_dates):
         gsw_txt = pd.to_datetime(actual_gsw_date).date()
 
         for spec in CURVE_SPECS.values():
-            out_path = CHARTS_DIR / f"methods_vs_gsw_{label}_{spec['slug']}.png"
+            out_png = OUTPUT_CHARTS_DIR / f"methods_vs_gsw_{label}_{spec['slug']}.png"
+            out_html = DOCS_CHARTS_DIR / f"methods_vs_gsw_{label}_{spec['slug']}.html"
             plot_named_curves(
                 named_curves=named_method_curves,
                 x_col="T",
                 y_col=spec["col"],
                 title=f"{spec['title']}: Methods vs GSW ({label_text}, date={dt_txt}, GSW={gsw_txt})",
                 y_axis_title=spec["yaxis"],
-                out_image=out_path,
+                out_image=out_png,
+                out_html=out_html,
                 extra_traces=[
                     {
                         "name": f"GSW ({gsw_txt})",
@@ -146,7 +195,7 @@ def _build_set_one_plots(curves_by_method, selected_dates):
                     }
                 ],
             )
-            generated.append(out_path)
+            generated.extend([out_png, out_html])
 
     return generated
 
@@ -170,16 +219,18 @@ def _build_set_two_plots(curves_by_method, selected_dates):
             if not named_curves:
                 continue
 
-            out_path = CHARTS_DIR / f"{method}_{spec['slug']}_selected_dates.png"
+            out_png = OUTPUT_CHARTS_DIR / f"{method}_{spec['slug']}_selected_dates.png"
+            out_html = DOCS_CHARTS_DIR / f"{method}_{spec['slug']}_selected_dates.html"
             plot_named_curves(
                 named_curves=named_curves,
                 x_col="T",
                 y_col=spec["col"],
                 title=f"{METHOD_DISPLAY[method]} {spec['title']} (selected dates)",
                 y_axis_title=spec["yaxis"],
-                out_image=out_path,
+                out_image=out_png,
+                out_html=out_html,
             )
-            generated.append(out_path)
+            generated.extend([out_png, out_html])
 
     return generated
 
@@ -195,10 +246,11 @@ def main():
     generated.extend(_build_set_two_plots(curves_by_method, selected_dates))
 
     manifest = pd.DataFrame({"file": [str(p) for p in generated]})
-    manifest_path = CHARTS_DIR / "curve_plot_manifest.csv"
+    manifest_path = OUTPUT_CHARTS_DIR / "curve_plot_manifest.csv"
     manifest.to_csv(manifest_path, index=False)
 
-    print("Wrote curve plots to:", CHARTS_DIR.resolve())
+    print("Wrote curve PNG plots to:", OUTPUT_CHARTS_DIR.resolve())
+    print("Wrote curve HTML plots to:", DOCS_CHARTS_DIR.resolve())
     print("Wrote manifest:", manifest_path.resolve())
 
 

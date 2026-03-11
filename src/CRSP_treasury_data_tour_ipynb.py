@@ -9,7 +9,7 @@
 # ---
 
 # %% [markdown]
-# # CRSP Treasury Data Oveview
+# # CRSP Treasury Data Overview
 #
 # The CRSP US Treasury Database is a comprehensive source of historical Treasury security data maintained by the Center for Research in Security Prices at the University of Chicago's Booth School of Business. This section provides an essential overview of this critical dataset, which will serve as the foundation for our subsequent replication of the Gürkaynak, Sack, and Wright (2006) & Waggoner (1997) yield curve estimation methodologies.
 
@@ -85,7 +85,7 @@ tfz_compact = (
 display(tfz_compact)
 
 # %% [markdown]
-# # 2. Cleaning Pipeline via `tidy_CRSP_treasury.py`
+# # Cleaning Pipeline via `tidy_CRSP_treasury.py`
 
 # %% [markdown]
 # The file `tidy_CRSP_treasury.py` implements a small explicit pipeline to prepare the `TFZ_with_runness.parquet` file for curve estimation via the following steps:

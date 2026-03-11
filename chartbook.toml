@@ -22,6 +22,12 @@ README_file_path = "./README.md"
 
 [notebooks]
 
+[notebooks.crsp_treasury_data_tour]
+notebook_path = "./_output/CRSP_treasury_data_tour_ipynb.ipynb"
+
+[notebooks.analysis_pipeline_tour]
+notebook_path = "./_output/analysis_pipeline_tour_ipynb.ipynb"
+
 
 [dataframes]
 
@@ -93,3 +99,23 @@ dataframe_id = "fed_yield_curve_all"
 path_to_html_chart = "./_output/fed_yield_curve_sample_plot.html"
 chart_docs_path = "./docs_src/charts/fed_yield_curve_sample_plot.md"
 
+[charts.replication_method_curves]
+chart_name = "Spline Method Curves (Discount, Spot, Forward)"
+short_description_chart = "Chartbook page with discount, spot, and forward curve series for each replication method."
+dataframe_id = "fed_yield_curve_all"
+path_to_html_chart = "./docs/charts/replication_method_curves.html"
+chart_docs_path = "./docs_src/charts/replication_method_curves.md"
+
+[charts.replication_gsw_overlays]
+chart_name = "GSW vs Spline Method Overlays (Low/Median/High Correlation Dates)"
+short_description_chart = "Chartbook page with GSW overlays against the spline methods for representative low/median/high-correlation dates."
+dataframe_id = "fed_yield_curve_all"
+path_to_html_chart = "./docs/charts/replication_gsw_overlays.html"
+chart_docs_path = "./docs_src/charts/replication_gsw_overlays.md"
+
+[charts.replication_correlation_heatmaps]
+chart_name = "Spline Method Pairwise Correlation Heatmaps"
+short_description_chart = "Chartbook page with spot and forward pairwise method correlation heatmaps."
+dataframe_id = "fed_yield_curve_all"
+path_to_html_chart = "./docs/charts/replication_correlation_heatmaps.html"
+chart_docs_path = "./docs_src/charts/replication_correlation_heatmaps.md"
