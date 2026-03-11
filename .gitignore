@@ -33,11 +33,16 @@ drafts/draft_bp.pdf
 # Sphinx build files
 _docs/
 
-# Generated charts
-docs/charts/
-
 # Data artifacts
 _data/*.parquet
+
+# Generated chartbook folders to keep out of git
+docs/charts/
+docs/dataframes/
+docs/_downloads/
+docs/_sources/
+docs/_static/
+docs_src/charts/
 
 
 ##############

@@ -5,6 +5,12 @@ p14_us_treasury_yield_curve_construction_and_model_comparison
 
 This project studies how the U.S. Treasury yield curve is constructed and how different modeling choices affect its shape and interpretation.
 
+## High Level Summary of Our Project: The U.S. Treasury Yield Curve: Construction and Model Comparison
+
+This project studies how the U.S. Treasury yield curve is constructed and how different modeling choices affect its shape and interpretation. We were given working code that reproduces the Gurkaynak-Sack-Wright (GSW) zero-coupon Treasury yield curve, which is widely used in academic and policy work. The GSW curve is based on the Nelson-Siegel-Svensson parametric framework. Our main task in this project is to extend the provided code by estimating and comparing alternative yield-curve methodologies that use interpolation rather than parameterization, as surveyed in Waggoner (1997), including spline-based and arbitrage-free approaches used by central banks. In particular, we seek to replicate the McCulloch (regression splines) and Fisher & VRP (smoothed spline with roughness penalty) approaches outlined by Waggoner. Following a successful replication of these approaches, we compare models in terms of in-sample and out-of-sample fits, smoothness, and behavior across maturities.
+
+This chartbook page provides a further look into the visuals and charts we created to understand the data, how the various replication methods behaved over time, and how they varied on days with low, median, and high correlation.
+
 ## Quick Start
 
 The quickest way to run code in this repo is to use the following steps.
@@ -155,4 +161,3 @@ To update the requirements file after adding new packages:
 ```bash
 pip freeze > requirements.txt
 ```
-

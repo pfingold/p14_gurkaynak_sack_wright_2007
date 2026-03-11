@@ -6,21 +6,24 @@ Compute two sets of date-level correlation metrics:
 This module loads saved curve outputs from `_data`, converts each method to a
 common representation, computes correlations on a shared maturity grid, and
 writes summary artifacts to `_data`. 
-The correlation heatmaps are saved to `_output`.
+The correlation heatmaps are saved to both `_output` (PNG) and `docs/charts` (HTML).
 """
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import plotly.graph_objects as go
 
 import curve_conversions as cc
 import pull_yield_curve_data
 from settings import config
 
 DATA_DIR = Path(config("DATA_DIR"))
-CHARTS_DIR = Path(config("OUTPUT_DIR"))
-CHARTS_DIR.mkdir(parents=True, exist_ok=True)
+OUTPUT_CHARTS_DIR = Path(config("OUTPUT_DIR"))
+DOCS_CHARTS_DIR = Path(config("BASE_DIR")) / "docs" / "charts"
+OUTPUT_CHARTS_DIR.mkdir(parents=True, exist_ok=True)
+DOCS_CHARTS_DIR.mkdir(parents=True, exist_ok=True)
 
 METHOD_FILE_MAP = {
     "mcc": "mcc_discount_curve.parquet",
@@ -305,13 +308,25 @@ def compute_and_save_correlation_metrics(curves_by_method=None, data_dir=DATA_DI
     _write_method_heatmap_image(
         pairwise_overall=pairwise_overall,
         curve_type="spot_cc",
-        out_path=CHARTS_DIR / "method_corr_heatmap_spot_cc.png",
+        out_path=OUTPUT_CHARTS_DIR / "method_corr_heatmap_spot_cc.png",
+        title="Method Correlation Heatmap: Spot (CC)",
+    )
+    _write_method_heatmap_html(
+        pairwise_overall=pairwise_overall,
+        curve_type="spot_cc",
+        out_path=DOCS_CHARTS_DIR / "method_corr_heatmap_spot_cc.html",
         title="Method Correlation Heatmap: Spot (CC)",
     )
     _write_method_heatmap_image(
         pairwise_overall=pairwise_overall,
         curve_type="forward_instant_cc",
-        out_path=CHARTS_DIR / "method_corr_heatmap_forward_instant_cc.png",
+        out_path=OUTPUT_CHARTS_DIR / "method_corr_heatmap_forward_instant_cc.png",
+        title="Method Correlation Heatmap: Instantaneous Forward (CC)",
+    )
+    _write_method_heatmap_html(
+        pairwise_overall=pairwise_overall,
+        curve_type="forward_instant_cc",
+        out_path=DOCS_CHARTS_DIR / "method_corr_heatmap_forward_instant_cc.html",
         title="Method Correlation Heatmap: Instantaneous Forward (CC)",
     )
 
@@ -413,6 +428,40 @@ def _write_method_heatmap_image(pairwise_overall, curve_type, out_path, title):
     fig.tight_layout()
     fig.savefig(out_path, dpi=220, bbox_inches="tight")
     plt.close(fig)
+
+
+def _write_method_heatmap_html(pairwise_overall, curve_type, out_path, title):
+    """Write an interactive method-correlation heatmap as HTML."""
+    mat = _pairwise_matrix(pairwise_overall, curve_type=curve_type)
+    label_map = {k: v for k, v in METHOD_LABELS.items()}
+    x_labels = [label_map[m] for m in mat.columns]
+    y_labels = [label_map[m] for m in mat.index]
+    z = mat.to_numpy(dtype=float)
+    z_text = np.round(z, 3).astype(str)
+
+    fig = go.Figure(
+        data=go.Heatmap(
+            z=z,
+            x=x_labels,
+            y=y_labels,
+            zmin=-1,
+            zmax=1,
+            colorscale="Spectral",
+            reversescale=True,
+            text=z_text,
+            texttemplate="%{text}",
+            hovertemplate="Method X: %{x}<br>Method Y: %{y}<br>Corr: %{z:.3f}<extra></extra>",
+        )
+    )
+    fig.update_layout(
+        title=title,
+        xaxis_title="Method",
+        yaxis_title="Method",
+        template="plotly_white",
+    )
+    out_path = Path(out_path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.write_html(out_path, include_plotlyjs="cdn")
 
 
 def main():

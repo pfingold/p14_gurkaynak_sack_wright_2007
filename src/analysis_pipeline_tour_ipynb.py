@@ -15,10 +15,10 @@
 # portions of the project in a lightweight way.
 # It covers four processes:
 #
-# 1. Prepare cleaned Treasury data for estimation via `tidy_CRSP_treasury`
-# 2. Run a short-slice McCulloch replication via `run_mcc_yield_curve`
-# 3. Run a short-slice Fisher replication via `run_fisher_yield_curve`
-# 4. Run a short-slice Waggoner replication via `run_waggoner_yield_curve`
+# - Prepare cleaned Treasury data for estimation via `tidy_CRSP_treasury`
+# - Run a short-slice McCulloch replication via `run_mcc_yield_curve`
+# - Run a short-slice Fisher replication via `run_fisher_yield_curve`
+# - Run a short-slice Waggoner replication via `run_waggoner_yield_curve`
 #
 # This notebook intentionally does *not* run the entire project pipeline, so it stays fast enough
 # for iterative exploration.
