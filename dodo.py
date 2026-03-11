@@ -566,7 +566,7 @@ def task_build_curve_plots():
             "ipython ./src/settings.py",
             "ipython ./src/plot_curves.py",
         ],
-        "targets": [BASE_DIR / "docs" / "charts" / f for f in chart_targets],
+        "targets": [OUTPUT_DIR / f for f in chart_targets],
         "file_dep": [
             "./src/settings.py",
             "./src/plot_curves.py",
