@@ -260,9 +260,10 @@ def _read_metrics_file(path):
     return df[["bucket", "wmae", "hit_rate"]].copy()
 
 
-def _resolve_metrics_path(file_stem, sample_label):
+def _resolve_metrics_path(file_stem, sample_label, modern=False):
     "Given a method's file stem and sample label, determine the path to the corresponding metrics file (csv or parquet) in the data directory."
     suffix = "_error_metrics" if sample_label == "in" else "_oos_error_metrics"
+    prefix = "modern_" if modern else ""
     candidates = [
         DATA_DIR / f"{file_stem}{suffix}.parquet",
         DATA_DIR / f"{file_stem}{suffix}.csv",
@@ -306,6 +307,16 @@ def main():
     repl_1b = compute_replication_values("out")
     table_1b = build_extended_table(paper_1b, repl_1b, title="Table 1b: Out-of-Sample Fit")
     export_to_latex(table_1b, out_dir / "table_1b_fit.tex")
+
+    #Table 2a - Modern In-Sample
+    repl_2a = compute_replication_values("in")
+    table_2a = build_extended_table(paper_1a, repl_2a, title="Table 2a: Modern Sample (2006-2026) In-Sample Fit")
+    export_to_latex(table_2a, out_dir / "table_2a_fit.tex")
+
+    #Table 2b - Modern Out-of-Sample
+    repl_2b = compute_replication_values("out")
+    table_2b = build_extended_table(paper_1b, repl_2b, title="Table 2b: Modern Sample (2006-2026) Out-of-Sample Fit")
+    export_to_latex(table_2b, out_dir / "table_2b_fit.tex")
 
 if __name__ == "__main__":
     main()
