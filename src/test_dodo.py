@@ -34,9 +34,13 @@ def test_CRSP_treasury_data_exists():
     assert (DATA_DIR / "TFZ_INFO.parquet").exists()
     assert (DATA_DIR / "TFZ_with_runness.parquet").exists()
 
-def test_new_notebook_outputs_exist():
-    """Test that the CRSP treasury tour notebook outputs were created"""
-    notebook = "CRSP_treasury_data_tour_ipynb"
+def test_notebook_outputs_exist():
+    """Test that notebook outputs were created."""
+    notebooks = [
+        "CRSP_treasury_data_tour_ipynb",
+        "analysis_pipeline_tour_ipynb",
+    ]
 
-    assert (OUTPUT_DIR / f"{notebook}.html").exists(), f"Missing HTML for {notebook}"
-    assert (OUTPUT_DIR / f"{notebook}.ipynb").exists(), f"Missing notebook copy for {notebook}"
+    for notebook in notebooks:
+        assert (OUTPUT_DIR / f"{notebook}.html").exists(), f"Missing HTML for {notebook}"
+        assert (OUTPUT_DIR / f"{notebook}.ipynb").exists(), f"Missing notebook copy for {notebook}"

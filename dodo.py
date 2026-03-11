@@ -640,6 +640,12 @@ notebook_tasks = {
         "file_dep": [],
         "targets": [],
     },
+    #Analysis Pipeline Tour Notebook
+    "analysis_pipeline_tour_ipynb": {
+        "path": "./src/analysis_pipeline_tour_ipynb.py",
+        "file_dep": [],
+        "targets": [],
+    },
 }
 
 
