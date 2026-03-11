@@ -1,5 +1,6 @@
 """
-Build Table 1a / 1b (in-sample & out-of-sample) for:
+Build Table 1a / 1b (in-sample & out-of-sample) 
+and Table 2a / 2b (using dates up to the present) for:
 - Metrics: WMAE, Hit Rate
 - Methods: McCulloch, Fisher, Waggoner
 and extend the paper tables by adding our replication values side-by-side
