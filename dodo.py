@@ -209,6 +209,23 @@ def task_config():
         "clean": [],
     }
 
+
+def task_test_unit():
+    """Run unit tests in src/test_*.py."""
+    return {
+        "actions": [
+            "pytest -q src/test_*.py",
+        ],
+        "file_dep": [
+            "./src/test_curve_fitting_utils.py",
+            "./src/test_dodo.py",
+            "./src/test_error_metrics.py",
+            "./src/test_replication_tables.py",
+            "./src/test_correlation_metrics.py",
+        ],
+        "clean": [],
+    }
+
 #Separately Load Data Sources, Can Be Updated Individually
 def task_pull_CRSP_treasury():
     """Pull CRSP Treasury data from WRDS"""
