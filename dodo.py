@@ -222,6 +222,9 @@ def task_test_unit():
             "./src/test_error_metrics.py",
             "./src/test_replication_tables.py",
             "./src/test_correlation_metrics.py",
+            "./src/test_run_mcc_yield_curve.py",
+            "./src/test_run_fisher_yield_curve.py",
+            "./src/test_run_waggoner_yield_curve.py",
         ],
         "clean": [],
     }
