@@ -648,30 +648,6 @@ def task_build_curve_plots():
     }
 
 
-def task_build_fisher_figure7_plot():
-    """Create the Fisher Figure 7 style plot for February 28, 1977."""
-    return {
-        "actions": [
-            "ipython ./src/settings.py",
-            "ipython ./src/plot_fisher_figure7.py",
-        ],
-        "targets": [
-            BASE_DIR / "docs" / "charts" / "fisher_figure7_1977_02_28.html",
-        ],
-        "file_dep": [
-            "./src/settings.py",
-            "./src/plot_fisher_figure7.py",
-            DATA_DIR / "fisher_forward_curve.parquet",
-            DATA_DIR / "fisher_bond_fits.parquet",
-            DATA_DIR / "fisher_oos_bond_fits.parquet",
-        ],
-        "task_dep": [
-            "build_fisher_figure7",
-        ],
-        "clean": True,
-    }
-
-
 def task_build_chartbook_replication_pages():
     """Build aggregate chartbook HTML pages for replication figures."""
     return {
@@ -712,26 +688,6 @@ def task_build_chartbook_replication_pages():
             "build_curve_plots",
             "build_correlation_metrics",
         ],
-        "clean": True,
-    }
-
-#Temporarily Disabling Summary Stats Task for Setup Ease
-def DISABLE_task_summary_stats_disabled():
-    """Generate summary statistics tables"""
-    file_dep = ["./src/example_table.py"]
-    file_output = [
-        "example_table.tex",
-        "pandas_to_latex_simple_table1.tex",
-    ]
-    targets = [OUTPUT_DIR / file for file in file_output]
-
-    return {
-        "actions": [
-            "ipython ./src/example_table.py",
-            "ipython ./src/pandas_to_latex_demo.py",
-        ],
-        "targets": targets,
-        "file_dep": file_dep,
         "clean": True,
     }
 

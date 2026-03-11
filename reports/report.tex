@@ -16,8 +16,8 @@
 \usepackage{booktabs}
 \usepackage{multirow}
 
-\title{Your Paper}
-\author{You}
+\title{Replication of Waggoner (1997) Spline Methods for Extracting Interest Rate Curves from Bond Prices}
+\author{Annie Reynolds \& Phoebe Fingold}
 
 \begin{document}
 \maketitle
@@ -72,32 +72,32 @@ Waggoner (1997) extends Fisher's smoothed-spline framework by replacing the sing
 \begin{table}[htbp]
 \centering
 \input{../_output/table_1a_fit.tex}
-\caption{In-Sample results on replicated fitted spline curves vs. Waggonner's paper}
+\caption{Comparison of replication results to the original paper for the in-sample period. The table reports weighted mean absolute pricing error (WMAE) and bid-ask hit rates across maturity buckets for the McCulloch, Fisher, and Waggoner spline methods. The key takeaway is that the replicated models broadly reproduce the performance patterns reported in the original study, confirming that the implementation successfully matches the behavior of the published methods.}
 \label{tab:1a}
 \end{table}
 
 \begin{table}[htbp]
 \centering
 \input{../_output/table_1b_fit.tex}
-\caption{Out-of-sample results on replicated fitted spline curves vs. Waggonner's paper}
+\caption{Out-of-sample performance of the replicated spline models compared with the original paper. The table evaluates WMAE and bid-ask hit rates across maturity buckets. The main takeaway is that the replication produces similar relative performance across methods and maturities, suggesting the implementation generalizes reasonably well outside the estimation sample.}
 \label{tab:1b}
 \end{table}
 
-\textbf{Note on Replication Tables:} To evaluate the success of our replication, we compared our estimated results to those reported in the original paper using two key performance metrics: Hit Rate and Weighted Mean Absolute Error (WMAE). Because minor implementation differences, numerical optimization procedures, and sample construction can lead to small deviations from published results, we adopted a tolerance-based approach to assessing replication accuracy. Specifically, we required that at least 90\% of the results across both the in-sample (IS) and out-of-sample (OOS) periods fall within a predefined threshold of the original paper’s values. The thresholds were set at 8% for Hit Rate and 10% for WMAE relative to the published results. Using this criterion, our replication results are broadly consistent with those reported in the paper, indicating that our implementation successfully reproduces the key empirical findings of the original study.
+\textbf{Note on Replication Tables:} To evaluate the success of our replication, we compared our estimated results to those reported in the original paper using two key performance metrics: Hit Rate and Weighted Mean Absolute Error (WMAE). Because minor implementation differences, numerical optimization procedures, and sample construction can lead to small deviations from published results, we adopted a tolerance-based approach to assessing replication accuracy. Specifically, we required that at least 90\% of the results across both the in-sample (IS) and out-of-sample (OOS) periods fall within a predefined threshold of the original paper’s values. The thresholds were set at 8\% for Hit Rate and 10\% for WMAE relative to the published results. Using this criterion, our replication results are broadly consistent with those reported in the paper, indicating that our implementation successfully reproduces the key empirical findings of the original study.
 
 \subsection{Replication Results Using Modern Data Sample}
 
 \begin{table}[htbp]
 \centering
 \input{../_output/table_2a_fit.tex}
-\caption{In-Sample results on replicated fitted spline curves using data from the past 20 years}
+\caption{Model fitting performance using the modern Treasury sample (last 20 years). The table reports in-sample WMAE and hit rates for each spline method across maturity buckets using more recent Treasury data. The key takeaway is that the relative ranking of methods remains similar to the historical replication, indicating that the spline approaches behave consistently even when applied to a much denser modern bond market.}
 \label{tab:2a}
 \end{table}
 
 \begin{table}[htbp]
 \centering
 \input{../_output/table_2b_fit.tex}
-\caption{Out-of-sample results on replicated fitted spline curves using data from the past 20 years}
+\caption{Out-of-sample performance of spline models using the modern Treasury sample (past 20 years). The table shows pricing errors and hit rates across maturity buckets. The main takeaway is that model fit generally deteriorates slightly at longer maturities and out-of-sample, highlighting where spline methods struggle most when predicting bond prices.}
 \label{tab:2b}
 \end{table}
 
@@ -113,19 +113,19 @@ To complement the replication tables, we produced a series of charts to provide 
 
 This sub-series of charts overlays all replication methods for selected dates representing the highest, lowest, and median levels of correlation between the Waggonner methods and the GSW curve. In this context, correlation is defined as the aggregate correlation between the fitted curves produced by the Waggonner methods and the GSW benchmark across maturities. These visual comparisons help illustrate when the alternative spline approaches closely track the benchmark curve and when the methods diverge more noticeably. Together, these charts provide an intuitive way to assess the similarities and differences across the yield curve estimation approaches beyond the numerical performance metrics presented in the replication tables.
 
-Two such charts are shown and analyzed below:
+Two such charts are shown and analyzed below. (Figures 1 and 2)
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.8\textwidth]{../_output/methods_vs_gsw_low_corr_discount.png}
-\caption{CAPTION}
+\caption{Comparison of discount curves from the spline methods and the GSW benchmark on the date with the lowest correlation between approaches. The figure highlights where spline methods diverge most from the parametric benchmark, illustrating how methodological differences can produce noticeably different curve shapes, particularly at longer maturities.}
 \label{fig:discount_low_corr}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.8\textwidth]{../_output/methods_vs_gsw_high_corr_fwd_instant_cc.png}
-\caption{CAPTION}
+\caption{Comparison of instantaneous forward curves produced by the spline-based methods and the GSW benchmark. While the overall shape of the forward curve is broadly consistent across models, the spline-based methods exhibit noticeably larger local perturbations. Because splines impose less structural restriction than the parametric GSW framework, they are able to capture small fluctuations in the data, which results in more oscillatory forward rate behavior even when the general term structure remains similar.}
 \label{fig:forward_high_corr}
 \end{figure}
 
